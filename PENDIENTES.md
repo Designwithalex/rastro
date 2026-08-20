@@ -11,7 +11,6 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 |---|---|---|---|
 | 1 | **% de descuento** por transferencia/efectivo | `15` en `data/settings.json` | Solo el número: la UI lo lee del helper. Bajo. |
 | 2 | **Número de WhatsApp** (minorista y mayorista) | `+54 9 000 000 0000` en `settings.json` | Bajo. Se cambia en un lugar. |
-| 3 | **Paleta verde**: el brandbook trae dos | Opción A `#00674F` | Medio: cambia un token CSS, pero afecta todo el look. Confirmar antes de Figma. |
 | 4 | **Licencia web de Eurostile** (WOFF/WOFF2) | Michroma + Saira de Google Fonts | Medio. Si hay licencia, self-hosting y ajuste de escala tipográfica. |
 | 5 | **Marcas oficiales**: listado definitivo + logos | Greencore + 5 slots dummy | Bajo. |
 | 6 | **Logos "Confían en nosotros"**: quiénes y sus logos | 8 slots dummy | Bajo. |
@@ -44,3 +43,11 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 |---|---|
 | 19 | Optimizar imágenes: 29 MB sin comprimir. Redimensionar + WebP antes del deploy. |
 | 20 | Los PNG transparentes pesan ~1 MB c/u. Recomprimir. |
+
+---
+
+## Resueltos
+
+| Fecha | Tema | Decisión |
+|---|---|---|
+| 2026-08-20 | Paleta verde (el brandbook traía `#00674F` y `#2E6F40`) | **Descartado.** El cliente no quiere verde. La paleta es negro + plata/grises + bordeaux, con bordeaux como único acento. Ver `CLAUDE.md` §5.3. |

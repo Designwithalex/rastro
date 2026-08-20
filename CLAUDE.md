@@ -144,29 +144,39 @@ y **Saira** para UI y texto corrido. Ambas en Google Fonts.
 
 ### 5.3 Paleta
 
+**Decisión del cliente: sin verde.** El brandbook traía dos variantes de verde
+(`#00674F` y `#2E6F40`); las dos quedan descartadas. La paleta del sitio es
+**negro + plata/grises + bordeaux**.
+
 | Rol | Valor |
 |---|---|
-| Fondo base | negro / `#0B0B0B` |
+| Fondo base | negro `#000000` · superficie `#0B0B0B` |
+| Superficies elevadas | `#151515` · `#1F1F1F` |
 | Grises | `#3D3D3D` · `#666666` · `#C4C4C4` · `#E0E0E0` |
-| Plata | degradé (identidad del isotipo) — reservado para logo y detalles |
-| **Verde** (opción A, default) | `#00674F` · escala `#0A3C30` `#3EBB9E` `#73E6CB` |
-| Verde (opción B) | `#2E6F40` · escala `#253D2C` `#68BA7F` `#CFFFDC` |
-| **Bordeaux** | `#780606` · escala `#DE6464` `#FFA6A6` `#FFD9D9` |
+| Plata | degradé del isotipo — logo, bordes de acento, detalles |
+| **Bordeaux (único acento)** | `#780606` · escala `#DE6464` `#FFA6A6` `#FFD9D9` |
+| Texto | blanco sobre negro; `#C4C4C4` para secundario |
 
-El brandbook trae **dos versiones de la paleta verde**; adoptamos la A por defecto
-y queda anotado en `PENDIENTES.md` para confirmar con el cliente.
+Con un solo color de acento, el peso visual lo cargan el **contraste**, la
+**tipografía** y el **espacio** — no el color. Eso empuja la estética hacia el
+lado industrial que pide la marca, y coincide con la referencia fm-pesas.com.
 
 ### 5.4 Semántica de color
 
-El brandbook ya define un código de color para iconografía de Instagram, y lo
-trasladamos al ecommerce:
-
-| Brandbook | En el sitio |
+| Uso | Color |
 |---|---|
-| Plata = productos | superficies, cards, bordes |
-| Verde = packs | **precio por transferencia / efectivo**, éxito, stock |
-| Bordeaux = promociones | ofertas, badges de descuento, errores |
-| Blanco = tips | texto principal sobre oscuro |
+| Producto, superficies, bordes | plata / grises |
+| **Precio por transferencia + badge de %** | **bordeaux** — es el acento de ahorro |
+| Promos, ofertas, destacados | bordeaux |
+| Éxito (agregado al carrito, guardado) | blanco/plata + ícono de check, sin color |
+| Error y validación | `#DE6464` + ícono + texto. **Nunca solo color** |
+| Texto principal | blanco |
+
+Ojo: promoción y error comparten familia cromática. Se diferencian por **ícono,
+ubicación y forma**, no por color. Es requisito de accesibilidad, no un detalle.
+
+El brandbook define además un código de color para íconos de Instagram que sí incluye
+verde (packs). Eso queda **solo para RRSS**; el sitio no lo usa.
 
 ### 5.5 Tono visual
 
