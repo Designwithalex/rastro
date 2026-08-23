@@ -136,11 +136,22 @@ Archivos en `assets/img/marca/`: `rastro-completo-blanco`, `rastro-completo-negr
 
 ### 5.2 Tipografía
 
-Brandbook: **Eurostile** (Regular / Medium / Bold / Heavy / Black + oblicuas) y
-**Eurostile Extended** (Regular / Medium / Black).
-Eurostile es tipografía paga (Linotype) — ver `PENDIENTES.md`. Hasta confirmar
-licencia web, fallback: **Michroma** para display (muy cercana a Eurostile Extended)
-y **Saira** para UI y texto corrido. Ambas en Google Fonts.
+Tres familias, con roles que no se pisan:
+
+| Familia | Rol | Estilos |
+|---|---|---|
+| **Michroma** | Display y precios. Reemplaza a Eurostile Extended. | `display/xl` `display/l` `display/m` `display/s` · `precio/lg` `precio/md` `precio/sm` |
+| **JetBrains Mono** | Todo lo que es dato: rótulos, códigos, especificaciones, precio por transferencia, índices de sección. | `mono/label` `mono/label-sm` `mono/dato` `mono/texto` `mono/texto-sm` |
+| **Saira** | Texto corrido y párrafos largos. | `body/lg` `body/md` `body/sm` `body/xs` |
+
+El brandbook pide **Eurostile** y **Eurostile Extended**, que son pagas (Linotype).
+Michroma y Saira son el reemplazo hasta confirmar si el cliente tiene licencia web
+(ver `PENDIENTES.md` #4). La escala está armada para que cambiar la familia no mueva
+el layout.
+
+JetBrains Mono no está en el brandbook: la sumamos en la v2 porque el negocio es
+numérico —10 kg, 2,20 m, código de producto, stock— y la tipografía monoespaciada
+es la que hace legible esa información.
 
 ### 5.3 Paleta
 
@@ -186,6 +197,29 @@ Nada "wellness", nada pastel. Referencia preferida: **https://fm-pesas.com/**.
 Secundarias: tienda.gfitness.com.ar y bolkequipment.com.ar.
 
 ---
+
+### 5.6 Lenguaje visual (v2)
+
+En agosto de 2026 el cliente eligió la dirección "ficha técnica" sobre la primera
+propuesta. Las reglas que la definen:
+
+- **Canto vivo.** Todos los radios valen 0. El único que sobrevive es `radio/full`,
+  para pastillas y avatares.
+- **Retícula de hairlines.** Las piezas no se separan con recuadros propios: el
+  contenedor se pinta de `border/subtle` y los hijos van con 1 px de gap. Esa línea
+  continua es lo que le da unidad al sitio.
+- **Tipografía sobredimensionada.** El titular del hero es 80 px en escritorio y
+  30 px en celular, en mayúsculas.
+- **Composición asimétrica.** Bento en hero y categorías, no grillas parejas.
+- **Números en degradé plata.** El degradé del isotipo sale del logo y pasa a los
+  precios y las cifras grandes. Es el único lugar donde se usa.
+- **Fotos de ambiente en duotono bordeaux**; fotos de producto sobre **blanco pleno**.
+- **Secciones numeradas** con el índice `[ 01 ]` en tipografía técnica.
+- **Datos visibles**: cada producto muestra código, stock y medida, no solo nombre
+  y precio. Eso es lo que un club o un gimnasio necesita para decidir una compra.
+
+La versión anterior queda en la página `Archivo · Home v1` de Figma, y congelada
+como imagen en la página de comparativa.
 
 ## 6. Assets disponibles
 

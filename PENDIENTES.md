@@ -11,7 +11,7 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 |---|---|---|---|
 | 1 | **% de descuento** por transferencia/efectivo | `15` en `data/settings.json` | Solo el número: la UI lo lee del helper. Bajo. |
 | 2 | **Número de WhatsApp** (minorista y mayorista) | `+54 9 000 000 0000` en `settings.json` | Bajo. Se cambia en un lugar. |
-| 4 | **Licencia web de Eurostile** (WOFF/WOFF2) | Michroma + Saira de Google Fonts | Medio. Si hay licencia, self-hosting y ajuste de escala tipográfica. |
+| 4 | **Licencia web de Eurostile** (WOFF/WOFF2) | Michroma + Saira + JetBrains Mono de Google Fonts | Medio. Si hay licencia, self-hosting y ajuste de escala. JetBrains Mono se queda igual: cubre un rol que Eurostile no tiene. |
 | 5 | **Marcas oficiales**: listado definitivo + logos | Greencore + 5 slots dummy | Bajo. |
 | 6 | **Logos "Confían en nosotros"**: quiénes y sus logos | 8 slots dummy | Bajo. |
 | 7 | **Precios reales** de los productos | Precios verosímiles inventados en el mock | Bajo, es data. |
@@ -61,7 +61,6 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 | 27 | **¿Hay reseñas o rating de producto?** Las referencias muestran estrellas en la card. `repository.php` no expone ese dato. | Agrega una línea a la card y una sección al detalle. | Fuera de alcance de esta etapa. No se diseña. |
 | 28 | **Copy real** del hero, del bloque mayorista y de los beneficios. | Hoy es texto puesto por el diseño. | Se escribe copy verosímil y se marca como provisorio en el frame. |
 | 29 | **¿El panel admin va en claro?** El sitio es oscuro, pero un panel con tablas y formularios se lee mejor en claro. | Lo dejé resuelto en el sistema: la colección `Color` tiene modo `Sitio` (oscuro) y modo `Admin` (claro), con los mismos tokens. Confirmar con el cliente antes de diseñar el panel. |
-| 30 | **Destacados en mobile a 1 columna.** A 2 columnas la card queda en 167 px y el bloque de precio no entra (necesita 236). | Se diseñó a 1 columna, card a ancho completo. Si el cliente quiere 2 columnas, hay que agregar una variante compacta del bloque de precio. |
 
 ---
 
@@ -70,3 +69,7 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 | Fecha | Tema | Decisión |
 |---|---|---|
 | 2026-08-20 | Paleta verde (el brandbook traía `#00674F` y `#2E6F40`) | **Descartado.** El cliente no quiere verde. La paleta es negro + plata/grises + bordeaux, con bordeaux como único acento. Ver `CLAUDE.md` §5.3. |
+| 2026-08-23 | Dirección de diseño: clásica (v1) o ficha técnica (v2) | **v2.** Canto vivo, retícula de hairlines, titular a 80 px, datos técnicos por producto y JetBrains Mono para los números. Foundations y los 5 componentes ya están migrados. Ver `CLAUDE.md` §5.6. |
+| 2026-08-23 | #30 Destacados en mobile a 1 columna | Confirmado en la v2: una columna a sangre, cards separadas por hairline. Con el bloque de precio nuevo entra cómodo. |
+
+| 31 | **Código, stock y medida por producto.** La v2 los muestra en cada card. | Hoy son datos verosímiles inventados. `repository.php` ya los expone (`sku`, `stock`), así que no hay cambio de contrato: falta que el cliente cargue los reales. |
