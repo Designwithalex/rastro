@@ -73,3 +73,7 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 | 2026-08-23 | #30 Destacados en mobile a 1 columna | Confirmado en la v2: una columna a sangre, cards separadas por hairline. Con el bloque de precio nuevo entra cómodo. |
 
 | 31 | **Código, stock y medida por producto.** La v2 los muestra en cada card. | Hoy son datos verosímiles inventados. `repository.php` ya los expone (`sku`, `stock`), así que no hay cambio de contrato: falta que el cliente cargue los reales. |
+| 32 | **Dónde se retira.** La ficha dice "En depósito, sin cargo. Córdoba capital". | Inventado por el diseño. Falta la dirección real y si hay retiro en más de un punto. |
+| 33 | **Política de garantía.** La ficha dice 12 meses por defecto de fabricación. | Inventado. Confirmar plazo real y qué cubre. |
+| 34 | **Especificaciones técnicas por producto** (material, diámetro, peso, buje, uso). | La ficha las muestra en tabla y `repository.php` ya las expone como `especificaciones`. Falta que el cliente las cargue: sin esto la ficha queda a medias. |
+| 35 | **Umbral de envío gratis.** Hoy $150.000 en `settings.json`. | Aparece en la ficha y en el carrito. Un solo valor, se cambia en un lugar. |

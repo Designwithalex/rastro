@@ -18,6 +18,9 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | **Foundations** | Paleta, tipografía, espaciado, radios | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=5-2) |
 | **Componentes** | Los 5 componentes con sus estados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-4) |
 | **Sitio · Home** | Home desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3) |
+| **Sitio · Catálogo** | Listado con filtros, orden y paginación | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=58-3) |
+| **Sitio · Producto** | Ficha con galería, especificaciones y relacionados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=60-3) |
+| **Sitio · Carrito** | Carrito con resumen, más el estado vacío | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-3) |
 | **Archivo · Home v1** | Primera dirección, como referencia | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=15-2) |
 | **Admin** | Vacía. Se diseña más adelante | — |
 
@@ -31,6 +34,13 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 |---|---|---|
 | Home desktop | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3) |
 | Home mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=37-2) |
+| Catálogo desktop | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=58-3) |
+| Catálogo mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=59-365) |
+| Producto desktop | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=60-3) |
+| Producto mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=63-227) |
+| Carrito desktop | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-3) |
+| Carrito mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=65-264) |
+| Carrito vacío | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-190) |
 
 ## Componentes
 
@@ -41,9 +51,17 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | Bloque de precio | 3 tipos × 3 tamaños = 9 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=9-60) |
 | Input | 4 estados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=10-49) |
 | Card de producto | 2 estados: default, hover | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=13-44) |
+| Breadcrumb | — | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=55-28) |
+| Chip de filtro | 2 estados: default, activo | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=55-39) |
+| Stepper de cantidad | — | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=55-40) |
+| Paginación | — | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=55-47) |
+| Select de orden | — | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=56-28) |
+| Fila de carrito | — | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=56-33) |
+| Estado vacío | 2 tipos: catálogo, carrito | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=56-65) |
+| Marquee / Header / Footer | desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-4) |
 
-La home usa **instancias** de estos componentes. Cambiar el Bloque de precio o el
-Botón actualiza el sitio entero.
+Las cuatro pantallas usan **instancias** de estos componentes, incluidos el header y
+el footer. Cambiar el Bloque de precio, el Botón o el Header actualiza el sitio entero.
 
 ---
 
@@ -76,7 +94,7 @@ JetBrains Mono (datos) y Saira (texto corrido).
 
 ## Qué falta
 
-- Catálogo, ficha de producto, carrito, login, registro, mi cuenta y mayoristas.
+- Login, registro, mi cuenta, landing de mayoristas y 404.
 - Panel admin completo (solo desktop), con frames anotados para el backend dev.
 - Íconos de interfaz: hoy son placeholders geométricos (`PENDIENTES.md` #24).
 - Logos de clientes y de marcas oficiales (`PENDIENTES.md` #25).
