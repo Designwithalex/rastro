@@ -1,0 +1,41 @@
+name: Deploy a Hostinger
+
+# Se despliega solo lo que está en main. El QA final decide qué llega acá.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
+jobs:
+  ftp:
+    name: Sincronizar por FTP
+    runs-on: ubuntu-latest
+    steps:
+      - name: Traer el repositorio
+        uses: actions/checkout@v4
+
+      - name: Subir a public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftp
+          server-dir: /public_html/
+          # Sube solo lo que el sitio necesita para correr.
+          # app/config.php NO se sincroniza: vive únicamente en el servidor.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.DS_Store
+            **/docs/**
+            **/design/**
+            **/*.md
+            **/app/config.php
+            **/node_modules/**
