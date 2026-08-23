@@ -14,7 +14,7 @@ Archivo de Figma del proyecto. Team **Projects v2**.
 | **Foundations** | Paleta, tipografía, espaciado, radios | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=5-2) |
 | **Componentes** | Los 5 componentes base con sus estados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-4) |
 | **Sitio · Home** | Home desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-6) |
-| **Sitio · Home BOLD** | Propuesta alternativa: misma paleta, lenguaje "ficha técnica" | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3) |
+| **Sitio · Home BOLD** | Propuesta alternativa: misma paleta, lenguaje "ficha técnica". Desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3) |
 | **Admin** | Vacía. Se diseña en el bloque siguiente | — |
 
 ## Pantallas
@@ -23,6 +23,8 @@ Archivo de Figma del proyecto. Team **Projects v2**.
 |---|---|---|
 | Home desktop | 1440 × 4076 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=15-2) |
 | Home mobile | 390 × 5250 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=21-84) |
+| Home BOLD desktop | 1440 × 4585 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3) |
+| Home BOLD mobile | 390 × 6120 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=37-2) |
 
 ## Componentes
 
@@ -106,7 +108,14 @@ decoración, es que los dos mundos hablan en números y especificaciones.
 - Las dos franjas de logos, el bloque mayorista y el botón de arrepentimiento.
 - Los pictogramas del brandbook, ahora como marcadores de categoría.
 
+**Cómo se resuelve en mobile**
+- El hero pasa a foto a sangre con duotono y overlay al 66%, titular a 30 px.
+- Los tres números de la ficha van en una tira de tres celdas separadas por hairlines.
+- Categorías: una celda grande con foto arriba, 2×2 abajo y "Ver todo" a ancho completo.
+- Destacados: una columna a sangre, cards separadas por hairline en vez de contorno.
+- La retícula de 1 px se mantiene en todo: es lo que le da unidad al sistema.
+
 **Si se adopta, hay que rehacer**
 1. Foundations: sumar JetBrains Mono, pasar los radios a 0, agregar los estilos mono.
 2. Los 5 componentes: cambian caja, estados y densidad.
-3. La home mobile (esta demo es solo desktop).
+3. Nada más: la home ya está en desktop y mobile.
