@@ -14,6 +14,7 @@ Archivo de Figma del proyecto. Team **Projects v2**.
 | **Foundations** | Paleta, tipografía, espaciado, radios | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=5-2) |
 | **Componentes** | Los 5 componentes base con sus estados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-4) |
 | **Sitio · Home** | Home desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-6) |
+| **Sitio · Home BOLD** | Propuesta alternativa: misma paleta, lenguaje "ficha técnica" | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3) |
 | **Admin** | Vacía. Se diseña en el bloque siguiente | — |
 
 ## Pantallas
@@ -72,3 +73,40 @@ así que `assets/css/tokens.css` se escribe copiando de Figma, sin traducir a ma
 - Panel admin completo (solo desktop), con frames anotados para el backend dev.
 - Íconos de interfaz: hoy son placeholders geométricos (`PENDIENTES.md` #24).
 - Logos de clientes y de marcas oficiales: hoy son slots (`PENDIENTES.md` #25).
+
+
+---
+
+## Propuesta alternativa — Home BOLD
+
+Página **Sitio · Home BOLD**. Misma paleta exacta (negro, plata/grises, bordeaux),
+otro lenguaje. Solo desktop, como demo.
+
+**Concepto: ficha técnica.** El gimnasio ya es numérico —10 KG, 2,20 M, 20 kg— y la
+UI técnica también. Ese es el puente real entre "tech" y "gimnasio": no es
+decoración, es que los dos mundos hablan en números y especificaciones.
+
+**Qué cambia respecto de la versión aprobada**
+
+| | Versión 1 | BOLD |
+|---|---|---|
+| Tipografías | Michroma + Saira | Michroma + **JetBrains Mono** + Saira |
+| Titular | 48 px | **80 px**, a sangre |
+| Radios | 2 a 8 px | **0. Todo canto vivo** |
+| Layout | grillas parejas | **bento asimétrico** |
+| Separación | bordes por card | **hairlines de 1 px que arman una retícula continua** |
+| Fotos | sobre well gris | **duotono bordeaux** en ambiente, **blanco puro** en producto |
+| Secciones | título | **índice `[ 01 ]` en cada una** |
+| Números | tipografía plana | **degradé plata del isotipo** |
+| Card | contorno + botón lleno | **ficha con SKU, marcas de encuadre y precio dominante** |
+
+**Lo que se mantiene igual**
+- Los 24 tokens de color. No se tocó ni un valor.
+- El precio doble: publicado (Mercado Pago) + transferencia en bordeaux con el %.
+- Las dos franjas de logos, el bloque mayorista y el botón de arrepentimiento.
+- Los pictogramas del brandbook, ahora como marcadores de categoría.
+
+**Si se adopta, hay que rehacer**
+1. Foundations: sumar JetBrains Mono, pasar los radios a 0, agregar los estilos mono.
+2. Los 5 componentes: cambian caja, estados y densidad.
+3. La home mobile (esta demo es solo desktop).
