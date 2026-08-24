@@ -77,3 +77,7 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 | 33 | **Política de garantía.** La ficha dice 12 meses por defecto de fabricación. | Inventado. Confirmar plazo real y qué cubre. |
 | 34 | **Especificaciones técnicas por producto** (material, diámetro, peso, buje, uso). | La ficha las muestra en tabla y `repository.php` ya las expone como `especificaciones`. Falta que el cliente las cargue: sin esto la ficha queda a medias. |
 | 35 | **Umbral de envío gratis.** Hoy $150.000 en `settings.json`. | Aparece en la ficha y en el carrito. Un solo valor, se cambia en un lugar. |
+| 36 | **Estados de pedido.** La cuenta muestra En camino, Entregado y Cancelado. | Inventados. Confirmar qué estados maneja el negocio de verdad: si hay más, se agrega una variante del chip y la tabla no se toca. |
+| 37 | **A qué correo llega el formulario mayorista** y qué campos son obligatorios. | Maqueta con cinco campos. El backend conecta el envío; a futuro alimenta el cotizador con PDF. |
+| 38 | **¿Direcciones múltiples en Mi cuenta?** La navegación tiene la sección pero no está diseñada. | Depende de si un cliente puede tener más de un lugar de entrega. Si es una sola, se saca del menú. |
+| 39 | **Registro: "Para un gimnasio o empresa".** El selector está diseñado. | Falta definir qué pasa después: ¿el usuario queda marcado como mayorista y ve precios distintos, o solo dispara un aviso al equipo? |

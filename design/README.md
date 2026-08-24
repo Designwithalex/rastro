@@ -21,6 +21,9 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | **Sitio · Catálogo** | Listado con filtros, orden y paginación | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=58-3) |
 | **Sitio · Producto** | Ficha con galería, especificaciones y relacionados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=60-3) |
 | **Sitio · Carrito** | Carrito con resumen, más el estado vacío | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-3) |
+| **Sitio · Cuenta** | Login, registro y mi cuenta | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-3) |
+| **Sitio · Mayoristas** | Landing con cotización | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=74-3) |
+| **Sitio · 404** | Página de error | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-604) |
 | **Archivo · Home v1** | Primera dirección, como referencia | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=15-2) |
 | **Admin** | Vacía. Se diseña más adelante | — |
 
@@ -41,6 +44,13 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | Carrito desktop | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-3) |
 | Carrito mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=65-264) |
 | Carrito vacío | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-190) |
+| Login desktop / mobile | 1440 / 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-3) · [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=70-192) |
+| Registro desktop / mobile | 1440 / 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-118) · [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=70-274) |
+| Mi cuenta · Pedidos | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=71-320) |
+| Mi cuenta · Datos | 1440 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=71-474) |
+| Mi cuenta mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-506) |
+| Mayoristas desktop / mobile | 1440 / 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=74-3) · [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=75-105) |
+| 404 desktop / mobile | 1440 / 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-604) · [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-702) |
 
 ## Componentes
 
@@ -91,10 +101,12 @@ JetBrains Mono (datos) y Saira (texto corrido).
 5. **El degradé plata es sólo para números y logo.** Nunca para texto corrido.
 6. **El error siempre lleva ícono**, nunca solo color: el bordeaux también es promoción.
 7. **Las secciones van numeradas** con el índice `[ 01 ]`.
+8. **Las maquetas de formulario llevan una nota** en pantalla diciendo qué tiene que
+   conectar el backend. No se entrega un formulario sin decir qué hace.
 
 ## Qué falta
 
-- Login, registro, mi cuenta, landing de mayoristas y 404.
+- **El sitio público está completo.** Nueve pantallas, todas en escritorio y celular.
 - Panel admin completo (solo desktop), con frames anotados para el backend dev.
 - Íconos de interfaz: hoy son placeholders geométricos (`PENDIENTES.md` #24).
 - Logos de clientes y de marcas oficiales (`PENDIENTES.md` #25).
