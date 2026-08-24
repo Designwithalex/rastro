@@ -25,7 +25,7 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | **Sitio · Mayoristas** | Landing con cotización | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=74-3) |
 | **Sitio · 404** | Página de error | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-604) |
 | **Archivo · Home v1** | Primera dirección, como referencia | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=15-2) |
-| **Admin** | Vacía. Se diseña más adelante | — |
+| **Admin · Panel** | Panel de administración, con anotaciones para el dev | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=80-43) |
 
 > La página de comparativa usa **capturas congeladas**, no los frames vivos. Eso es a
 > propósito: la v1 quedó registrada tal como se presentó y no se altera aunque el
@@ -51,6 +51,32 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | Mi cuenta mobile | 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-506) |
 | Mayoristas desktop / mobile | 1440 / 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=74-3) · [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=75-105) |
 | 404 desktop / mobile | 1440 / 390 | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-604) · [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-702) |
+
+## Panel de administración
+
+Ocho pantallas, **solo escritorio**. Lo diseñamos nosotros, lo programa el backend dev.
+
+| Pantalla | Link |
+|---|---|
+| Dashboard | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=80-43) |
+| Productos · listado | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=82-41) |
+| Producto · alta y edición | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=82-249) |
+| Pedidos · listado | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=83-135) |
+| Pedido · detalle | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=83-294) |
+| Marcas oficiales | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-227) |
+| Logos de clientes | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-331) |
+| Banners | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-449) |
+| Configuración | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-550) |
+
+**Usa el modo `Admin` de la colección Color.** Los mismos 24 tokens, en claro: no hay
+un segundo sistema que mantener.
+
+**Cada pantalla tiene al lado un panel rojo** con lo que hace falta para programarla:
+qué se valida, qué es obligatorio, qué pasa al guardar, qué hace cada botón. Están
+fuera del frame a propósito, para que no se confundan con la interfaz.
+
+`Categorías` no tiene pantalla propia: es el mismo patrón que Marcas oficiales y está
+explicado en su propia anotación, al lado de esa pantalla.
 
 ## Componentes
 
@@ -106,7 +132,9 @@ JetBrains Mono (datos) y Saira (texto corrido).
 
 ## Qué falta
 
-- **El sitio público está completo.** Nueve pantallas, todas en escritorio y celular.
-- Panel admin completo (solo desktop), con frames anotados para el backend dev.
+**La fase de diseño está cerrada.** Nueve pantallas de sitio en escritorio y celular,
+más ocho de panel de administración.
+
+Lo que queda abierto no es diseño:
 - Íconos de interfaz: hoy son placeholders geométricos (`PENDIENTES.md` #24).
 - Logos de clientes y de marcas oficiales (`PENDIENTES.md` #25).
