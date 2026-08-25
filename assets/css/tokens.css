@@ -3,6 +3,12 @@
    NO EDITAR A MANO. Los valores salen de las variables de Figma:
    https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs
    Si cambia un token en Figma, se actualiza acá y en ningún otro lado.
+
+   Las URLs de las fuentes van SIN parámetro de versión, a propósito: este archivo
+   se genera desde Figma y no puede consultar el filemtime, así que si llevaran
+   versión podrían divergir de la del preload y el browser bajaría cada fuente dos
+   veces. El .htaccess las sirve immutable por un año; si cambia una familia,
+   cambia el nombre del archivo. No agregar ?v= acá al regenerar.
    ============================================================ */
 
 /* --- tipografías, servidas desde el propio servidor --- */
