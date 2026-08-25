@@ -184,6 +184,22 @@ code, kbd, samp, pre {
   outline-offset: -4px;
 }
 
+/* Íconos de interfaz. El SVG viene con width y height propios; la clase
+   evita que el `height: auto` del reinicio le cambie la proporción y que
+   un contenedor flexible lo achique. */
+.icono {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+}
+
+/* Bloquea el scroll del cuerpo mientras hay un diálogo abierto. Lo prende
+   y lo apaga assets/js/nav.js: sin esto, el dedo mueve la página de atrás
+   en vez del cajón. */
+.sin-scroll {
+  overflow: hidden;
+}
+
 .texto-secundario {
   color: var(--color-text-secondary);
 }

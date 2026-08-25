@@ -460,6 +460,47 @@ function whatsapp_link(array $settings, ?string $mensaje = null): ?string
 }
 
 /**
+ * La medida que identifica a un producto en una línea: "20 kg", "2,20 m".
+ *
+ * Es el tercer dato de la línea técnica que la v2 muestra en cada producto
+ * —código, medida y estado— tanto en la card del catálogo como en el
+ * mega-menú (CLAUDE.md §5.6). Vive acá y no en cada vista para que las dos
+ * digan lo mismo.
+ *
+ * Casi todo el catálogo se identifica por peso, así que ese es el valor
+ * preferido. Los productos que no tienen peso cargado caen en la primera
+ * especificación dimensional que exista.
+ */
+function medida_producto(array $producto): string
+{
+    if (isset($producto['peso_kg']) && $producto['peso_kg'] !== null && $producto['peso_kg'] !== '') {
+        return peso_kg((float) $producto['peso_kg']);
+    }
+
+    $preferidas = ['Medidas', 'Largo', 'Alto', 'Diámetro'];
+
+    foreach ($preferidas as $etiqueta) {
+        foreach ($producto['especificaciones'] ?? [] as $especificacion) {
+            if (($especificacion['label'] ?? '') === $etiqueta && ($especificacion['valor'] ?? '') !== '') {
+                return (string) $especificacion['valor'];
+            }
+        }
+    }
+
+    return '—';
+}
+
+/**
+ * El estado de stock en una palabra, para la línea técnica.
+ * No dice cuántas unidades quedan a propósito: eso es información de
+ * depósito y en un listado invita a la comparación equivocada.
+ */
+function estado_stock(array $producto): string
+{
+    return ((int) ($producto['stock'] ?? 0)) > 0 ? 'En stock' : 'Sin stock';
+}
+
+/**
  * Versión WebP de una imagen, para el <source> de un <picture>.
  * Devuelve null si todavía no se generó, así la vista cae al original
  * sin romperse.
@@ -475,4 +516,31 @@ function imagen_webp(string $ruta): ?string
     $absoluta = dirname(__DIR__) . '/assets/' . ltrim($webp, '/');
 
     return is_file($absoluta) ? asset($webp) : null;
+}
+
+/**
+ * Miniatura de 96 px de una foto de producto, en WebP.
+ *
+ * Existe por el mega-menú: muestra hasta ocho fotos por categoría a 48 px de
+ * lado, y servir ahí los archivos de 1000 px son varios cientos de KB para
+ * dibujar una estampilla. Las genera bin/optimizar-imagenes.sh en
+ * assets/img/productos/miniaturas/, con el mismo nombre de archivo.
+ *
+ * Devuelve null si todavía no se generó —o si la imagen es un SVG, como el
+ * marcador de foto pendiente— y ahí la vista usa el original.
+ *
+ * TODO(backend): cuando el panel permita subir fotos, el alta tiene que
+ * generar esta miniatura además del WebP grande. Si no existe, el sitio no
+ * se rompe: cae al archivo original, solo que pesado.
+ */
+function imagen_miniatura(string $ruta): ?string
+{
+    if (!preg_match('#^img/productos/([^/]+)\.(jpe?g|png|webp)$#i', $ruta, $partes)) {
+        return null;
+    }
+
+    $miniatura = 'img/productos/miniaturas/' . $partes[1] . '.webp';
+    $absoluta  = dirname(__DIR__) . '/assets/' . $miniatura;
+
+    return is_file($absoluta) ? asset($miniatura) : null;
 }
