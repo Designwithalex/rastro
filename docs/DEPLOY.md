@@ -93,3 +93,26 @@ que quitarla apenas termina.
 
 Conviene que FTP y base de datos **no compartan contraseña**: son dos superficies
 de ataque distintas y una filtración no debería abrir las dos.
+
+## Por qué el deploy va por FTPS y no por FTP
+
+`.github/workflows/deploy.yml` usa `protocol: ftps`. Con `ftp` a secas el
+usuario y la contraseña de Hostinger viajan en texto plano por la red del
+runner de GitHub, en cada push a `main`. La action lo soporta y Hostinger
+también, así que no hay razón para no cifrarlo.
+
+FTPS acá es **FTP explícito sobre TLS**: mismo puerto 21, misma cuenta, mismo
+`server-dir`. No es SFTP y no requiere cambiar ningún secret.
+
+**Si un deploy falla con un error de handshake TLS o de certificado:** volver
+a `protocol: ftp` destraba la subida, pero deja las credenciales expuestas.
+No es un arreglo, es un parche. Antes de eso conviene probar en este orden:
+
+1. Confirmar en hPanel que la cuenta FTP tiene TLS habilitado.
+2. Probar a mano: `curl --ssl-reqd -u USUARIO ftp://SERVIDOR/` .
+3. Si el certificado de Hostinger es autofirmado, la action acepta
+   `security: loose`, que cifra igual pero no valida el certificado. Es
+   bastante mejor que texto plano.
+
+Si aun así hay que revertir a `ftp`, dejar anotado en `PENDIENTES.md` por qué,
+para que no quede como una decisión deliberada.
