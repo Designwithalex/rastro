@@ -137,6 +137,42 @@ function moneda_sin_simbolo(int|float|string|null $n): string
 }
 
 /**
+ * Convierte a número algo que escribió una persona.
+ *
+ * En Argentina el separador decimal es la coma, así que quien cargue el
+ * descuento en el panel va a escribir "12,5" y no "12.5". Un cast directo a
+ * float devuelve 12 sin avisar: medio punto de descuento perdido en silencio
+ * sobre todo el catálogo. También se toleran el símbolo de porcentaje y los
+ * espacios, que es lo otro que aparece pegado al número.
+ *
+ * FORMATO ESPERADO EN LOS DATOS (para docs/DATA-CONTRACT.md):
+ * el campo canónico es un número JSON con punto decimal —`"descuento_pct": 12.5`—
+ * y esta función existe para aguantar lo que hoy llega como texto desde el
+ * panel. El día que el panel valide en el alta, se puede simplificar.
+ */
+function numero_decimal(mixed $valor): float
+{
+    if (is_int($valor) || is_float($valor)) {
+        return (float) $valor;
+    }
+
+    if (!is_string($valor)) {
+        return 0.0;
+    }
+
+    $limpio = str_replace([' ', '%', "\u{00A0}"], '', trim($valor));
+
+    // "12,5" -> "12.5". Si vienen los dos separadores ("1.234,5"), el punto
+    // es de miles y la coma es la decimal.
+    if (str_contains($limpio, ',')) {
+        $limpio = str_replace('.', '', $limpio);
+        $limpio = str_replace(',', '.', $limpio);
+    }
+
+    return is_numeric($limpio) ? (float) $limpio : 0.0;
+}
+
+/**
  * Formatea un porcentaje sin decimales inútiles: 15 -> "15", 12.5 -> "12,5".
  */
 function porcentaje(int|float $n): string
@@ -189,9 +225,17 @@ function precio_con_descuento(array $producto, array $settings): array
         $pct = $settings['descuento_transferencia_pct'] ?? 0;
     }
 
-    // Un porcentaje mal cargado en el panel no puede regalar mercadería
-    // ni inflar el precio: se recorta a un rango sano.
-    $pct = max(0.0, min(100.0, (float) $pct));
+    // Se lee con numero_decimal() porque "12,5" escrito con coma tiene que
+    // valer 12,5 y no 12.
+    $pct = numero_decimal($pct);
+
+    // Un porcentaje mal cargado en el panel no puede regalar mercadería ni
+    // inflar el precio. Fuera de rango NO se recorta al extremo: se ignora.
+    // Recortar un 150 mal tipeado a 100 es justamente regalar el producto,
+    // que es el error caro; con 0 el precio queda alto y alguien se da cuenta.
+    if ($pct <= 0 || $pct >= 100) {
+        $pct = 0.0;
+    }
 
     $con_descuento = (int) round($publicado * (100 - $pct) / 100);
 
@@ -211,7 +255,7 @@ function precio_con_descuento(array $producto, array $settings): array
  */
 function descuento_global(array $settings): string
 {
-    return porcentaje((float) ($settings['descuento_transferencia_pct'] ?? 0));
+    return porcentaje(numero_decimal($settings['descuento_transferencia_pct'] ?? 0));
 }
 
 /* ------------------------------------------------------------------
