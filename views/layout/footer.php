@@ -32,6 +32,7 @@ $layout_columnas = [
             ['texto' => 'Todo el catálogo',       'ruta' => '/catalogo'],
             ['texto' => 'Destacados',             'ruta' => '/catalogo?destacado=1'],
             ['texto' => 'Venta mayorista',        'ruta' => '/mayoristas'],
+            ['texto' => 'Nosotros',               'ruta' => '/nosotros'],
             ['texto' => 'Términos y condiciones', 'ruta' => '/terminos'],
         ],
     ],
@@ -105,9 +106,12 @@ $layout_columnas = [
 
         </div>
 
-        <p class="pie__envio t-mono-texto">
-            <?= e(interpolar('Envío sin cargo en compras desde {envio_gratis}. {descuento} de descuento pagando por transferencia o efectivo.', $settings)) ?>
-        </p>
+        <?php /* La misma pieza que el pie del mega-menú y el cajón de celular.
+                 Antes acá había una frase escrita a mano que decía lo mismo:
+                 dos redacciones de la regla de precio es una de más. */ ?>
+        <div class="pie__regla">
+            <?php require RASTRO_VIEWS . '/partials/regla-precio.php'; ?>
+        </div>
     </div>
 
     <div class="pie__legales">
@@ -147,6 +151,7 @@ $layout_columnas = [
 
 </footer>
 
+<script src="<?= e(asset('js/nav.js')) ?>" defer></script>
 <script src="<?= e(asset('js/carrito.js')) ?>" defer></script>
 </body>
 </html>
