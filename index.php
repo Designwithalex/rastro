@@ -51,6 +51,12 @@ if (RASTRO_BASE !== '' && str_starts_with($camino, RASTRO_BASE)) {
     $camino = substr($camino, strlen(RASTRO_BASE));
 }
 
+// El front controller no es una URL: /index.php es la home, no un 404.
+if ($camino === '/index.php') {
+    header('Location: ' . url('/'), true, 301);
+    exit;
+}
+
 // Una sola URL por página: /catalogo/ redirige a /catalogo.
 if ($camino !== '/' && str_ends_with($camino, '/')) {
     $destino = url(rtrim($camino, '/'));
