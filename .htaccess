@@ -68,6 +68,13 @@ DirectoryIndex index.php
     ExpiresDefault                        "access plus 1 hour"
 </IfModule>
 
+# --- El repositorio no se sirve nunca ---
+# Hoy .github/workflows/deploy.yml no sincroniza .git/, así que en el servidor
+# no existe. Esto es por si algún día el despliegue cambia de método: .git/config
+# trae la URL del repositorio y el historial trae todo lo que alguna vez se
+# commiteó.
+RedirectMatch 404 /\.git(/|$)
+
 # --- Nunca servir archivos sensibles, pase lo que pase con el rewrite ---
 # Los .json van acá aparte del Require all denied de data/: si un día alguien
 # mueve o renombra ese archivo, los mocks —settings con el WhatsApp, users con

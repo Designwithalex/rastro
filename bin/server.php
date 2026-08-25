@@ -51,9 +51,13 @@ if ($camino !== '/' && $archivo !== false && is_file($archivo)) {
         return true;
     }
 
-    // 2. Carpetas privadas: las mismas que en producción cierra
-    //    su propio .htaccess con Require all denied.
-    foreach (['app', 'views', 'data', 'bin', '.originales-img'] as $privada) {
+    // 2. Carpetas que en producción no se pueden pedir por HTTP, sea porque
+    //    su .htaccess las cierra con Require all denied (app, views, data) o
+    //    porque directamente no se despliegan: .github/workflows/deploy.yml
+    //    las excluye del FTP, así que en el servidor no existen. Localmente sí
+    //    existen, y .git/config trae la URL del repositorio.
+    foreach (['app', 'views', 'data', 'bin', '.originales-img',
+              '.git', '.github', 'docs', 'design'] as $privada) {
         $absoluta = realpath($raiz . '/' . $privada);
 
         if ($absoluta !== false && $dentro_de($archivo, $absoluta)) {
