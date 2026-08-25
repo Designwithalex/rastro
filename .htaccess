@@ -1,0 +1,80 @@
+# ============================================================
+# Rastro Fitness — .htaccess de la raíz (public_html)
+# Todo el tráfico entra por index.php. Las carpetas privadas
+# (app/, views/, data/) tienen su propio .htaccess que las cierra.
+# ============================================================
+
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Un archivo o una carpeta que existe de verdad se sirve tal cual:
+    # así salen los assets sin pasar por PHP.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Todo lo demás lo resuelve el front controller.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# --- Cabeceras de seguridad ---
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+
+    # El sitio no usa CDN ni scripts de terceros: todo sale de su propio origen.
+    # Ojo: con esta política no se pueden usar atributos style="" ni <script> en
+    # línea. Si el checkout de Mercado Pago necesita su dominio, se agrega acá.
+    # TODO(backend): sumar los orígenes de Mercado Pago cuando se integre el pago.
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'"
+
+    # Las tipografías propias se pueden cachear un año: el nombre no cambia.
+    <FilesMatch "\.(woff2?)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# --- Tipos que Hostinger no siempre trae declarados ---
+<IfModule mod_mime.c>
+    AddType image/webp .webp
+    AddType image/svg+xml .svg
+    AddType font/woff2 .woff2
+</IfModule>
+
+# --- Compresión ---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/json application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# --- Caché de estáticos. El ?v= de asset() se encarga de invalidarla. ---
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                "access plus 1 year"
+    ExpiresByType application/javascript  "access plus 1 year"
+    ExpiresByType image/jpeg              "access plus 6 months"
+    ExpiresByType image/png               "access plus 6 months"
+    ExpiresByType image/webp              "access plus 6 months"
+    ExpiresByType image/svg+xml           "access plus 6 months"
+    ExpiresByType font/woff2              "access plus 1 year"
+    ExpiresDefault                        "access plus 1 hour"
+</IfModule>
+
+# --- Nunca servir archivos sensibles, pase lo que pase con el rewrite ---
+<FilesMatch "^(\.env|\.gitignore|composer\.(json|lock)|.*\.md)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
