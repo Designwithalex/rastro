@@ -28,6 +28,11 @@
  *     en `repo_cart_items()` y sigue figurando en pedidos viejos.
  *   · Los precios son enteros en pesos. El descuento por transferencia NO se
  *     calcula acá: lo calcula `precio_con_descuento()` en helpers.php.
+ *   · El copy editable —hoy `banners.titulo`— no lleva números escritos a
+ *     mano. Lleva marcadores: `{descuento}`, `{envio_gratis}`, `{whatsapp}`,
+ *     que la vista resuelve con `interpolar()`. Un banner que dice "15%" es
+ *     una segunda fuente de verdad del dato más importante del sitio y queda
+ *     desactualizado el día que el cliente cambie el porcentaje.
  *   · Un pedido guarda su propio `precio_unitario` y su propio
  *     `descuento_aplicado_pct`. Nunca se recalculan contra el producto:
  *     el precio de hoy no es el precio al que se vendió en abril.
@@ -227,14 +232,14 @@ function repo_products(array $filters = [], int $page = 1, int $perPage = 12): a
 
     usort($productos, static function (array $a, array $b) use ($orden): int {
         return match ($orden) {
-            'precio_asc'  => ((int) $a['precio_lista']) <=> ((int) $b['precio_lista']),
-            'precio_desc' => ((int) $b['precio_lista']) <=> ((int) $a['precio_lista']),
+            'precio_asc'  => ((int) ($a['precio_lista'] ?? 0)) <=> ((int) ($b['precio_lista'] ?? 0)),
+            'precio_desc' => ((int) ($b['precio_lista'] ?? 0)) <=> ((int) ($a['precio_lista'] ?? 0)),
             'nombre'      => strcmp(
-                _repo_normalizar((string) $a['nombre']),
-                _repo_normalizar((string) $b['nombre'])
+                _repo_normalizar((string) ($a['nombre'] ?? '')),
+                _repo_normalizar((string) ($b['nombre'] ?? ''))
             ),
-            default       => [(int) ($b['stock'] ?? 0) > 0, $b['destacado'] ?? false, $b['nuevo'] ?? false, (int) $a['id']]
-                             <=> [(int) ($a['stock'] ?? 0) > 0, $a['destacado'] ?? false, $a['nuevo'] ?? false, (int) $b['id']],
+            default       => [(int) ($b['stock'] ?? 0) > 0, $b['destacado'] ?? false, $b['nuevo'] ?? false, (int) ($a['id'] ?? 0)]
+                             <=> [(int) ($a['stock'] ?? 0) > 0, $a['destacado'] ?? false, $a['nuevo'] ?? false, (int) ($b['id'] ?? 0)],
         };
     });
 
@@ -323,7 +328,7 @@ function repo_categories(): array
     }
     unset($categoria);
 
-    usort($categorias, static fn ($a, $b) => ((int) $a['orden']) <=> ((int) $b['orden']));
+    usort($categorias, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
 
     return $categorias;
 }
@@ -360,7 +365,7 @@ function repo_brands(): array
         static fn (array $m): bool => empty($m['es_propia'])
     ));
 
-    usort($marcas, static fn ($a, $b) => ((int) $a['orden']) <=> ((int) $b['orden']));
+    usort($marcas, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
 
     return $marcas;
 }
@@ -371,7 +376,7 @@ function repo_brands(): array
 function repo_clients(): array
 {
     $clientes = _repo_json('clients');
-    usort($clientes, static fn ($a, $b) => ((int) $a['orden']) <=> ((int) $b['orden']));
+    usort($clientes, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
 
     return $clientes;
 }
@@ -387,7 +392,8 @@ function repo_banners(): array
         static fn (array $b): bool => ($b['activo'] ?? false) === true
     ));
 
-    usort($banners, static fn ($a, $b) => [$a['posicion'], (int) $a['orden']] <=> [$b['posicion'], (int) $b['orden']]);
+    usort($banners, static fn ($a, $b) => [(string) ($a['posicion'] ?? ''), (int) ($a['orden'] ?? 0)]
+                                      <=> [(string) ($b['posicion'] ?? ''), (int) ($b['orden'] ?? 0)]);
 
     return $banners;
 }
@@ -534,13 +540,21 @@ function repo_orders(int $userId): array
         static fn (array $o): bool => (int) ($o['usuario_id'] ?? 0) === $userId
     ));
 
-    usort($pedidos, static fn ($a, $b) => strcmp((string) $b['fecha'], (string) $a['fecha']));
+    usort($pedidos, static fn ($a, $b) => strcmp((string) ($b['fecha'] ?? ''), (string) ($a['fecha'] ?? '')));
 
     return $pedidos;
 }
 
 /**
  * Un pedido por su código (RF-2026-0418).
+ *
+ * TODO(backend): esta función NO valida quién pide el pedido. Hoy da igual
+ * porque no hay sesión y la vista no está escrita, pero el código es
+ * adivinable (RF-año-ddmm) y devuelve nombre, dirección y total de una
+ * compra. Antes de exponerla en /cuenta hay que exigir sesión y comparar
+ * usuario_id contra el usuario logueado, o recibir el id del dueño como
+ * segundo argumento y filtrar acá. Si no, cualquiera lee los pedidos de
+ * cualquiera probando códigos.
  */
 function repo_order(string $code): ?array
 {
