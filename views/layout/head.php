@@ -15,6 +15,27 @@
  *
  * Este archivo abre <body> y deja puestos el marquee y la cabecera.
  * El pie y el cierre del documento los pone footer.php.
+ *
+ * ---------------------------------------------------------------------
+ * NOMBRES RESERVADOS
+ *
+ * Los partials del layout se incluyen con require dentro del scope de la
+ * vista: comparten variables con ella. Estas son las que ocupa el layout,
+ * y ninguna vista puede usarlas para otra cosa.
+ *
+ * Las lee el layout (las escribe la vista, antes del require):
+ *   $titulo       string  título de la pestaña, sin el sufijo de marca
+ *   $descripcion  string  meta description
+ *   $clase_body   string  clases extra del <body>
+ *
+ * Las define el layout (la vista las puede leer, no pisar):
+ *   $settings            array   repo_settings(), ya cacheado
+ *   $titulo_pagina       string  título final, con sufijo
+ *   $descripcion_pagina  string  descripción final
+ *
+ * Todo lo demás que necesitan header.php y footer.php va con prefijo
+ * `layout_` justamente para no chocar con las variables de las vistas.
+ * ---------------------------------------------------------------------
  */
 
 declare(strict_types=1);
@@ -29,6 +50,10 @@ $descripcion_pagina = $descripcion
     ?? 'Discos, barras, mancuernas, kettlebells y racks para gimnasios, clubes y entrenamiento en casa. '
      . descuento_global($settings)
      . '% de descuento pagando por transferencia o efectivo.';
+
+// El cuerpo toma su tipografía de la escala, igual que cualquier otro
+// elemento: base.css no declara ni un tamaño de fuente.
+$clases_body = trim('t-body-md ' . ($clase_body ?? ''));
 ?>
 <!doctype html>
 <html lang="es-AR">
@@ -59,7 +84,7 @@ $descripcion_pagina = $descripcion
     <link rel="stylesheet" href="<?= e(asset('css/base.css')) ?>">
     <link rel="stylesheet" href="<?= e(asset('css/layout.css')) ?>">
 </head>
-<body<?= isset($clase_body) && $clase_body !== '' ? ' class="' . e($clase_body) . '"' : '' ?>>
+<body class="<?= e($clases_body) ?>">
 
 <a class="saltar t-mono-label" href="#contenido">Saltar al contenido</a>
 

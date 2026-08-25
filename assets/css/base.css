@@ -21,19 +21,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* La tipografía del cuerpo NO se declara acá: el <body> lleva la clase
+   .t-body-md, que es el mismo estilo de la escala que usa cualquier
+   párrafo. Duplicar el tamaño en este archivo era tener dos lugares donde
+   cambiarlo. Y sin overflow-x: hidden a propósito: esa línea tapaba en
+   silencio cualquier desborde horizontal, que es justo lo que hay que ver. */
 body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg-base);
   color: var(--color-text-primary);
-  font-family: var(--fuente-texto);
-  font-size: 16px;
-  line-height: 26px;
-  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
 /* El pie siempre abajo aunque la página tenga poco contenido. */
