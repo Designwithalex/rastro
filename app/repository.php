@@ -32,6 +32,28 @@
  *     `descuento_aplicado_pct`. Nunca se recalculan contra el producto:
  *     el precio de hoy no es el precio al que se vendió en abril.
  *   · Las funciones nunca devuelven el `password_hash` de un usuario.
+ *
+ * MARCA PROPIA vs. MARCA DE TERCEROS  (`brands.es_propia`)
+ *
+ *   Rastro vende dos cosas distintas y la UI no las puede mezclar:
+ *
+ *     · Marcas de terceros — Greencore y compañía. Rastro es su vendedor
+ *       oficial, y esa es la prueba social de la home: la franja dice
+ *       "somos vendedores oficiales de estas marcas".
+ *     · Línea propia — productos que Rastro fabrica o marca. Ponerlos en
+ *       esa franja le saca el sentido a la frase: uno no es vendedor
+ *       oficial de sí mismo.
+ *
+ *   Por eso una marca con `es_propia: true` existe en la tabla —un producto
+ *   siempre tiene que poder resolver el nombre de su marca— pero
+ *   `repo_brands()` NO la devuelve: esa función alimenta la franja de la
+ *   home y solo lista terceros.
+ *
+ *   El nombre de la marca de un producto no se resuelve llamando a
+ *   `repo_brands()`: viene ya en el propio producto, en `marca_nombre`,
+ *   que el repository resuelve contra la tabla completa (propias incluidas).
+ *   TODO(backend): eso es un LEFT JOIN marcas ON marcas.slug = productos.marca,
+ *   sin el WHERE que filtra las propias.
  */
 
 declare(strict_types=1);
@@ -81,6 +103,40 @@ function _repo_normalizar(string $texto): string
         'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u',
         'ñ' => 'n', 'ç' => 'c',
     ]);
+}
+
+/**
+ * Todas las marcas indexadas por slug, la línea propia incluida.
+ * Es el lado "uno" del join: sirve para resolver el nombre de la marca de
+ * un producto, no para listar marcas en pantalla. Para eso está repo_brands().
+ */
+function _repo_marcas_por_slug(): array
+{
+    static $indice = null;
+
+    if ($indice === null) {
+        $indice = [];
+        foreach (_repo_json('brands') as $marca) {
+            $indice[(string) ($marca['slug'] ?? '')] = $marca;
+        }
+    }
+
+    return $indice;
+}
+
+/**
+ * Deja un producto listo para salir del repository: le agrega el nombre de
+ * su marca, que es lo que la vista muestra. Ningún producto sale de acá sin
+ * pasar por esta función.
+ */
+function _repo_producto_publico(array $producto): array
+{
+    $marcas = _repo_marcas_por_slug();
+    $slug   = (string) ($producto['marca'] ?? '');
+
+    $producto['marca_nombre'] = $marcas[$slug]['nombre'] ?? null;
+
+    return $producto;
 }
 
 /**
@@ -188,7 +244,7 @@ function repo_products(array $filters = [], int $page = 1, int $perPage = 12): a
     $page    = min(max(1, $page), $paginas);
 
     return [
-        'items'   => array_slice($productos, ($page - 1) * $perPage, $perPage),
+        'items'   => array_map('_repo_producto_publico', array_slice($productos, ($page - 1) * $perPage, $perPage)),
         'total'   => $total,
         'pagina'  => $page,
         'paginas' => $paginas,
@@ -202,7 +258,7 @@ function repo_product(string $slug): ?array
 {
     foreach (_repo_json('products') as $producto) {
         if (($producto['slug'] ?? '') === $slug && ($producto['activo'] ?? false) === true) {
-            return $producto;
+            return _repo_producto_publico($producto);
         }
     }
 
@@ -240,7 +296,7 @@ function repo_related_products(string $slug, int $limit = 4): array
         ];
     });
 
-    return array_slice($candidatos, 0, max(0, $limit));
+    return array_map('_repo_producto_publico', array_slice($candidatos, 0, max(0, $limit)));
 }
 
 /**
@@ -291,11 +347,19 @@ function repo_category(string $slug): ?array
    ========================================================================== */
 
 /**
- * Marcas de las que Rastro es vendedor oficial, ordenadas.
+ * Marcas de TERCEROS de las que Rastro es vendedor oficial, ordenadas.
+ *
+ * Deja afuera la línea propia (`es_propia: true`): esta función alimenta la
+ * franja de prueba social de la home, y ahí Rastro no va. Ver el bloque
+ * "marca propia vs. marca de terceros" arriba de todo.
  */
 function repo_brands(): array
 {
-    $marcas = _repo_json('brands');
+    $marcas = array_values(array_filter(
+        _repo_json('brands'),
+        static fn (array $m): bool => empty($m['es_propia'])
+    ));
+
     usort($marcas, static fn ($a, $b) => ((int) $a['orden']) <=> ((int) $b['orden']));
 
     return $marcas;
@@ -512,7 +576,7 @@ function repo_cart_items(array $ids): array
     foreach ($ids as $id) {
         $id = (int) $id;
         if (isset($porId[$id])) {
-            $items[] = $porId[$id];
+            $items[] = _repo_producto_publico($porId[$id]);
         }
     }
 

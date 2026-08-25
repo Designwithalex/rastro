@@ -4,7 +4,8 @@
         "slug": "rastro",
         "nombre": "Rastro",
         "logo": "img/marca/rastro-horizontal-transparente.png",
-        "orden": 1
+        "orden": 1,
+        "es_propia": true
     },
     {
         "id": 2,
