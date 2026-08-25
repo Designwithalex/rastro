@@ -53,7 +53,7 @@ Panel a sangre 1440, borde superior e inferior de 1 px `border/subtle`, fondo
 | x | 40 → 362 | 386 → 1054 | 1078 → 1400 |
 
 - **A**: rótulo + 6 filas de 44 separadas por hairline + "VER TODO EL CATÁLOGO →".
-  Nombre a la izquierda, cantidad a la derecha en `text/disabled`.
+  Nombre a la izquierda, cantidad a la derecha en `text/secondary`.
   La primera categoría viene preseleccionada: el panel nunca abre con B vacía.
 - **B**: 2 subcolumnas de 322, gutter 24, 4 filas de 64. Cada ítem:
   miniatura 48 sobre well claro + nombre `body/sm` una línea con elipsis +
@@ -177,7 +177,21 @@ honesta, una con dos señores comprados es un problema.
 
 ---
 
-## 4. Decisión de sistema: dos componentes de precio, no uno
+## 4. `text/disabled` no se usa. En ningún lado.
+
+El token existe y sigue definido, pero **ninguna hoja del sitio lo usa** y eso es una
+invariante, no una casualidad. Sobre los fondos reales del sistema da entre 3,18:1 y
+3,66:1, o sea que no llega al 4,5:1 de AA para texto normal en ninguno.
+
+`CLAUDE.md` §5.3 ya lo reserva para lo inhabilitado. La trampa es que "dato apagado"
+y "dato secundario" se parecen: la cantidad de productos de una categoría, el rótulo
+de una fila, el horario de atención y el CUIT **son dato legible**, y van en
+`text/secondary` (#C4C4C4), que da entre 10,5:1 y 12:1.
+
+Cuando algo parezca merecer un gris más apagado, la respuesta es bajar el tamaño o el
+peso, no el contraste.
+
+## 5. Decisión de sistema: dos componentes de precio, no uno
 
 - **`regla-precio`** — la política, sin monto. "Publicado = Mercado Pago · −15% por
   transferencia". Vive en hero, pie del mega-menú, cajón mobile y pie del sitio.
