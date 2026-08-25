@@ -62,8 +62,13 @@ Como está excluido de la sincronización, los deploys posteriores no lo pisan.
 ## Desarrollo local
 
 ```bash
-php -S localhost:8000
+php -S localhost:8000 bin/server.php
 ```
+
+El router es obligatorio: `php -S localhost:8000` a secas ignora los
+`.htaccess` de `app/`, `views/` y `data/`, y sirve los mocks —incluidos los
+hashes de `users.json`— a cualquiera que los pida. `bin/server.php` replica
+en local el bloqueo que en Hostinger hace Apache.
 
 Mientras los datos sean mock no hace falta base de datos. Cuando el backend dev
 conecte MySQL y quiera trabajar contra la base remota, hay que habilitar el acceso:

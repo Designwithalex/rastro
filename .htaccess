@@ -69,6 +69,19 @@ DirectoryIndex index.php
 </IfModule>
 
 # --- Nunca servir archivos sensibles, pase lo que pase con el rewrite ---
+# Los .json van acá aparte del Require all denied de data/: si un día alguien
+# mueve o renombra ese archivo, los mocks —settings con el WhatsApp, users con
+# los hashes— no quedan colgando de una sola línea de defensa.
+<FilesMatch "\.json$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <FilesMatch "^(\.env|\.gitignore|composer\.(json|lock)|.*\.md)$">
     <IfModule mod_authz_core.c>
         Require all denied
