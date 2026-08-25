@@ -39,6 +39,76 @@ function e_json(mixed $v): string
 }
 
 /* ------------------------------------------------------------------
+   Query string
+
+   TODA vista que lea un parámetro de la URL lo hace con estas tres
+   funciones. Nunca `$_GET['x']` directo: `?q[]=a` llega como array y
+   cualquier cast a string tira un warning y ensucia la página.
+   ------------------------------------------------------------------ */
+
+/**
+ * Parámetro de texto. Devuelve el valor por defecto si no vino, si vino
+ * vacío, si vino como array o si no está en la lista de permitidos.
+ *
+ * @param string[] $permitidos Lista blanca. Vacía significa "cualquier texto".
+ */
+function param(string $nombre, string $defecto = '', array $permitidos = []): string
+{
+    $valor = $_GET[$nombre] ?? null;
+
+    if (!is_string($valor)) {
+        return $defecto;
+    }
+
+    $valor = trim($valor);
+
+    if ($valor === '') {
+        return $defecto;
+    }
+
+    if ($permitidos !== [] && !in_array($valor, $permitidos, true)) {
+        return $defecto;
+    }
+
+    return $valor;
+}
+
+/**
+ * Parámetro numérico entero, con recorte opcional a un rango.
+ * Sirve para `pagina`, `precio_min` y `precio_max`.
+ */
+function param_int(string $nombre, ?int $defecto = null, ?int $min = null, ?int $max = null): ?int
+{
+    $valor = $_GET[$nombre] ?? null;
+
+    if (!is_string($valor) || !preg_match('/^-?\d{1,12}$/', trim($valor))) {
+        return $defecto;
+    }
+
+    $numero = (int) trim($valor);
+
+    if ($min !== null) {
+        $numero = max($min, $numero);
+    }
+
+    if ($max !== null) {
+        $numero = min($max, $numero);
+    }
+
+    return $numero;
+}
+
+/**
+ * Parámetro de bandera: `?destacado=1`, `?en_stock=on`.
+ */
+function param_bool(string $nombre): bool
+{
+    $valor = $_GET[$nombre] ?? null;
+
+    return is_string($valor) && in_array(strtolower(trim($valor)), ['1', 'true', 'on', 'si'], true);
+}
+
+/* ------------------------------------------------------------------
    Números y moneda
    ------------------------------------------------------------------ */
 
@@ -48,7 +118,11 @@ function e_json(mixed $v): string
  */
 function moneda(int|float|string|null $n): string
 {
-    return '$' . number_format((float) $n, 0, ',', '.');
+    $n = (float) $n;
+
+    // El signo va antes del símbolo: -$500, nunca $-500.
+    // Aparece en el carrito, donde el ahorro y las notas de crédito son negativos.
+    return ($n < 0 ? '-' : '') . '$' . number_format(abs($n), 0, ',', '.');
 }
 
 /**
@@ -57,7 +131,9 @@ function moneda(int|float|string|null $n): string
  */
 function moneda_sin_simbolo(int|float|string|null $n): string
 {
-    return number_format((float) $n, 0, ',', '.');
+    $n = (float) $n;
+
+    return ($n < 0 ? '-' : '') . number_format(abs($n), 0, ',', '.');
 }
 
 /**
@@ -263,6 +339,32 @@ function recortar(string $texto, int $largo = 120, string $final = '…'): strin
     return rtrim($ultimo ? mb_substr($corte, 0, $ultimo, 'UTF-8') : $corte, ' ,.;:') . $final;
 }
 
+/**
+ * Reemplaza los marcadores de un texto editable por el dato vivo.
+ *
+ * El copy de banners y promos lo carga el cliente desde el panel, y ahí no
+ * puede quedar escrito "15%": si mañana el descuento pasa a 12, el banner
+ * miente y hay dos fuentes de verdad para el dato más importante del sitio.
+ * En vez del número se escribe el marcador:
+ *
+ *   "{descuento} de descuento pagando por transferencia o efectivo"
+ *   "Envío sin cargo desde {envio_gratis}"
+ *
+ * Se usa strtr y no sprintf a propósito: un "%" suelto escrito por el
+ * cliente en el panel no puede romper nada.
+ *
+ * TODO(backend): el panel tiene que listar estos marcadores al lado del
+ * campo de texto, si no nadie se entera de que existen.
+ */
+function interpolar(string $texto, array $settings): string
+{
+    return strtr($texto, [
+        '{descuento}'    => descuento_global($settings) . '%',
+        '{envio_gratis}' => moneda($settings['envio_gratis_desde'] ?? 0),
+        '{whatsapp}'     => (string) ($settings['whatsapp'] ?? ''),
+    ]);
+}
+
 /* ------------------------------------------------------------------
    Contacto
    ------------------------------------------------------------------ */
@@ -273,11 +375,20 @@ function recortar(string $texto, int $largo = 120, string $final = '…'): strin
  *
  * @param array       $settings Configuración de repo_settings().
  * @param string|null $mensaje  Mensaje inicial; si es null usa el de settings.
+ *
+ * @return string|null null si todavía no hay número cargado.
  */
-function whatsapp_link(array $settings, ?string $mensaje = null): string
+function whatsapp_link(array $settings, ?string $mensaje = null): ?string
 {
     $numero = preg_replace('/\D+/', '', (string) ($settings['whatsapp'] ?? '')) ?? '';
     $texto  = $mensaje ?? (string) ($settings['whatsapp_mensaje'] ?? '');
+
+    // Sin número no hay enlace. Devolver "https://wa.me/" mandaría al usuario
+    // a la home de WhatsApp, que es peor que no ofrecer el botón: la vista
+    // pregunta por null y esconde la pieza.
+    if ($numero === '') {
+        return null;
+    }
 
     $url = 'https://wa.me/' . $numero;
 

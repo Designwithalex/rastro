@@ -3,26 +3,31 @@
  * layout/header.php — logo, navegación numerada, buscador y carrito.
  *
  * La navegación se arma con las categorías reales del repository: si el
- * cliente agrega una categoría en el panel, el menú la toma sola.
+ * cliente agrega una categoría en el panel, el menú la toma sola. Por eso
+ * el ancho del menú es variable y el layout no puede dar por sentado que
+ * entra: ver la nota de layout.css sobre los tres tramos de la cabecera.
+ *
+ * Las variables de este archivo van con prefijo `layout_` porque se
+ * requiere dentro del scope de la vista y no puede pisarle un nombre.
  */
 
 declare(strict_types=1);
 
-$categorias_nav = array_slice(repo_categories(), 0, 3);
-
 // El índice numerado del menú: 01 Catálogo, 02 Discos, 03 Barras…
-$nav = [['ruta' => '/catalogo', 'texto' => 'Catálogo']];
+$layout_nav = [['ruta' => '/catalogo', 'texto' => 'Catálogo']];
 
-foreach ($categorias_nav as $categoria) {
-    $nav[] = [
-        'ruta'  => '/catalogo/' . $categoria['slug'],
-        'texto' => $categoria['nombre'],
+foreach (array_slice(repo_categories(), 0, 3) as $layout_categoria) {
+    $layout_nav[] = [
+        'ruta'  => '/catalogo/' . $layout_categoria['slug'],
+        'texto' => $layout_categoria['nombre'],
     ];
 }
 
-$nav[] = ['ruta' => '/mayoristas', 'texto' => 'Mayoristas'];
+$layout_nav[] = ['ruta' => '/mayoristas', 'texto' => 'Mayoristas'];
 
-$busqueda = isset($_GET['q']) ? trim((string) $_GET['q']) : '';
+// param() y no $_GET: ?q[]=a llega como array y el cast tira un warning
+// arriba de todo el HTML.
+$layout_busqueda = param('q');
 ?>
 <header class="cabecera">
     <div class="cabecera__barra contenedor">
@@ -35,14 +40,14 @@ $busqueda = isset($_GET['q']) ? trim((string) $_GET['q']) : '';
 
         <nav class="nav" aria-label="Navegación principal">
             <ul class="nav__lista">
-                <?php foreach ($nav as $i => $item): ?>
-                    <?php $es_actual = es_ruta_exacta($item['ruta']); ?>
+                <?php foreach ($layout_nav as $i => $layout_item): ?>
+                    <?php $layout_es_actual = es_ruta_exacta($layout_item['ruta']); ?>
                     <li class="nav__item">
-                        <a class="<?= e(trim('nav__enlace t-mono-label ' . activo($item['ruta']) . ($es_actual ? ' es-actual' : ''))) ?>"
-                           href="<?= e(url($item['ruta'])) ?>"
-                           <?= $es_actual ? 'aria-current="page"' : '' ?>>
+                        <a class="<?= e(trim('nav__enlace t-mono-label ' . activo($layout_item['ruta']) . ($layout_es_actual ? ' es-actual' : ''))) ?>"
+                           href="<?= e(url($layout_item['ruta'])) ?>"
+                           <?= $layout_es_actual ? 'aria-current="page"' : '' ?>>
                             <span class="nav__indice"><?= e(str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT)) ?></span>
-                            <span class="nav__texto"><?= e($item['texto']) ?></span>
+                            <span class="nav__texto"><?= e($layout_item['texto']) ?></span>
                         </a>
                     </li>
                 <?php endforeach; ?>
@@ -52,7 +57,7 @@ $busqueda = isset($_GET['q']) ? trim((string) $_GET['q']) : '';
         <form class="buscador" role="search" method="get" action="<?= e(url('/catalogo')) ?>">
             <label class="visualmente-oculto" for="buscador-q">Buscar en el catálogo</label>
             <input class="buscador__campo t-mono-texto" type="search" id="buscador-q" name="q"
-                   value="<?= e($busqueda) ?>" placeholder="Buscar por nombre o código"
+                   value="<?= e($layout_busqueda) ?>" placeholder="Buscar por nombre o código"
                    autocomplete="off" enterkeyhint="search">
             <button class="buscador__boton t-mono-label-sm" type="submit">Buscar</button>
         </form>
