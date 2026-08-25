@@ -66,6 +66,25 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 
 ---
 
+Los nueve que siguen salieron de la misma revisión, pero son datos que tiene
+que cargar el cliente y no decisiones de diseño: por eso van sin la columna de
+"por qué importa". Estaban quedando debajo de "Resueltos" sin encabezado, lo
+que los hacía parecer cerrados. **Están los nueve abiertos.**
+
+| # | Tema | Decisión provisoria |
+|---|---|---|
+| 31 | **Código, stock y medida por producto.** La v2 los muestra en cada card. | Hoy son datos verosímiles inventados. `repository.php` ya los expone (`sku`, `stock`), así que no hay cambio de contrato: falta que el cliente cargue los reales. |
+| 32 | **Dónde se retira.** La ficha dice "En depósito, sin cargo. Córdoba capital". | Inventado por el diseño. Falta la dirección real y si hay retiro en más de un punto. |
+| 33 | **Política de garantía.** La ficha dice 12 meses por defecto de fabricación. | Inventado. Confirmar plazo real y qué cubre. |
+| 34 | **Especificaciones técnicas por producto** (material, diámetro, peso, buje, uso). | La ficha las muestra en tabla y `repository.php` ya las expone como `especificaciones`. Falta que el cliente las cargue: sin esto la ficha queda a medias. |
+| 35 | **Umbral de envío gratis.** Hoy $150.000 en `settings.json`. | Aparece en la ficha y en el carrito. Un solo valor, se cambia en un lugar. |
+| 36 | **Estados de pedido.** La cuenta muestra En camino, Entregado y Cancelado. | Inventados. Confirmar qué estados maneja el negocio de verdad: si hay más, se agrega una variante del chip y la tabla no se toca. |
+| 37 | **A qué correo llega el formulario mayorista** y qué campos son obligatorios. | Maqueta con cinco campos. El backend conecta el envío; a futuro alimenta el cotizador con PDF. |
+| 38 | **¿Direcciones múltiples en Mi cuenta?** La navegación tiene la sección pero no está diseñada. | Depende de si un cliente puede tener más de un lugar de entrega. Si es una sola, se saca del menú. |
+| 39 | **Registro: "Para un gimnasio o empresa".** El selector está diseñado. | Falta definir qué pasa después: ¿el usuario queda marcado como mayorista y ve precios distintos, o solo dispara un aviso al equipo? |
+
+---
+
 ## Abiertos por la Fase 2 de frontend
 
 Surgidos al armar la capa de datos y el layout compartido.
@@ -91,13 +110,3 @@ Surgidos al armar la capa de datos y el layout compartido.
 | 2026-08-25 | #41 ¿Rastro va en la franja de "vendedores oficiales"? | **No.** Esa franja dice "somos vendedores oficiales de estas marcas": son marcas de terceros, y la línea propia ahí le saca el sentido a la frase. La marca queda en `brands.json` con `es_propia: true` para que los 18 productos de línea propia resuelvan su nombre, pero `repo_brands()` la filtra y no la devuelve. El nombre de la marca de un producto viene en el propio producto, en `marca_nombre`, que el repository resuelve contra la tabla completa. Sin funciones nuevas en el contrato. |
 | 2026-08-25 | #42 Falta un Michroma chico en la escala | **Resuelto.** Se creó `display/xs` en Figma (Michroma 10/14, tracking 1.2, mayúsculas) y `.t-display-xs` en `tokens.css`. El marquee usa la clase y ya no hay ningún override de familia en CSS. |
 | 2026-08-25 | #4 Tipografías self-hosted | **Parcial.** Michroma, Saira y JetBrains Mono se sirven desde `assets/fonts/` en WOFF2, subconjunto latin, 88 KB en total. Sigue abierta la licencia de Eurostile. Ver `assets/fonts/LICENCIAS.txt`. |
-
-| 31 | **Código, stock y medida por producto.** La v2 los muestra en cada card. | Hoy son datos verosímiles inventados. `repository.php` ya los expone (`sku`, `stock`), así que no hay cambio de contrato: falta que el cliente cargue los reales. |
-| 32 | **Dónde se retira.** La ficha dice "En depósito, sin cargo. Córdoba capital". | Inventado por el diseño. Falta la dirección real y si hay retiro en más de un punto. |
-| 33 | **Política de garantía.** La ficha dice 12 meses por defecto de fabricación. | Inventado. Confirmar plazo real y qué cubre. |
-| 34 | **Especificaciones técnicas por producto** (material, diámetro, peso, buje, uso). | La ficha las muestra en tabla y `repository.php` ya las expone como `especificaciones`. Falta que el cliente las cargue: sin esto la ficha queda a medias. |
-| 35 | **Umbral de envío gratis.** Hoy $150.000 en `settings.json`. | Aparece en la ficha y en el carrito. Un solo valor, se cambia en un lugar. |
-| 36 | **Estados de pedido.** La cuenta muestra En camino, Entregado y Cancelado. | Inventados. Confirmar qué estados maneja el negocio de verdad: si hay más, se agrega una variante del chip y la tabla no se toca. |
-| 37 | **A qué correo llega el formulario mayorista** y qué campos son obligatorios. | Maqueta con cinco campos. El backend conecta el envío; a futuro alimenta el cotizador con PDF. |
-| 38 | **¿Direcciones múltiples en Mi cuenta?** La navegación tiene la sección pero no está diseñada. | Depende de si un cliente puede tener más de un lugar de entrega. Si es una sola, se saca del menú. |
-| 39 | **Registro: "Para un gimnasio o empresa".** El selector está diseñado. | Falta definir qué pasa después: ¿el usuario queda marcado como mayorista y ve precios distintos, o solo dispara un aviso al equipo? |
