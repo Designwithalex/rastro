@@ -21,6 +21,7 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 | **Sitio · Catálogo** | Listado con filtros, orden y paginación | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=58-3) |
 | **Sitio · Producto** | Ficha con galería, especificaciones y relacionados | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=60-3) |
 | **Sitio · Carrito** | Carrito con resumen, más el estado vacío | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-3) |
+| **Sitio · Nosotros** | Página de credibilidad, desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=150-3) |
 | **Sitio · Cuenta** | Login, registro y mi cuenta | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-3) |
 | **Sitio · Mayoristas** | Landing con cotización | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=74-3) |
 | **Sitio · 404** | Página de error | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=73-604) |
@@ -54,7 +55,7 @@ sobre la primera dirección. Ver `CLAUDE.md` §5.6.
 
 ## Panel de administración
 
-Ocho pantallas, **solo escritorio**. Lo diseñamos nosotros, lo programa el backend dev.
+Nueve pantallas, **solo escritorio**. Lo diseñamos nosotros, lo programa el backend dev.
 
 | Pantalla | Link |
 |---|---|
@@ -66,6 +67,7 @@ Ocho pantallas, **solo escritorio**. Lo diseñamos nosotros, lo programa el back
 | Marcas oficiales | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-227) |
 | Logos de clientes | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-331) |
 | Banners | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-449) |
+| Nosotros | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=155-392) |
 | Configuración | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=84-550) |
 
 **Usa el modo `Admin` de la colección Color.** Los mismos 24 tokens, en claro: no hay
@@ -95,6 +97,8 @@ explicado en su propia anotación, al lado de esa pantalla.
 | Fila de carrito | — | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=56-33) |
 | Estado vacío | 2 tipos: catálogo, carrito | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=56-65) |
 | Marquee / Header / Footer | desktop y mobile | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=4-4) |
+| Mega-menú / Productos | panel de 1440 × 504, alto fijo | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=145-38) |
+| Cajón de navegación / Mobile | diálogo a pantalla completa | [abrir](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=147-38) |
 
 Las cuatro pantallas usan **instancias** de estos componentes, incluidos el header y
 el footer. Cambiar el Bloque de precio, el Botón o el Header actualiza el sitio entero.
@@ -143,3 +147,40 @@ Se reabrió una sola cosa, y es de panel: **la sección "Nosotros" es la novena
 pantalla del admin** y todavía no está dibujada. Salió de la dirección UX v3, que
 sumó la página `/nosotros` y con ella el contenido que el cliente va a querer
 editar: fundadores, hitos, obras y cuatro cifras (`PENDIENTES.md` #49).
+
+
+---
+
+## Navegación v3 y Nosotros
+
+`Catálogo` y `Productos` se fusionaron: para un usuario eran sinónimos y llevaban al
+mismo lugar. El menú quedó en **cuatro puertas**:
+
+`01 PRODUCTOS ▾ · 02 MAYORISTAS · 03 NOSOTROS · 04 CONTACTO`
+
+`CONTACTO` ancla a la sección "Dónde estamos" de Nosotros; no es una página aparte.
+
+Un efecto secundario que vale la pena: con el menú fijo en cuatro ítems, **el ancho de
+la barra dejó de depender de los datos**. Antes se armaba con las primeras categorías,
+así que reordenarlas en el panel podía romper la cabecera. Ahora el breakpoint se
+calcula sumando piezas conocidas.
+
+El detalle de geometría, estados, teclado y el orden de las secciones de Nosotros está
+en [`direccion-ux-v3.md`](direccion-ux-v3.md).
+
+### Lo que falta para publicar Nosotros
+
+La página está construida y funciona con los datos que hay. Lo que falta es contenido
+del cliente, y se ve como hueco a propósito —`[ DATO ]`, `[ ROL ]`, `[ AÑO ]`— tanto en
+la página como en la pantalla 08 del panel:
+
+1. **Licencia web de la tipografía del hero.** Es `Urban Thunder Demo`, instalada solo
+   en la máquina de Ale. El sufijo "Demo" casi siempre significa uso personal, sin
+   derecho comercial ni webfont. **Bloquea el maquetado del hero.**
+2. **Tres obras** con foto, club, ciudad, qué se entregó y autorización para publicarlo.
+   Es lo que más vende de toda la página.
+3. **Foto de Santino y Juan Pedro**, misma toma y mismo fondo, y el rol de cada uno.
+4. **Los tres números** de la barra: años en el rubro, gimnasios equipados y provincias.
+   El cuarto sale solo del catálogo.
+5. **¿Rastro fabrica, importa o revende? ¿Instala? ¿Hay repuestos?** Define la sección
+   "Cómo trabajamos" entera y también el argumento de la landing mayorista.
