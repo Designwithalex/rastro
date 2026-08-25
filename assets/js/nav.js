@@ -252,15 +252,13 @@
       }
     });
 
-    disparador.addEventListener('keydown', function (evento) {
-      if (evento.key === 'ArrowDown' || evento.key === 'Down') {
-        evento.preventDefault();
-        abrir();
-        enfocarCategoria(0);
-      }
-    });
+    /* --- Teclado ---------------------------------------------
+       Todo el teclado se atiende en un solo lugar, el contenedor. Con un
+       listener aparte en el disparador, la flecha abajo movía el foco a la
+       primera categoría y el mismo evento seguía burbujeando hasta acá,
+       donde ya se leía la categoría como foco actual y avanzaba a la
+       segunda: dos saltos por una tecla.
 
-    /* --- Teclado adentro del panel ---------------------------
        Esc cierra siempre y devuelve el foco. Las flechas recorren la
        columna A y cruzan a la B. Tab no se toca: avanza linealmente y,
        cuando se va del panel, el focusout de más abajo lo cierra. */
@@ -271,6 +269,16 @@
         if (abierto) {
           evento.preventDefault();
           cerrar(true);
+        }
+
+        return;
+      }
+
+      if (doc.activeElement === disparador) {
+        if (tecla === 'ArrowDown' || tecla === 'Down') {
+          evento.preventDefault();
+          abrir();
+          enfocarCategoria(0);
         }
 
         return;
