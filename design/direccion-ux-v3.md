@@ -79,6 +79,12 @@ Panel a sangre 1440, borde superior e inferior de 1 px `border/subtle`, fondo
 
 - Hover con retardo de intención de 120 ms; cierre con 240 ms para permitir el
   movimiento diagonal hacia el panel.
+- **El panel vive dentro del `<li>` de Productos**, no como hermano de la barra.
+  Es el patrón de disclosure estándar: el contenido revelado sigue a su disparador
+  en el orden de foco y en el árbol de accesibilidad, y es lo que permite que el
+  `focusout` cierre solo sin centinelas. Consecuencia: `Tab` desde el último
+  elemento del panel cae en el ítem siguiente del menú, no en el buscador. Es más
+  coherente que cruzar tres ítems sin visitarlos.
 - El disparador es `<button aria-expanded aria-controls>`, **no un enlace**: elimina
   el bug de "el primer toque navega en vez de abrir".
 - `Enter`/`Espacio`/`↓` abre y mueve el foco a la primera categoría. `↑↓` recorre y
@@ -87,12 +93,27 @@ Panel a sangre 1440, borde superior e inferior de 1 px `border/subtle`, fondo
   `Esc` cierra y devuelve el foco al disparador, siempre.
 - Anillo de foco 2 px blanco, canto vivo, en todo el panel.
 
+### El corte de escritorio va en 1280
+
+Medido: `.nav` con las cuatro puertas ocupa 475 px y `.cabecera__acciones` necesita 573,
+así que la barra en una línea no entra hasta **1220**. Bajar el corte a 1120 deja 80 px
+de tierra de nadie donde las acciones se montan sobre el último ítem del menú — y como
+`.nav__enlace` está posicionado, además **captura los clics del buscador**. Si algún día
+se quiere bajar, primero hay que hacer que la barra se achique de verdad.
+
 ### Mobile — cajón, no tira
 
 La tira horizontal actual esconde el canal mayorista detrás de un gesto. Se reemplaza
 por un cajón a pantalla completa que entra desde la izquierda en 200 ms.
 
-Cabecera 56: `[hamburguesa 44][logo 110×28 centrado][buscar 44][carrito 44]`.
+Cabecera 56: `[hamburguesa 44][logo 110×28 centrado][buscar 44][carrito ~60]`.
+
+La celda del carrito mide ~60 y no 44 porque el contador `[00]` es dato, no adorno:
+con el contador puesto termina en x=370 sobre 390, con los mismos 20 px de margen que
+el flanco izquierdo, y el logo queda centrado de verdad. El área táctil son 44 de alto,
+que es lo que exige el criterio. En celular pierde el fondo bordeaux: en una barra de
+cuatro celdas el botón lleno es el único elemento que grita, y el carrito vacío no es
+la acción principal. El bordeaux vuelve en escritorio, donde sí es un botón.
 Cuerpo: filas de 56 con hairline entre ellas · acordeón de PRODUCTOS con las 6
 categorías en filas de 48 sangradas · bloque secundario (cuenta, pedidos, contacto) ·
 la regla de precio en su módulo de 2 filas · CTA de WhatsApp · pie con redes.
