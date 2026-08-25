@@ -17,8 +17,8 @@ $repeticiones = 8;
     <?php for ($pista = 0; $pista < 2; $pista++): ?>
         <div class="marquee__pista">
             <?php for ($i = 0; $i < $repeticiones; $i++): ?>
-                <span class="marquee__item t-mono-label-sm"><?= e($consigna) ?></span>
-                <span class="marquee__barra">/</span>
+                <span class="marquee__item t-display-xs"><?= e($consigna) ?></span>
+                <span class="marquee__barra t-mono-texto-sm">/</span>
             <?php endfor; ?>
         </div>
     <?php endfor; ?>

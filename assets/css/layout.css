@@ -27,19 +27,13 @@
   animation: marquee-desplazar 42s linear infinite;
 }
 
-/* La escala tipográfica no tiene un Michroma de 10 px: se toma la
-   métrica de mono/label-sm (tamaño, interlínea y tracking) y solo se
-   cambia la familia, que es lo que pide el diseño para esta franja. */
+/* Tipografía: .t-display-xs y .t-mono-texto-sm, puestas en el marcado.
+   Acá solo va lo que la escala no resuelve. */
 .marquee__item {
-  font-family: var(--fuente-display);
-  font-weight: 400;
   white-space: nowrap;
 }
 
 .marquee__barra {
-  font-family: var(--fuente-mono);
-  font-size: 10px;
-  line-height: 14px;
   opacity: 0.5;
 }
 
@@ -238,8 +232,9 @@
   background-color: var(--color-accent-pressed);
 }
 
+/* La familia la hereda de .t-mono-label; acá solo hace falta que el
+   contador no baile de ancho al pasar de [09] a [10]. */
 .boton-carrito__contador {
-  font-family: var(--fuente-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -420,6 +415,10 @@
   pointer-events: none;
 }
 
+/* Único texto del sitio fuera de la escala tipográfica, y a propósito:
+   es una marca de agua a sangre que tiene que medir lo mismo que el ancho
+   de la ventana. Ninguna clase de la escala puede ser fluida. La familia
+   sí sale del token. */
 .pie__marca span {
   display: block;
   font-family: var(--fuente-display);
