@@ -41,8 +41,10 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 
 | # | Tema |
 |---|---|
-| 19 | Optimizar imágenes: 29 MB sin comprimir. Redimensionar + WebP antes del deploy. |
-| 20 | Los PNG transparentes pesan ~1 MB c/u. Recomprimir. |
+| ~~19~~ | ~~Optimizar imágenes~~ → resuelto el 2026-08-25, ver abajo. |
+| ~~20~~ | ~~Recomprimir los PNG transparentes~~ → resuelto el 2026-08-25, ver abajo. |
+| 46 | `docs/DATA-CONTRACT.md` y `docs/HANDOFF.md` todavía no existen. `repository.php` ya los referencia. Se escriben al cerrar la Fase 2. |
+| 47 | No hay `views/errors/404.php`: hoy el 404 cae en el andamio `views/partials/en-construccion.php` con el código correcto. Entra con el bloque de páginas. |
 
 ---
 
@@ -64,6 +66,21 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 
 ---
 
+## Abiertos por la Fase 2 de frontend
+
+Surgidos al armar la capa de datos y el layout compartido.
+
+| # | Tema | Por qué importa | Decisión provisoria |
+|---|---|---|---|
+| 40 | **Faltan fotos de kettlebells, racks y jaulas.** De las 68 fotos, ninguna es una kettlebell, un half rack ni una jaula de potencia. | Son dos de las seis categorías de la home. Sin foto, la card queda coja justo donde el ticket es más alto. | Cuatro productos del mock apuntan a `assets/img/productos/sin-foto.svg`, un marcador que usa el mismo *image well* claro que la card. Se pide sesión de fotos o material del proveedor. |
+| 41 | **Rastro figura como marca propia** en `brands.json` (id 1, con logo). Trece productos del mock son de línea propia. | La franja de la home dice "marcas de las que somos vendedores oficiales": ahí Rastro no iría. | Queda cargada para que la ficha de producto siempre resuelva una marca. Si el cliente prefiere que no aparezca en esa franja, se saca la entrada y esos productos quedan con `marca: null`. |
+| 42 | **`tokens.css` no tiene un estilo Michroma chico.** El marquee pide Michroma a 10 px y la escala arranca en `display/s` (16 px). | Es el único lugar del sitio donde una clase de la escala se completa con CSS. | `.marquee__item` toma la métrica de `mono/label-sm` y solo cambia la familia. Si se va a repetir, conviene un `display/xs` en Figma. |
+| 43 | **Rutas legales agregadas al router**: `/terminos` y `/arrepentimiento`. | El botón de arrepentimiento es obligatorio en todas las páginas (Res. 424/2020) y el pie tiene que enlazar a algún lado. | Las rutas existen y hoy muestran el andamio. Las páginas se maquetan cuando el cliente pase el texto legal (#10). |
+| 44 | **Los recortes con transparencia quedaron solo en WebP** (`assets/img/productos/png/*.webp`). | Los PNG originales pesaban hasta 1,5 MB cada uno. | Cada recorte tiene su gemelo `.jpg` sobre blanco en la carpeta de arriba, que sirve de respaldo. Hoy los mocks usan el `.jpg`; los recortes quedan disponibles para el hero y el bento. |
+| 45 | **Usuarios de prueba con contraseña conocida** en `data/users.json`: `demo@rastrofitness.com.ar` y `mayorista@rastrofitness.com.ar`, los dos con `rastro2026`. | Es un mock, pero viaja en el repo y se despliega. | Se guardan como hash bcrypt, no en texto plano. El backend dev tiene que borrar el archivo al conectar la base real. |
+
+---
+
 ## Resueltos
 
 | Fecha | Tema | Decisión |
@@ -71,6 +88,8 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 | 2026-08-20 | Paleta verde (el brandbook traía `#00674F` y `#2E6F40`) | **Descartado.** El cliente no quiere verde. La paleta es negro + plata/grises + bordeaux, con bordeaux como único acento. Ver `CLAUDE.md` §5.3. |
 | 2026-08-23 | Dirección de diseño: clásica (v1) o ficha técnica (v2) | **v2.** Canto vivo, retícula de hairlines, titular a 80 px, datos técnicos por producto y JetBrains Mono para los números. Foundations y los 5 componentes ya están migrados. Ver `CLAUDE.md` §5.6. |
 | 2026-08-23 | #30 Destacados en mobile a 1 columna | Confirmado en la v2: una columna a sangre, cards separadas por hairline. Con el bloque de precio nuevo entra cómodo. |
+| 2026-08-25 | #19 y #20 Peso de las imágenes | **Resuelto.** `bin/optimizar-imagenes.sh` deja las fotos de producto en 1000 px de lado largo, las de ambiente en 1600 y la marca en 600, y genera un `.webp` al lado de cada archivo. Los PNG con transparencia quedan solo en WebP. De 29 MB a 9,4 MB, con el archivo más pesado en 298 KB. Los originales se guardan en `.originales-img/`, fuera del repo. |
+| 2026-08-25 | #4 Tipografías self-hosted | **Parcial.** Michroma, Saira y JetBrains Mono se sirven desde `assets/fonts/` en WOFF2, subconjunto latin, 88 KB en total. Sigue abierta la licencia de Eurostile. Ver `assets/fonts/LICENCIAS.txt`. |
 
 | 31 | **Código, stock y medida por producto.** La v2 los muestra en cada card. | Hoy son datos verosímiles inventados. `repository.php` ya los expone (`sku`, `stock`), así que no hay cambio de contrato: falta que el cliente cargue los reales. |
 | 32 | **Dónde se retira.** La ficha dice "En depósito, sin cargo. Córdoba capital". | Inventado por el diseño. Falta la dirección real y si hay retiro en más de un punto. |
