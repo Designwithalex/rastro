@@ -36,6 +36,7 @@ jobs:
             **/.DS_Store
             **/docs/**
             **/design/**
+            **/bin/**
             **/*.md
             **/app/config.php
             **/node_modules/**
