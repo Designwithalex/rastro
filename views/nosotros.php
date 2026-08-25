@@ -257,9 +257,15 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <?php foreach ($marcas as $marca): ?>
                     <li class="credenciales__item">
                         <?php if (($marca['logo'] ?? '') !== ''): ?>
+                            <?php /* Los logos los sube el cliente y cada uno tiene su
+                                     forma: un 200×80 escrito a mano miente en todos
+                                     menos en uno. PENDIENTES #25 además los pide en
+                                     SVG, que imagen_medidas() sabe leer. */ ?>
+                            <?php $logo_medidas = imagen_medidas((string) $marca['logo']); ?>
                             <img class="credenciales__logo" src="<?= e(asset($marca['logo'])) ?>"
                                  alt="<?= e($marca['nombre'] ?? '') ?>"
-                                 width="200" height="80" loading="lazy" decoding="async">
+                                 <?php if ($logo_medidas !== null): ?>width="<?= e((string) $logo_medidas['ancho']) ?>" height="<?= e((string) $logo_medidas['alto']) ?>"<?php endif; ?>
+                                 loading="lazy" decoding="async">
                         <?php else: ?>
                             <p class="credenciales__nombre t-mono-label"><?= e($marca['nombre'] ?? '') ?></p>
                         <?php endif; ?>
@@ -285,9 +291,15 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <?php foreach ($clientes as $cliente): ?>
                     <li class="credenciales__item">
                         <?php if (($cliente['logo'] ?? '') !== ''): ?>
+                            <?php /* Los logos los sube el cliente y cada uno tiene su
+                                     forma: un 200×80 escrito a mano miente en todos
+                                     menos en uno. PENDIENTES #25 además los pide en
+                                     SVG, que imagen_medidas() sabe leer. */ ?>
+                            <?php $logo_medidas = imagen_medidas((string) $cliente['logo']); ?>
                             <img class="credenciales__logo" src="<?= e(asset($cliente['logo'])) ?>"
                                  alt="<?= e($cliente['nombre'] ?? '') ?>"
-                                 width="200" height="80" loading="lazy" decoding="async">
+                                 <?php if ($logo_medidas !== null): ?>width="<?= e((string) $logo_medidas['ancho']) ?>" height="<?= e((string) $logo_medidas['alto']) ?>"<?php endif; ?>
+                                 loading="lazy" decoding="async">
                         <?php else: ?>
                             <p class="credenciales__nombre t-mono-label"><?= e($cliente['nombre'] ?? '') ?></p>
                         <?php endif; ?>

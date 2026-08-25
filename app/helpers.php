@@ -519,18 +519,85 @@ function imagen_webp(string $ruta): ?string
 }
 
 /**
+ * Medidas de un SVG, leídas del propio archivo.
+ *
+ * NO se delega en getimagesize() a propósito: soporta SVG recién desde PHP
+ * 8.5, y Hostinger puede estar corriendo 8.1. La misma llamada devolvería
+ * 800×800 en la máquina de desarrollo y null en el servidor, con el
+ * consiguiente salto de layout que aparece solo en producción. Doce líneas
+ * de lectura valen más que un comportamiento que depende del intérprete.
+ *
+ * Se aceptan únicamente medidas en píxeles. Un `width="100%"` o un
+ * `width="10cm"` no dicen cuánto va a ocupar la imagen en la página, así
+ * que se ignoran y se cae al viewBox, que da la proporción —que es lo que
+ * el navegador necesita para reservar el espacio— aunque no sea el tamaño
+ * final.
+ *
+ * @return array{ancho:int, alto:int}|null
+ */
+function _medidas_svg(string $absoluta): ?array
+{
+    // La etiqueta <svg> es lo primero del archivo salvo prólogo o
+    // comentario; 4 KB alcanzan de sobra y evitan cargar un mapa entero.
+    $cabecera = (string) @file_get_contents($absoluta, false, null, 0, 4096);
+
+    if (!preg_match('/<svg\b[^>]*>/i', $cabecera, $etiqueta)) {
+        return null;
+    }
+
+    $svg = $etiqueta[0];
+
+    $en_pixeles = static function (string $atributo) use ($svg): ?float {
+        if (!preg_match('/\b' . $atributo . '\s*=\s*["\']([^"\']*)["\']/i', $svg, $valor)) {
+            return null;
+        }
+
+        if (!preg_match('/^\s*([0-9]*\.?[0-9]+)\s*(px)?\s*$/i', $valor[1], $numero)) {
+            return null;
+        }
+
+        return (float) $numero[1];
+    };
+
+    $ancho = $en_pixeles('width');
+    $alto  = $en_pixeles('height');
+
+    if ($ancho === null || $alto === null) {
+        // min-x min-y ancho alto
+        if (preg_match('/\bviewBox\s*=\s*["\']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i', $svg, $caja)) {
+            $ancho = (float) $caja[1];
+            $alto  = (float) $caja[2];
+        }
+    }
+
+    if ($ancho === null || $alto === null || $ancho <= 0 || $alto <= 0) {
+        return null;
+    }
+
+    return ['ancho' => (int) round($ancho), 'alto' => (int) round($alto)];
+}
+
+/**
  * Medidas reales de una imagen: ['ancho' => int, 'alto' => int].
  *
  * Existe para no escribir width y height a mano en las vistas. Las fotos
  * que hoy están en el repo miden todas 928×1152, pero las que suba el
- * cliente —la de los fundadores, las de las obras— van a medir cualquier
- * cosa, y un width/height que miente reserva un espacio que no es el de la
- * imagen: la página salta cuando termina de cargar, que es justo lo que
- * esos dos atributos existen para evitar.
+ * cliente —la de los fundadores, las de las obras, los logos de las marcas
+ * oficiales— van a medir cualquier cosa, y un width/height que miente
+ * reserva un espacio que no es el de la imagen: la página salta cuando
+ * termina de cargar, que es justo lo que esos dos atributos existen para
+ * evitar.
  *
- * Devuelve null si el archivo no está o si no es un mapa de bits —un SVG no
- * tiene medidas intrínsecas en píxeles— y ahí la vista omite los atributos
- * en vez de inventarlos.
+ * Los SVG se leen aparte, con _medidas_svg(), y por eso también devuelven
+ * medidas. La alternativa era dejárselo a getimagesize(), que soporta SVG
+ * recién desde PHP 8.5: en local daría 800×800 y en Hostinger null, y el
+ * marcador `sin-foto.svg` de los cuatro productos sin foto entra en la card
+ * de producto, que todavía no está escrita. Un comportamiento que cambia
+ * con la versión del intérprete es una trampa para el que venga después.
+ *
+ * Devuelve null cuando no se puede saber: el archivo no está, el formato no
+ * se reconoce, o el SVG declara su tamaño en porcentaje. Ahí la vista omite
+ * los atributos en lugar de inventarlos.
  *
  * TODO(backend): con la base real conviene guardar ancho y alto como
  * columnas al subir la foto y devolverlos en el propio producto, en vez de
@@ -550,6 +617,10 @@ function imagen_medidas(string $ruta): ?array
 
     if (!is_file($absoluta)) {
         return $cache[$ruta] = null;
+    }
+
+    if (preg_match('/\.svg$/i', $ruta)) {
+        return $cache[$ruta] = _medidas_svg($absoluta);
     }
 
     $medidas = @getimagesize($absoluta);
