@@ -47,8 +47,11 @@
   padding-top: var(--espaciado-12);
 }
 
+/* text/secondary y no text/disabled: es un rótulo que se lee, no un
+   elemento inhabilitado. Con disabled sobre bg/surface daba 3,43:1 y no
+   pasaba AA, y este rótulo sale cuatro veces por página. */
 .regla-precio__rotulo {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .regla-precio__dato {
@@ -142,7 +145,7 @@
 }
 
 .mega__rotulo {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
   margin-bottom: var(--espaciado-12);
 }
 
@@ -170,7 +173,7 @@
 }
 
 .mega__categoria-cantidad {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -413,7 +416,7 @@
 }
 
 .cajon__titulo {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .cajon__cerrar {
@@ -493,7 +496,7 @@
 }
 
 .cajon__cantidad {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -544,10 +547,11 @@
   color: var(--color-text-secondary);
 }
 
+/* 44 como el resto del cajón: el pie no es menos tocable que una fila. */
 .cajon__pie-enlace {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
+  min-height: 44px;
   color: var(--color-text-secondary);
 }
 

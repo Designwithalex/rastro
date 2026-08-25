@@ -323,8 +323,10 @@
   padding: var(--espaciado-20);
 }
 
+/* text/secondary: la ciudad de una obra es dato que se lee, no un
+   elemento apagado. Con disabled no llegaba a AA. */
 .obras__lugar {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .obras__texto {
@@ -435,7 +437,7 @@
 }
 
 .deposito__fila dt {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .deposito__enlace {
