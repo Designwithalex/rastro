@@ -129,6 +129,7 @@
 .t-display-l { font-family: var(--fuente-display); font-weight: 400; font-size: 32px; line-height: 40px; letter-spacing: -0.5px; text-transform: uppercase; }
 .t-display-m { font-family: var(--fuente-display); font-weight: 400; font-size: 24px; line-height: 32px; letter-spacing: -0.25px; text-transform: uppercase; }
 .t-display-s { font-family: var(--fuente-display); font-weight: 400; font-size: 16px; line-height: 22px; text-transform: uppercase; }
+.t-display-xs { font-family: var(--fuente-display); font-weight: 400; font-size: 10px; line-height: 14px; letter-spacing: 1.2px; text-transform: uppercase; }
 .t-precio-lg { font-family: var(--fuente-display); font-weight: 400; font-size: 40px; line-height: 44px; letter-spacing: -0.5px; }
 .t-precio-md { font-family: var(--fuente-display); font-weight: 400; font-size: 26px; line-height: 30px; letter-spacing: -0.25px; }
 .t-precio-sm { font-family: var(--fuente-display); font-weight: 400; font-size: 22px; line-height: 26px; }
