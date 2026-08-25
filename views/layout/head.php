@@ -10,8 +10,14 @@
  *   $clase_body  = 'pagina-catalogo';           // opcional
  *   require RASTRO_VIEWS . '/layout/head.php';
  *   ?>
- *   <main id="contenido"> … </main>
+ *   <main id="contenido" tabindex="-1"> … </main>
  *   <?php require RASTRO_VIEWS . '/layout/footer.php'; ?>
+ *
+ * El tabindex="-1" del <main> no es opcional: es el destino del enlace
+ * "Saltar al contenido". Sin él, Firefox mueve el scroll pero deja el foco
+ * donde estaba, así que la siguiente vez que se aprieta Tab el recorrido
+ * vuelve a empezar por la cabecera y el salto no sirvió para nada. Chrome
+ * lo perdona; Firefox no, y el atributo no le molesta a ninguno de los dos.
  *
  * Este archivo abre <body> y deja puestos el marquee y la cabecera.
  * El pie y el cierre del documento los pone footer.php.

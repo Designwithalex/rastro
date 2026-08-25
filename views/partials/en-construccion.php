@@ -19,7 +19,7 @@ $clase_body  = 'pagina-andamio';
 require RASTRO_VIEWS . '/layout/head.php';
 ?>
 
-<main class="andamio" id="contenido">
+<main class="andamio" id="contenido" tabindex="-1">
     <div class="contenedor andamio__caja">
         <p class="andamio__indice t-mono-label">[ Fase 2 · en construcción ]</p>
         <h1 class="andamio__titulo t-display-l">La base ya está</h1>

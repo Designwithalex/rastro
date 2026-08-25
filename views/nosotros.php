@@ -54,7 +54,7 @@ $foto_fundadores = $nosotros['fundadores']['foto'] ?? null;
 require RASTRO_VIEWS . '/layout/head.php';
 ?>
 
-<main class="nosotros" id="contenido">
+<main class="nosotros" id="contenido" tabindex="-1">
 
     <?php if ($nosotros['provisorio']): ?>
         <?php /* Se apaga poniendo "provisorio": false en data/nosotros.json.
