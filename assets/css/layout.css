@@ -110,6 +110,15 @@
   grid-area: nav;
   min-width: 0;
   margin-inline: calc(var(--margen-mobile) * -1);
+
+  /* La tira se desvanece contra el borde derecho para avisar que sigue.
+     "05 Mayoristas" es el último ítem y el canal mayorista es medio
+     negocio: no puede quedar escondido sin ninguna pista.
+     La máscara se esconde sola cuando no hace falta: si el menú entra
+     entero, en la zona del degradé no hay tinta que apagar. */
+  --nav-desvanecido: var(--espaciado-32);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--nav-desvanecido)), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--nav-desvanecido)), transparent 100%);
 }
 
 .nav__lista {
@@ -118,7 +127,10 @@
   gap: var(--espaciado-20);
   overflow-x: auto;
   scrollbar-width: none;
-  padding-inline: var(--margen-mobile);
+
+  /* El relleno del final saca al último ítem de abajo del degradé
+     cuando la tira está desplazada hasta el tope. */
+  padding-inline: var(--margen-mobile) calc(var(--margen-mobile) + var(--nav-desvanecido));
 }
 
 .nav__lista::-webkit-scrollbar {
@@ -136,8 +148,10 @@
   transition: color 0.15s ease;
 }
 
+/* text/secondary y no text/disabled: el índice es dato legible, no un
+   elemento apagado. CLAUDE.md §5.3 reserva disabled para lo inhabilitado. */
 .nav__indice {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
   transition: color 0.15s ease;
 }
 
@@ -191,7 +205,7 @@
 }
 
 .buscador__campo::placeholder {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 /* El contorno del conjunto ya avisa que el campo tiene el foco. */
@@ -244,12 +258,21 @@
   }
 }
 
+/* --- Tramo intermedio: el menú se lleva una fila entera --------
+   Entre 1040 y 1279 px no entra logo + menú + buscador + acciones en una
+   sola línea. Y el ancho del menú no es fijo: se arma con las tres
+   primeras categorías del panel, así que si el cliente sube "Racks y
+   jaulas" el renglón crece. En vez de calcular un punto de corte que
+   depende de los datos, acá el menú baja a su propia fila y deja de
+   competir por el ancho. */
 @media (min-width: 1040px) {
   .cabecera__barra {
-    grid-template-areas: "logo nav buscador acciones";
-    grid-template-columns: auto auto minmax(180px, 1fr) auto;
+    grid-template-areas:
+      "logo buscador acciones"
+      "nav  nav      nav";
+    grid-template-columns: auto minmax(180px, 1fr) auto;
     column-gap: var(--espaciado-32);
-    row-gap: 0;
+    row-gap: var(--espaciado-12);
     padding-block: var(--espaciado-16);
   }
 
@@ -262,8 +285,7 @@
   }
 
   .nav__lista {
-    overflow-x: visible;
-    padding-inline: 0;
+    padding-inline: 0 var(--nav-desvanecido);
     gap: var(--espaciado-24);
   }
 
@@ -271,6 +293,18 @@
     justify-self: end;
     width: 100%;
     max-width: 320px;
+  }
+}
+
+/* --- Escritorio: la cabecera vuelve a una sola línea -----------
+   El menú es el único track que puede achicarse —minmax(0, auto)—, así que
+   si algún día el contenido no entra, la tira se desplaza como en celular
+   y se desvanece contra el borde. Nunca se dibuja encima del buscador. */
+@media (min-width: 1280px) {
+  .cabecera__barra {
+    grid-template-areas: "logo nav buscador acciones";
+    grid-template-columns: auto minmax(0, auto) minmax(180px, 1fr) auto;
+    row-gap: 0;
   }
 }
 
@@ -325,7 +359,7 @@
 }
 
 .pie__dato {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .pie__envio {
@@ -371,8 +405,9 @@
   padding-block: var(--espaciado-20);
 }
 
+/* Razón social y CUIT: por ley tienen que poder leerse. */
 .pie__razon {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .pie__legales-lista {
