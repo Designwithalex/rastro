@@ -321,27 +321,25 @@
 
 /* --- Botón de carrito --------------------------------------- */
 
+/* En celular es la cuarta celda de la barra y se comporta como las otras
+   tres: ícono, sin fondo y sin la palabra. El bordeaux vuelve en
+   escritorio, donde el carrito sí es un botón y no una celda.
+
+   La celda mide un poco más de 44 porque además del ícono lleva el
+   contador, que es dato y no adorno: sacarlo para respetar el cuadrado
+   dejaría al visitante sin saber cuántas unidades tiene cargadas. Con el
+   contador puesto y sin fondo, los dos flancos de la barra quedan casi
+   iguales y el logo se lee centrado. */
 .boton-carrito {
   display: inline-flex;
   align-items: center;
-  gap: var(--espaciado-8);
+  gap: var(--espaciado-4);
   min-height: 44px;
-  padding-inline: var(--espaciado-12);
-  background-color: var(--color-accent-base);
-  color: var(--color-accent-on);
-  transition: background-color 0.15s ease;
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.boton-carrito:hover {
-  background-color: var(--color-accent-hover);
-}
-
-.boton-carrito:active {
-  background-color: var(--color-accent-pressed);
-}
-
-/* La palabra entra recién cuando hay ancho: en la barra de 56 el
-   carrito es una celda de 44 como las otras tres. */
+/* La palabra entra recién cuando hay ancho. */
 .boton-carrito__texto {
   display: none;
 }
@@ -402,7 +400,18 @@
   }
 
   .boton-carrito {
+    gap: var(--espaciado-8);
     padding-inline: var(--espaciado-16);
+    background-color: var(--color-accent-base);
+    color: var(--color-accent-on);
+  }
+
+  .boton-carrito:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  .boton-carrito:active {
+    background-color: var(--color-accent-pressed);
   }
 
   .boton-carrito__texto {
