@@ -249,9 +249,11 @@
   border-color: var(--color-plata-3);
 }
 
+/* 2 px, igual que el :focus-visible de base.css. Con el hairline el
+   buscador era el único control del sitio con un anillo más fino. */
 .buscador:focus-within {
   border-color: var(--color-border-focus);
-  outline: var(--hairline) solid var(--color-border-focus);
+  outline: 2px solid var(--color-border-focus);
   outline-offset: 0;
 }
 

@@ -385,6 +385,17 @@
     var reloj = null;
     var abierto = false;
 
+    /* El diálogo se declara desde acá y no desde el marcado. Sin
+       JavaScript el cajón queda a la vista y estático (sin-js.css), y un
+       aria-modal sobre un bloque siempre visible le esconde la página
+       entera a un lector de pantalla: todo lo que está afuera del diálogo
+       deja de existir. Si el código que atrapa el foco no corre, la
+       promesa de que es modal tampoco se puede hacer. */
+    if (panel) {
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'true');
+    }
+
     function abrir() {
       if (abierto) {
         return;

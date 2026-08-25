@@ -45,7 +45,14 @@ $cajon_secundario = [
              ya están Esc y el botón de cerrar: sería una parada de más. */ ?>
     <div class="cajon__velo" data-cajon-cerrar></div>
 
-    <div class="cajon__panel" role="dialog" aria-modal="true" aria-labelledby="cajon-titulo" tabindex="-1">
+    <?php /* role="dialog" y aria-modal NO están en el marcado: los pone
+             assets/js/nav.js al arrancar. Sin JavaScript este bloque queda
+             a la vista y estático (ver assets/css/sin-js.css), y un
+             aria-modal sobre algo siempre visible le esconde la página
+             entera a un lector de pantalla: todo lo que está afuera del
+             diálogo deja de existir. Un atributo de estado desactualizado
+             es una molestia; este sería una página en blanco. */ ?>
+    <div class="cajon__panel" aria-labelledby="cajon-titulo" tabindex="-1">
 
         <div class="cajon__barra">
             <p class="cajon__titulo t-mono-label" id="cajon-titulo">Menú</p>
@@ -68,8 +75,13 @@ $cajon_secundario = [
 
                         <?php if ($cajon_item['tipo'] === 'mega'): ?>
                             <li class="cajon__fila">
-                                <button class="cajon__enlace t-mono-label" type="button"
+                                <?php /* aria-current="true" y no "page": el disparador no
+                                         es un enlace y no lleva a ninguna página; lo que dice
+                                         es que la sección en la que estás parado es esta. */ ?>
+                                <button class="<?= e(trim('cajon__enlace t-mono-label ' . ($cajon_productos_abierto ? 'es-actual' : ''))) ?>"
+                                        type="button"
                                         aria-expanded="<?= $cajon_productos_abierto ? 'true' : 'false' ?>"
+                                        <?= $cajon_productos_abierto ? 'aria-current="true"' : '' ?>
                                         aria-controls="cajon-categorias" data-cajon-acordeon>
                                     <span class="cajon__indice"><?= e($cajon_indice) ?></span>
                                     <span class="cajon__texto"><?= e($cajon_item['texto']) ?></span>

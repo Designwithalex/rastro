@@ -98,9 +98,15 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
 
                     <?php if ($layout_item['tipo'] === 'mega'): ?>
                         <li class="nav__item nav__item--mega" data-mega>
+                            <?php /* aria-current="true" y no "page": el disparador es un
+                                     botón, no lleva a ninguna página. Lo que declara es que la
+                                     sección donde estás parado —catálogo o ficha— es esta. Sin
+                                     esto, la barra bordeaux marcaba la sección activa solo para
+                                     quien la ve. */ ?>
                             <button class="<?= e(trim('nav__enlace nav__disparador t-mono-label ' . ($layout_es_actual ? 'es-activo es-actual' : ''))) ?>"
                                     type="button" id="nav-productos"
                                     aria-expanded="false" aria-controls="mega-productos"
+                                    <?= $layout_es_actual ? 'aria-current="true"' : '' ?>
                                     data-mega-disparador>
                                 <span class="nav__indice"><?= e($layout_indice) ?></span>
                                 <span class="nav__texto"><?= e($layout_item['texto']) ?></span>
@@ -136,6 +142,15 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                     <span class="visualmente-oculto">Buscar en el catálogo</span>
                 </button>
 
+                <?php /* Cancelar va ANTES del campo, en el marcado y en pantalla.
+                         Cuando la búsqueda se queda con la barra entera, la salida
+                         tiene que ser lo primero que se anuncia y lo primero que se
+                         ve, en el mismo lugar donde estaba la hamburguesa. Solo se
+                         dibuja en celular y con la búsqueda abierta. */ ?>
+                <button class="busqueda__cerrar t-mono-label" type="button" data-busqueda-cerrar>
+                    Cancelar
+                </button>
+
                 <form class="buscador" id="busqueda-formulario" role="search"
                       method="get" action="<?= e(url('/catalogo')) ?>">
                     <label class="visualmente-oculto" for="buscador-q">Buscar en el catálogo</label>
@@ -144,10 +159,6 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                            autocomplete="off" enterkeyhint="search">
                     <button class="buscador__boton t-mono-label-sm" type="submit">Buscar</button>
                 </form>
-
-                <button class="busqueda__cerrar t-mono-label" type="button" data-busqueda-cerrar>
-                    Cancelar
-                </button>
             </div>
 
             <?php /* TODO(backend): con sesión abierta este enlace va a /cuenta
