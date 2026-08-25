@@ -10,8 +10,14 @@
  *   $clase_body  = 'pagina-catalogo';           // opcional
  *   require RASTRO_VIEWS . '/layout/head.php';
  *   ?>
- *   <main id="contenido"> … </main>
+ *   <main id="contenido" tabindex="-1"> … </main>
  *   <?php require RASTRO_VIEWS . '/layout/footer.php'; ?>
+ *
+ * El tabindex="-1" del <main> no es opcional: es el destino del enlace
+ * "Saltar al contenido". Sin él, Firefox mueve el scroll pero deja el foco
+ * donde estaba, así que la siguiente vez que se aprieta Tab el recorrido
+ * vuelve a empezar por la cabecera y el salto no sirvió para nada. Chrome
+ * lo perdona; Firefox no, y el atributo no le molesta a ninguno de los dos.
  *
  * Este archivo abre <body> y deja puestos el marquee y la cabecera.
  * El pie y el cierre del documento los pone footer.php.
@@ -27,6 +33,9 @@
  *   $titulo       string  título de la pestaña, sin el sufijo de marca
  *   $descripcion  string  meta description
  *   $clase_body   string  clases extra del <body>
+ *   $estilos      array   hojas de estilo propias de la página, por nombre
+ *                         de archivo sin extensión: ['nosotros'] carga
+ *                         assets/css/nosotros.css después de las comunes.
  *
  * Las define el layout (la vista las puede leer, no pisar):
  *   $settings            array   repo_settings(), ya cacheado
@@ -54,6 +63,16 @@ $descripcion_pagina = $descripcion
 // El cuerpo toma su tipografía de la escala, igual que cualquier otro
 // elemento: base.css no declara ni un tamaño de fuente.
 $clases_body = trim('t-body-md ' . ($clase_body ?? ''));
+
+/* Hojas de estilo. Las tres primeras están en todas las páginas; nav.css
+   también, porque la cabecera está en todas. Lo que es de una sola página
+   —la de Nosotros, mañana el catálogo— lo declara la vista en $estilos y
+   no lo baja el resto del sitio. */
+$estilos_comunes = ['tokens', 'base', 'layout', 'nav'];
+$estilos_pagina  = array_values(array_filter(
+    (array) ($estilos ?? []),
+    static fn ($hoja): bool => is_string($hoja) && preg_match('/^[a-z0-9-]+$/', $hoja) === 1
+));
 ?>
 <!doctype html>
 <html lang="es-AR">
@@ -80,9 +99,14 @@ $clases_body = trim('t-body-md ' . ($clase_body ?? ''));
     <link rel="preload" href="<?= e(asset('fonts/michroma-400.woff2')) ?>" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="<?= e(asset('fonts/saira-400.woff2')) ?>" as="font" type="font/woff2" crossorigin>
 
-    <link rel="stylesheet" href="<?= e(asset('css/tokens.css')) ?>">
-    <link rel="stylesheet" href="<?= e(asset('css/base.css')) ?>">
-    <link rel="stylesheet" href="<?= e(asset('css/layout.css')) ?>">
+    <?php foreach (array_merge($estilos_comunes, $estilos_pagina) as $hoja): ?>
+        <link rel="stylesheet" href="<?= e(asset('css/' . $hoja . '.css')) ?>">
+    <?php endforeach; ?>
+
+    <?php /* Lo único que puede reaccionar a la falta de JavaScript sin
+             ejecutar JavaScript. El CSP de la raíz no permite <style> en
+             línea, pero sí un <link> del mismo origen. */ ?>
+    <noscript><link rel="stylesheet" href="<?= e(asset('css/sin-js.css')) ?>"></noscript>
 </head>
 <body class="<?= e($clases_body) ?>">
 

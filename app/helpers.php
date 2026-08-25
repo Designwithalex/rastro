@@ -460,6 +460,47 @@ function whatsapp_link(array $settings, ?string $mensaje = null): ?string
 }
 
 /**
+ * La medida que identifica a un producto en una línea: "20 kg", "2,20 m".
+ *
+ * Es el tercer dato de la línea técnica que la v2 muestra en cada producto
+ * —código, medida y estado— tanto en la card del catálogo como en el
+ * mega-menú (CLAUDE.md §5.6). Vive acá y no en cada vista para que las dos
+ * digan lo mismo.
+ *
+ * Casi todo el catálogo se identifica por peso, así que ese es el valor
+ * preferido. Los productos que no tienen peso cargado caen en la primera
+ * especificación dimensional que exista.
+ */
+function medida_producto(array $producto): string
+{
+    if (isset($producto['peso_kg']) && $producto['peso_kg'] !== null && $producto['peso_kg'] !== '') {
+        return peso_kg((float) $producto['peso_kg']);
+    }
+
+    $preferidas = ['Medidas', 'Largo', 'Alto', 'Diámetro'];
+
+    foreach ($preferidas as $etiqueta) {
+        foreach ($producto['especificaciones'] ?? [] as $especificacion) {
+            if (($especificacion['label'] ?? '') === $etiqueta && ($especificacion['valor'] ?? '') !== '') {
+                return (string) $especificacion['valor'];
+            }
+        }
+    }
+
+    return '—';
+}
+
+/**
+ * El estado de stock en una palabra, para la línea técnica.
+ * No dice cuántas unidades quedan a propósito: eso es información de
+ * depósito y en un listado invita a la comparación equivocada.
+ */
+function estado_stock(array $producto): string
+{
+    return ((int) ($producto['stock'] ?? 0)) > 0 ? 'En stock' : 'Sin stock';
+}
+
+/**
  * Versión WebP de una imagen, para el <source> de un <picture>.
  * Devuelve null si todavía no se generó, así la vista cae al original
  * sin romperse.
@@ -475,4 +516,145 @@ function imagen_webp(string $ruta): ?string
     $absoluta = dirname(__DIR__) . '/assets/' . ltrim($webp, '/');
 
     return is_file($absoluta) ? asset($webp) : null;
+}
+
+/**
+ * Medidas de un SVG, leídas del propio archivo.
+ *
+ * NO se delega en getimagesize() a propósito: soporta SVG recién desde PHP
+ * 8.5, y Hostinger puede estar corriendo 8.1. La misma llamada devolvería
+ * 800×800 en la máquina de desarrollo y null en el servidor, con el
+ * consiguiente salto de layout que aparece solo en producción. Doce líneas
+ * de lectura valen más que un comportamiento que depende del intérprete.
+ *
+ * Se aceptan únicamente medidas en píxeles. Un `width="100%"` o un
+ * `width="10cm"` no dicen cuánto va a ocupar la imagen en la página, así
+ * que se ignoran y se cae al viewBox, que da la proporción —que es lo que
+ * el navegador necesita para reservar el espacio— aunque no sea el tamaño
+ * final.
+ *
+ * @return array{ancho:int, alto:int}|null
+ */
+function _medidas_svg(string $absoluta): ?array
+{
+    // La etiqueta <svg> es lo primero del archivo salvo prólogo o
+    // comentario; 4 KB alcanzan de sobra y evitan cargar un mapa entero.
+    $cabecera = (string) @file_get_contents($absoluta, false, null, 0, 4096);
+
+    if (!preg_match('/<svg\b[^>]*>/i', $cabecera, $etiqueta)) {
+        return null;
+    }
+
+    $svg = $etiqueta[0];
+
+    $en_pixeles = static function (string $atributo) use ($svg): ?float {
+        if (!preg_match('/\b' . $atributo . '\s*=\s*["\']([^"\']*)["\']/i', $svg, $valor)) {
+            return null;
+        }
+
+        if (!preg_match('/^\s*([0-9]*\.?[0-9]+)\s*(px)?\s*$/i', $valor[1], $numero)) {
+            return null;
+        }
+
+        return (float) $numero[1];
+    };
+
+    $ancho = $en_pixeles('width');
+    $alto  = $en_pixeles('height');
+
+    if ($ancho === null || $alto === null) {
+        // min-x min-y ancho alto
+        if (preg_match('/\bviewBox\s*=\s*["\']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i', $svg, $caja)) {
+            $ancho = (float) $caja[1];
+            $alto  = (float) $caja[2];
+        }
+    }
+
+    if ($ancho === null || $alto === null || $ancho <= 0 || $alto <= 0) {
+        return null;
+    }
+
+    return ['ancho' => (int) round($ancho), 'alto' => (int) round($alto)];
+}
+
+/**
+ * Medidas reales de una imagen: ['ancho' => int, 'alto' => int].
+ *
+ * Existe para no escribir width y height a mano en las vistas. Las fotos
+ * que hoy están en el repo miden todas 928×1152, pero las que suba el
+ * cliente —la de los fundadores, las de las obras, los logos de las marcas
+ * oficiales— van a medir cualquier cosa, y un width/height que miente
+ * reserva un espacio que no es el de la imagen: la página salta cuando
+ * termina de cargar, que es justo lo que esos dos atributos existen para
+ * evitar.
+ *
+ * Los SVG se leen aparte, con _medidas_svg(), y por eso también devuelven
+ * medidas. La alternativa era dejárselo a getimagesize(), que soporta SVG
+ * recién desde PHP 8.5: en local daría 800×800 y en Hostinger null, y el
+ * marcador `sin-foto.svg` de los cuatro productos sin foto entra en la card
+ * de producto, que todavía no está escrita. Un comportamiento que cambia
+ * con la versión del intérprete es una trampa para el que venga después.
+ *
+ * Devuelve null cuando no se puede saber: el archivo no está, el formato no
+ * se reconoce, o el SVG declara su tamaño en porcentaje. Ahí la vista omite
+ * los atributos en lugar de inventarlos.
+ *
+ * TODO(backend): con la base real conviene guardar ancho y alto como
+ * columnas al subir la foto y devolverlos en el propio producto, en vez de
+ * abrir el archivo en cada request.
+ *
+ * @return array{ancho:int, alto:int}|null
+ */
+function imagen_medidas(string $ruta): ?array
+{
+    static $cache = [];
+
+    if (array_key_exists($ruta, $cache)) {
+        return $cache[$ruta];
+    }
+
+    $absoluta = dirname(__DIR__) . '/assets/' . ltrim($ruta, '/');
+
+    if (!is_file($absoluta)) {
+        return $cache[$ruta] = null;
+    }
+
+    if (preg_match('/\.svg$/i', $ruta)) {
+        return $cache[$ruta] = _medidas_svg($absoluta);
+    }
+
+    $medidas = @getimagesize($absoluta);
+
+    if ($medidas === false || (int) $medidas[0] <= 0 || (int) $medidas[1] <= 0) {
+        return $cache[$ruta] = null;
+    }
+
+    return $cache[$ruta] = ['ancho' => (int) $medidas[0], 'alto' => (int) $medidas[1]];
+}
+
+/**
+ * Miniatura de 96 px de una foto de producto, en WebP.
+ *
+ * Existe por el mega-menú: muestra hasta ocho fotos por categoría a 48 px de
+ * lado, y servir ahí los archivos de 1000 px son varios cientos de KB para
+ * dibujar una estampilla. Las genera bin/optimizar-imagenes.sh en
+ * assets/img/productos/miniaturas/, con el mismo nombre de archivo.
+ *
+ * Devuelve null si todavía no se generó —o si la imagen es un SVG, como el
+ * marcador de foto pendiente— y ahí la vista usa el original.
+ *
+ * TODO(backend): cuando el panel permita subir fotos, el alta tiene que
+ * generar esta miniatura además del WebP grande. Si no existe, el sitio no
+ * se rompe: cae al archivo original, solo que pesado.
+ */
+function imagen_miniatura(string $ruta): ?string
+{
+    if (!preg_match('#^img/productos/([^/]+)\.(jpe?g|png|webp)$#i', $ruta, $partes)) {
+        return null;
+    }
+
+    $miniatura = 'img/productos/miniaturas/' . $partes[1] . '.webp';
+    $absoluta  = dirname(__DIR__) . '/assets/' . $miniatura;
+
+    return is_file($absoluta) ? asset($miniatura) : null;
 }

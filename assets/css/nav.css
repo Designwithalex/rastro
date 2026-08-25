@@ -1,0 +1,571 @@
+/* ============================================================
+   nav.css — Rastro Fitness
+   El mega-menú de escritorio, el cajón de celular y la regla de
+   precio, que viven los tres en la cabecera. Móvil primero.
+   Ningún valor de marca literal: todo sale de tokens.css.
+
+   EL CORTE ES 1280 px. Abajo de eso manda el cajón; arriba, el
+   mega-menú.
+
+   Estuvo en 1120 y era una cuenta mal hecha: el menú medido en
+   pantalla mide 475 px y no los ~430 que estimé, y las acciones
+   —buscador, cuenta y carrito— necesitan 573. Con los márgenes y
+   los huecos, el mínimo real para que la barra entre en una línea
+   es 1220. Entre 1120 y 1200 las acciones se montaban sobre
+   04 CONTACTO: 81 px de solapamiento a 1120 y 53 a 1152, que es un
+   portátil corriente. Y no era solo feo: .nav__enlace es relative y
+   el buscador no está posicionado, así que el enlace se quedaba con
+   los clics y quien apuntaba a la mitad izquierda del campo de
+   búsqueda terminaba en /nosotros#contacto.
+
+   1280 es lo que decía la dirección UX v3 y deja 60 px de margen.
+   Bajarlo otra vez exige antes que la barra aguante de verdad.
+   El número está en este archivo, en layout.css, en sin-js.css y en
+   los tres matchMedia de nav.js: se cambian los seis juntos.
+   ============================================================ */
+
+/* ============================================================
+   Regla de precio — la política, sin montos
+   ============================================================ */
+
+.regla-precio {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.regla-precio__celda {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--espaciado-4);
+  min-height: 48px;
+  padding: var(--espaciado-12) 0;
+}
+
+.regla-precio__celda + .regla-precio__celda {
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  padding-top: var(--espaciado-12);
+}
+
+/* text/secondary y no text/disabled: es un rótulo que se lee, no un
+   elemento inhabilitado. Con disabled sobre bg/surface daba 3,43:1 y no
+   pasaba AA, y este rótulo sale cuatro veces por página. */
+.regla-precio__rotulo {
+  color: var(--color-text-secondary);
+}
+
+.regla-precio__dato {
+  color: var(--color-text-secondary);
+}
+
+/* El porcentaje es el dato que la gente busca en esta línea. */
+.regla-precio__acento {
+  color: var(--color-accent-text);
+}
+
+/* En una barra ancha las dos celdas conviven en una línea, con el umbral
+   de envío contra el borde derecho. Que vaya en fila o apilada no es una
+   variante del componente: lo decide el lugar donde se lo incluye. El
+   cajón de celular no entra acá y por eso queda en dos filas. */
+@media (min-width: 640px) {
+  .mega__pie .regla-precio,
+  .pie__regla .regla-precio {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: var(--espaciado-32);
+  }
+
+  .mega__pie .regla-precio__celda + .regla-precio__celda,
+  .pie__regla .regla-precio__celda + .regla-precio__celda {
+    border-top: 0;
+    padding-top: var(--espaciado-12);
+    border-left: var(--hairline) solid var(--color-border-subtle);
+    padding-left: var(--espaciado-24);
+    text-align: right;
+  }
+}
+
+/* ============================================================
+   Mega-menú de PRODUCTOS
+   ============================================================ */
+
+/* Velo sobre el resto de la página. Va afuera de la cabecera y con
+   menos z-index, así oscurece el contenido sin tocar la barra.
+   Se pinta con opacidad y no con un rgba escrito a mano: el negro
+   sale del token igual que en cualquier otro lado. */
+.mega__velo {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  background-color: var(--color-bg-base);
+  opacity: 0.6;
+}
+
+.mega {
+  /* Se posiciona contra .cabecera, que es sticky y por lo tanto el
+     único ancestro posicionado: por eso el panel sale a sangre
+     aunque el disparador viva adentro del contenedor de 1360. */
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  z-index: 1;
+  background-color: var(--color-bg-surface);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.mega__interior {
+  display: flex;
+  flex-direction: column;
+
+  /* Alto fijo: si el panel creciera o se achicara al pasar de una
+     categoría a otra, todo saltaría con cada movimiento del mouse.
+     En una pantalla baja se recorta y desplaza en vez de tapar la
+     página entera. */
+  height: 504px;
+  max-height: calc(100dvh - var(--espaciado-120));
+  overflow-y: auto;
+  padding-block: var(--espaciado-32) var(--espaciado-24);
+}
+
+/* 322 · 668 · 322 sobre 1360, con gutter de 24. En fr para que la
+   proporción aguante cualquier ancho de ventana. */
+.mega__grilla {
+  display: grid;
+  grid-template-columns: 322fr 668fr 322fr;
+  gap: var(--espaciado-24);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.mega__columna {
+  min-width: 0;
+  min-height: 0;
+}
+
+.mega__rotulo {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--espaciado-12);
+}
+
+/* --- A · Categorías ------------------------------------------ */
+
+.mega__categorias {
+  grid-template-columns: 1fr;
+}
+
+.mega__categoria {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-12);
+  min-height: 44px;
+  padding-inline: var(--espaciado-12);
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.mega__categoria-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mega__categoria-cantidad {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.mega__categoria:hover,
+.mega__categoria[data-activa="true"] {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface-alt);
+}
+
+/* La categoría abierta lleva la barra bordeaux, igual que la página
+   actual en el menú. Va como sombra interior para no meter un
+   elemento decorativo en el marcado. */
+.mega__categoria[data-activa="true"] {
+  box-shadow: inset 2px 0 0 0 var(--color-accent-base);
+}
+
+.mega__ver-todo,
+.mega__ver-categoria,
+.mega__mayoristas-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  transition: color 0.15s ease, gap 0.15s ease;
+}
+
+.mega__ver-todo {
+  margin-top: var(--espaciado-16);
+  padding: var(--espaciado-12);
+  color: var(--color-text-primary);
+}
+
+.mega__ver-todo:hover,
+.mega__ver-categoria:hover,
+.mega__mayoristas-enlace:hover {
+  gap: var(--espaciado-12);
+  color: var(--color-accent-text);
+}
+
+/* --- B · Productos de la categoría --------------------------- */
+
+.mega__columna--b {
+  display: flex;
+  flex-direction: column;
+}
+
+.mega__grupo {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* El display de una clase le gana al display:none que el navegador aplica
+   por el atributo hidden, que es hoja de usuario-agente. Sin esta regla,
+   grupo.hidden = true no apagaba nada y las seis categorías se dibujaban
+   apiladas: el panel medía 1232 en vez de 504, el texto pisaba el pie y
+   había 43 elementos enfocables en vez de trece. Misma trampa que el velo,
+   más abajo. Cada vez que a un elemento que se apaga con hidden se le pone
+   un display, hay que escribir su [hidden]. */
+.mega__grupo[hidden] {
+  display: none;
+}
+
+/* 2 subcolumnas de 322 con gutter de 24, filas de 64 sin hueco:
+   la lista se lee como una tabla, no como ocho tarjetas. */
+.mega__productos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--espaciado-24);
+  row-gap: 0;
+  grid-auto-rows: 64px;
+}
+
+.mega__producto {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  height: 100%;
+  padding-right: var(--espaciado-8);
+  transition: background-color 0.15s ease;
+}
+
+.mega__producto:hover {
+  background-color: var(--color-bg-surface-alt);
+}
+
+/* Well claro: las fotos vienen sobre blanco y el sitio es negro.
+   El recuadro claro convierte ese blanco en una decisión. */
+.mega__miniatura {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-bg-product-well);
+}
+
+.mega__miniatura img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.mega__producto-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  min-width: 0;
+}
+
+/* Una línea y elipsis: dos líneas desalinean las ocho filas. */
+.mega__producto-nombre {
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mega__producto-dato {
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mega__ver-categoria {
+  margin-top: auto;
+  padding-block: var(--espaciado-12);
+  color: var(--color-accent-text);
+}
+
+/* --- C · Mayoristas ------------------------------------------ */
+
+.mega__mayoristas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+  height: 100%;
+  padding: var(--espaciado-20);
+  border: var(--hairline) solid var(--color-border-strong);
+}
+
+.mega__alerta {
+  color: var(--color-accent-text);
+}
+
+.mega__mayoristas-texto {
+  color: var(--color-text-secondary);
+}
+
+.mega__cta {
+  margin-top: auto;
+  padding: var(--espaciado-12);
+  text-align: center;
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+  transition: background-color 0.15s ease;
+}
+
+.mega__cta:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.mega__mayoristas-enlace {
+  color: var(--color-text-secondary);
+}
+
+/* --- Pie del panel ------------------------------------------- */
+
+.mega__pie {
+  flex: 0 0 auto;
+  margin-top: var(--espaciado-24);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* El velo es un elemento suelto del <body>, no un hijo del menú: abajo del
+   corte tiene que estar apagado sí o sí, porque una ventana que se achica
+   con el panel abierto si no deja la página oscurecida sin motivo.
+   El :not([hidden]) es para que el atributo siga mandando: sin él, el
+   display:block de la clase le gana al display:none del atributo. */
+@media (min-width: 1280px) {
+  .mega__velo:not([hidden]) {
+    display: block;
+  }
+}
+
+/* ============================================================
+   Cajón de celular
+   ============================================================ */
+
+.cajon {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.cajon__velo {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-bg-base);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cajon[data-abierto] .cajon__velo {
+  opacity: 0.6;
+}
+
+.cajon__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, 88vw);
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--color-bg-surface);
+  border-right: var(--hairline) solid var(--color-border-subtle);
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+}
+
+.cajon[data-abierto] .cajon__panel {
+  transform: translateX(0);
+}
+
+/* El contenedor recibe el foco al abrir para que se anuncie el
+   diálogo; el anillo lo pone el botón que se enfoca después. */
+.cajon__panel:focus {
+  outline: none;
+}
+
+.cajon__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-12);
+  min-height: 56px;
+  padding-inline: var(--espaciado-20);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cajon__titulo {
+  color: var(--color-text-secondary);
+}
+
+.cajon__cerrar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: calc(var(--espaciado-12) * -1);
+  color: var(--color-text-primary);
+}
+
+.cajon__cuerpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  padding-bottom: var(--espaciado-24);
+}
+
+.cajon__fila {
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cajon__enlace {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  width: 100%;
+  min-height: 56px;
+  padding-inline: var(--espaciado-20);
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+.cajon__indice {
+  color: var(--color-text-secondary);
+}
+
+.cajon__enlace.es-actual .cajon__indice,
+.cajon__enlace[aria-expanded="true"] .cajon__indice {
+  color: var(--color-accent-text);
+}
+
+.cajon__texto {
+  flex: 1 1 auto;
+}
+
+.cajon__chevron {
+  display: flex;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.cajon__enlace[aria-expanded="true"] .cajon__chevron {
+  transform: rotate(180deg);
+}
+
+/* Segundo nivel: filas de 48 sangradas. No hay tercer nivel —tocar
+   una categoría navega a la página de la categoría. */
+.cajon__sublista {
+  background-color: var(--color-bg-surface-alt);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cajon__subenlace {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-12);
+  min-height: 48px;
+  padding-inline: var(--espaciado-40) var(--espaciado-20);
+  color: var(--color-text-secondary);
+}
+
+.cajon__subenlace[aria-current="page"] {
+  color: var(--color-text-primary);
+  box-shadow: inset 2px 0 0 0 var(--color-accent-base);
+}
+
+.cajon__cantidad {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cajon__subenlace--todo {
+  color: var(--color-accent-text);
+  justify-content: flex-start;
+  gap: var(--espaciado-8);
+}
+
+.cajon__secundario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-16) var(--espaciado-24);
+  padding: var(--espaciado-20);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cajon__enlace-secundario {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-text-secondary);
+}
+
+.cajon__enlace-secundario[aria-current="page"] {
+  color: var(--color-text-primary);
+}
+
+.cajon__regla {
+  padding: var(--espaciado-8) var(--espaciado-20);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cajon__cta {
+  display: block;
+  margin: var(--espaciado-20);
+  padding: var(--espaciado-16);
+  text-align: center;
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.cajon__pie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding-inline: var(--espaciado-20);
+  color: var(--color-text-secondary);
+}
+
+/* 44 como el resto del cajón: el pie no es menos tocable que una fila. */
+.cajon__pie-enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-text-secondary);
+}
+
+.cajon__pie-enlace:hover {
+  color: var(--color-text-primary);
+}
+
+.cajon__horario {
+  color: var(--color-text-secondary);
+}
+
+/* Arriba del corte el cajón no existe: el menú es el de escritorio. */
+@media (min-width: 1280px) {
+  .cajon {
+    display: none;
+  }
+}

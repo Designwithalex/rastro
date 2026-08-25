@@ -1,0 +1,70 @@
+/* ============================================================
+   sin-js.css — Rastro Fitness
+   Se carga ÚNICAMENTE desde el <noscript> de layout/head.php, así que
+   estas reglas solo existen cuando el navegador no ejecuta JavaScript.
+
+   Por qué un archivo y no un <style> embebido: el Content-Security-Policy
+   de la raíz no permite estilos en línea. Un <link> a un archivo del mismo
+   origen adentro de <noscript> sí, y es la única forma de reaccionar a la
+   ausencia de JavaScript sin ejecutar JavaScript.
+
+   Qué resuelve: sin JS, la hamburguesa y el disparador del mega-menú son
+   botones que no hacen nada, y en celular eso deja al visitante sin ningún
+   menú. Todos los enlaces ya están en el marcado —el cajón y el panel se
+   dibujan siempre y se apagan con hidden—, así que alcanza con mostrarlos.
+   ============================================================ */
+
+/* --- Celular: el cajón se dibuja estático debajo de la cabecera ---
+   No es un diálogo si no puede abrirse ni cerrarse: se lo trata como
+   lo que queda, un bloque de navegación largo. */
+@media (max-width: 1279px) {
+  .cabecera__hamburguesa {
+    display: none;
+  }
+
+  /* Sin el botón de la lupa no hay forma de desplegar el campo, y meterlo
+     a la fuerza en una celda de 44 lo deja ilegible. La búsqueda vive en
+     la página de catálogo, a un toque de "Ver todo el catálogo". */
+  .busqueda {
+    display: none;
+  }
+
+  .cajon,
+  .cajon[hidden] {
+    position: static;
+    display: block;
+  }
+
+  .cajon__velo,
+  .cajon__barra,
+  .cajon__chevron {
+    display: none;
+  }
+
+  .cajon__panel {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    transform: none;
+    border-right: 0;
+    border-bottom: var(--hairline) solid var(--color-border-subtle);
+  }
+
+  /* El acordeón tampoco abre: las seis categorías van a la vista. */
+  .cajon__sublista,
+  .cajon__sublista[hidden] {
+    display: block;
+  }
+}
+
+/* --- Escritorio: el panel se abre con el mouse y con el foco ---
+   El aria-expanded del disparador se queda en "false" y eso es una
+   imprecisión conocida: sin JavaScript no hay quién lo actualice. Entre
+   un atributo desactualizado y un menú de productos al que no se llega,
+   la elección es fácil. Con JS —el caso normal— nada de esto se aplica. */
+@media (min-width: 1280px) {
+  .nav__item--mega:hover .mega[hidden],
+  .nav__item--mega:focus-within .mega[hidden] {
+    display: block;
+  }
+}

@@ -58,6 +58,16 @@ for f in "$IMG"/productos/*.jpg; do
   webp "$f" 80
 done
 
+echo "→ Miniaturas de producto (96 px, solo WebP)"
+# El mega-menú dibuja hasta ocho fotos por categoría a 48 px de lado. Servir
+# ahí los archivos de 1000 px es bajar cientos de KB para pintar estampillas.
+# 96 = 48 a 2x, que es lo que necesita una pantalla retina.
+mkdir -p "$IMG/productos/miniaturas"
+for f in "$IMG"/productos/*.jpg; do
+  destino="$IMG/productos/miniaturas/$(basename "${f%.*}").webp"
+  cwebp -quiet -q 72 -metadata none -resize 96 0 "$f" -o "$destino"
+done
+
 echo "→ Recortes con transparencia (lado largo 1000, solo WebP)"
 # El PNG original pesa ~1 MB y no se versiona: cada recorte tiene su
 # gemelo .jpg en la carpeta de arriba, que hace de respaldo si el

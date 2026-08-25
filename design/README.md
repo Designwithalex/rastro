@@ -138,3 +138,8 @@ más ocho de panel de administración.
 Lo que queda abierto no es diseño:
 - Íconos de interfaz: hoy son placeholders geométricos (`PENDIENTES.md` #24).
 - Logos de clientes y de marcas oficiales (`PENDIENTES.md` #25).
+
+Se reabrió una sola cosa, y es de panel: **la sección "Nosotros" es la novena
+pantalla del admin** y todavía no está dibujada. Salió de la dirección UX v3, que
+sumó la página `/nosotros` y con ella el contenido que el cliente va a querer
+editar: fundadores, hitos, obras y cuatro cifras (`PENDIENTES.md` #49).

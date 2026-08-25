@@ -1,0 +1,88 @@
+{
+    "_comentario": "Contenido de la sección Nosotros. TODO EL COPY ES PROVISORIO: lo escribió el diseño para que la página tenga forma, no el cliente. Los valores en null son huecos a propósito y la vista los dibuja como [ DATO ] visible, para que en la revisión se vea qué falta en vez de leerse como si estuviera resuelto. Ver PENDIENTES #49.",
+    "provisorio": true,
+
+    "encabezado": {
+        "kicker": "Quiénes somos",
+        "titulo": "El fierro lo vendemos nosotros y lo atendemos nosotros",
+        "declaracion": "Rastro Fitness equipa gimnasios, clubes, hoteles y salas de entrenamiento. Somos vendedores oficiales de las marcas que representamos: lo que está publicado está en depósito, se factura y se entrega. No somos un catálogo de fotos que después consigue la mercadería."
+    },
+
+    "cifras": [
+        { "clave": "anios_en_el_rubro",     "rotulo": "Años en el rubro",      "valor": null },
+        { "clave": "gimnasios_equipados",   "rotulo": "Gimnasios equipados",   "valor": null },
+        { "clave": "productos_en_catalogo", "rotulo": "Productos en catálogo", "valor": null },
+        { "clave": "provincias",            "rotulo": "Provincias con envío",  "valor": null }
+    ],
+
+    "fundadores": {
+        "titulo": "Quién te atiende",
+        "texto": "Del otro lado del teléfono no hay un centro de atención: hay dos personas que conocen cada producto del catálogo y que arman ellas mismas los presupuestos.",
+        "foto": null,
+        "foto_alt": null,
+        "personas": [
+            { "nombre": "Santino Pantanali",     "rol": null },
+            { "nombre": "Juan Pedro Ramognino",  "rol": null }
+        ]
+    },
+
+    "historia": {
+        "titulo": "Cómo empezó",
+        "texto": "La historia corta, para el que ya decidió que somos gente real.",
+        "hitos": [
+            { "anio": null, "titulo": "Los primeros discos",       "texto": "Empezamos vendiendo discos y barras a gimnasios del barrio, con entrega propia y sin depósito." },
+            { "anio": null, "titulo": "El primer depósito",        "texto": "Alquilamos el galpón y pasamos a tener stock propio: dejamos de encargar cada pedido." },
+            { "anio": null, "titulo": "Vendedores oficiales",      "texto": "Nos hicimos representantes de las marcas que ya veníamos vendiendo, con precio y garantía de fábrica." },
+            { "anio": null, "titulo": "Salas completas",           "texto": "Además de la venta por unidad empezamos a cotizar salas enteras, con plano y entrega coordinada." }
+        ]
+    },
+
+    "como_trabajamos": {
+        "titulo": "Cómo trabajamos",
+        "texto": "Qué pasa entre que escribís y que el equipamiento queda armado.",
+        "pasos": [
+            { "titulo": "Cotizamos",   "texto": "Contás qué espacio tenés y qué querés poner. Sale un presupuesto por escrito, con medidas y plazos, no un precio suelto por WhatsApp." },
+            { "titulo": "Confirmás",   "texto": "Se factura, se reserva el stock y queda una fecha de entrega. Si algo no está disponible te lo decimos antes de cobrar, no después." },
+            { "titulo": "Entregamos",  "texto": "Despachamos a todo el país o entregamos con transporte propio en la zona. El envío se cotiza aparte y va en el presupuesto." },
+            { "titulo": "Seguimos",    "texto": "Después de la entrega seguís hablando con la misma persona. Repuestos, garantía y ampliaciones no vuelven a empezar de cero." }
+        ]
+    },
+
+    "obras": {
+        "titulo": "Obras",
+        "texto": "Salas que salieron de este depósito.",
+        "items": []
+    },
+
+    "garantia": {
+        "titulo": "Garantía, envíos y posventa",
+        "items": [
+            { "titulo": "Garantía",  "texto": "Doce meses por defecto de fabricación en todo el equipamiento. No cubre el desgaste normal de uso ni los golpes: en un gimnasio eso pasa y no es una falla." },
+            { "titulo": "Envíos",    "texto": "Despachamos a todo el país por transporte. El costo depende del peso y del destino, y va escrito en el presupuesto antes de que pagues nada." },
+            { "titulo": "Posventa",  "texto": "Repuestos de lo que vendemos y ampliaciones de lo que ya tenés. Escribís al mismo número y te atiende la misma persona." }
+        ]
+    },
+
+    "donde_estamos": {
+        "titulo": "Dónde estamos",
+        "texto": "Acá está la mercadería. Se puede venir a ver antes de comprar y se puede retirar sin cargo, con turno.",
+        "direccion": null,
+        "foto": "img/ambiente/ambiente-disco-fundicion-galpon.jpg",
+        "foto_alt": "Discos de fundición apilados en el depósito de Rastro Fitness"
+    },
+
+    "cierre": {
+        "titulo": "¿Y ahora?",
+        "texto": "Si estás mirando para vos, el catálogo tiene precio y stock. Si estás equipando un espacio, la cotización va por otro lado.",
+        "acciones": [
+            { "texto": "Ver el catálogo",       "ruta": "/catalogo",   "tipo": "principal" },
+            { "texto": "Cotizar una sala",      "ruta": "/mayoristas", "tipo": "secundario" }
+        ]
+    },
+
+    "franja": {
+        "titulo": "No somos un catálogo de fotos",
+        "texto": "Somos vendedores oficiales, tenemos depósito propio y atendemos nosotros. Lo que está publicado está en stock, se factura y se entrega.",
+        "enlace_texto": "Conocé Rastro Fitness"
+    }
+}

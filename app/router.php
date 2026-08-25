@@ -25,6 +25,11 @@ function router_tabla(): array
         '#^/producto/([a-z0-9-]+)$#'   => ['producto',               ['slug']],
         '#^/carrito$#'                 => ['carrito',                []],
         '#^/mayoristas$#'              => ['mayoristas',             []],
+
+        // /nosotros se lleva también el contacto: el menú apunta a
+        // /nosotros#contacto y no hay una página de contacto aparte.
+        '#^/nosotros$#'                => ['nosotros',               []],
+
         '#^/ingresar$#'                => ['auth/ingresar',          []],
         '#^/registro$#'                => ['auth/registro',          []],
         '#^/cuenta$#'                  => ['cuenta/index',           []],
