@@ -234,14 +234,30 @@ function url(string $ruta = '/'): string
 }
 
 /**
- * URL de un archivo de assets, con un sufijo de versión sacado de la
- * fecha de modificación. Evita tener que purgar caché a mano en cada deploy.
+ * URL de un archivo de assets, con un sufijo de versión sacado de la fecha
+ * de modificación. Evita tener que purgar caché a mano en cada deploy.
+ *
+ * Las tipografías son la excepción y van SIN versión, a propósito.
+ * La referencia canónica de cada fuente es el @font-face de tokens.css, que
+ * se genera desde Figma y no puede pedirle el filemtime a PHP. Si el preload
+ * llevara ?v= y el @font-face no, serían dos URLs distintas: el navegador
+ * bajaría cada fuente dos veces y el preload no se usaría nunca. Sin versión,
+ * las dos URLs no pueden divergir.
+ *
+ * No hace falta invalidarlas: el .htaccess las sirve `immutable` por un año
+ * y el contenido de un WOFF2 no cambia. El día que cambie la familia
+ * (licencia de Eurostile, PENDIENTES #4) cambia el nombre del archivo.
  */
 function asset(string $ruta): string
 {
     $relativa = 'assets/' . ltrim($ruta, '/');
     $absoluta = dirname(__DIR__) . '/' . $relativa;
-    $version  = is_file($absoluta) ? substr((string) filemtime($absoluta), -6) : null;
+
+    if (preg_match('/\.woff2?$/i', $relativa)) {
+        return url($relativa);
+    }
+
+    $version = is_file($absoluta) ? substr((string) filemtime($absoluta), -6) : null;
 
     return url($relativa) . ($version ? '?v=' . $version : '');
 }
