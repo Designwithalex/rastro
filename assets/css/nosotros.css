@@ -237,7 +237,6 @@
 
 .linea-tiempo {
   grid-template-columns: 1fr;
-  border: var(--hairline) solid var(--color-border-subtle);
 }
 
 .linea-tiempo__hito {
@@ -265,7 +264,6 @@
 
 .pasos {
   grid-template-columns: 1fr;
-  border: var(--hairline) solid var(--color-border-subtle);
 }
 
 .pasos__paso {
@@ -301,7 +299,6 @@
 
 .obras {
   grid-template-columns: 1fr;
-  border: var(--hairline) solid var(--color-border-subtle);
 }
 
 .obras__obra {
@@ -360,7 +357,6 @@
 
 .credenciales {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  border: var(--hairline) solid var(--color-border-subtle);
 }
 
 .credenciales__item {
@@ -397,7 +393,6 @@
 
 .ficha-legal {
   grid-template-columns: 1fr;
-  border: var(--hairline) solid var(--color-border-subtle);
   margin-bottom: var(--espaciado-24);
 }
 

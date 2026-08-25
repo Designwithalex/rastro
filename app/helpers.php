@@ -519,6 +519,49 @@ function imagen_webp(string $ruta): ?string
 }
 
 /**
+ * Medidas reales de una imagen: ['ancho' => int, 'alto' => int].
+ *
+ * Existe para no escribir width y height a mano en las vistas. Las fotos
+ * que hoy están en el repo miden todas 928×1152, pero las que suba el
+ * cliente —la de los fundadores, las de las obras— van a medir cualquier
+ * cosa, y un width/height que miente reserva un espacio que no es el de la
+ * imagen: la página salta cuando termina de cargar, que es justo lo que
+ * esos dos atributos existen para evitar.
+ *
+ * Devuelve null si el archivo no está o si no es un mapa de bits —un SVG no
+ * tiene medidas intrínsecas en píxeles— y ahí la vista omite los atributos
+ * en vez de inventarlos.
+ *
+ * TODO(backend): con la base real conviene guardar ancho y alto como
+ * columnas al subir la foto y devolverlos en el propio producto, en vez de
+ * abrir el archivo en cada request.
+ *
+ * @return array{ancho:int, alto:int}|null
+ */
+function imagen_medidas(string $ruta): ?array
+{
+    static $cache = [];
+
+    if (array_key_exists($ruta, $cache)) {
+        return $cache[$ruta];
+    }
+
+    $absoluta = dirname(__DIR__) . '/assets/' . ltrim($ruta, '/');
+
+    if (!is_file($absoluta)) {
+        return $cache[$ruta] = null;
+    }
+
+    $medidas = @getimagesize($absoluta);
+
+    if ($medidas === false || (int) $medidas[0] <= 0 || (int) $medidas[1] <= 0) {
+        return $cache[$ruta] = null;
+    }
+
+    return $cache[$ruta] = ['ancho' => (int) $medidas[0], 'alto' => (int) $medidas[1]];
+}
+
+/**
  * Miniatura de 96 px de una foto de producto, en WebP.
  *
  * Existe por el mega-menú: muestra hasta ocho fotos por categoría a 48 px de

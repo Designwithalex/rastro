@@ -101,14 +101,20 @@ require RASTRO_VIEWS . '/layout/head.php';
 
         <div class="<?= $foto_fundadores ? 'fundadores fundadores--con-foto' : 'fundadores' ?>">
             <?php if ($foto_fundadores): ?>
-                <?php $fundadores_webp = imagen_webp($foto_fundadores); ?>
+                <?php
+                $fundadores_webp = imagen_webp($foto_fundadores);
+                // Las medidas se leen del archivo: la foto de los fundadores la
+                // sube el cliente y no tiene por qué medir lo que mide hoy.
+                $fundadores_medidas = imagen_medidas($foto_fundadores);
+                ?>
                 <picture class="fundadores__foto">
                     <?php if ($fundadores_webp !== null): ?>
                         <source srcset="<?= e($fundadores_webp) ?>" type="image/webp">
                     <?php endif; ?>
                     <img src="<?= e(asset($foto_fundadores)) ?>"
                          alt="<?= e($nosotros['fundadores']['foto_alt'] ?? '') ?>"
-                         width="928" height="1152" loading="lazy" decoding="async">
+                         <?php if ($fundadores_medidas !== null): ?>width="<?= e((string) $fundadores_medidas['ancho']) ?>" height="<?= e((string) $fundadores_medidas['alto']) ?>"<?php endif; ?>
+                         loading="lazy" decoding="async">
                 </picture>
             <?php endif; ?>
 
@@ -147,7 +153,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <?= e($nosotros['historia']['texto'] ?? '') ?>
             </h2>
 
-            <ol class="linea-tiempo reticula">
+            <ol class="linea-tiempo reticula reticula--celdas">
                 <?php foreach ($nosotros['historia']['hitos'] as $hito): ?>
                     <li class="linea-tiempo__hito">
                         <?php if (($hito['anio'] ?? null) !== null && $hito['anio'] !== ''): ?>
@@ -175,7 +181,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <?= e($nosotros['como_trabajamos']['texto'] ?? '') ?>
             </h2>
 
-            <ol class="pasos reticula">
+            <ol class="pasos reticula reticula--celdas">
                 <?php foreach ($nosotros['como_trabajamos']['pasos'] as $i => $paso): ?>
                     <li class="pasos__paso">
                         <p class="pasos__letra t-mono-label"><?= e(chr(65 + $i)) ?></p>
@@ -202,18 +208,22 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <?= e($nosotros['obras']['texto'] ?? '') ?>
             </h2>
 
-            <ul class="obras reticula">
+            <ul class="obras reticula reticula--celdas">
                 <?php foreach ($obras as $obra): ?>
                     <li class="obras__obra">
                         <?php if (($obra['foto'] ?? null) !== null && $obra['foto'] !== ''): ?>
-                            <?php $obra_webp = imagen_webp((string) $obra['foto']); ?>
+                            <?php
+                            $obra_webp = imagen_webp((string) $obra['foto']);
+                            $obra_medidas = imagen_medidas((string) $obra['foto']);
+                            ?>
                             <picture class="obras__foto">
                                 <?php if ($obra_webp !== null): ?>
                                     <source srcset="<?= e($obra_webp) ?>" type="image/webp">
                                 <?php endif; ?>
                                 <img src="<?= e(asset((string) $obra['foto'])) ?>"
                                      alt="<?= e($obra['foto_alt'] ?? '') ?>"
-                                     width="928" height="1152" loading="lazy" decoding="async">
+                                     <?php if ($obra_medidas !== null): ?>width="<?= e((string) $obra_medidas['ancho']) ?>" height="<?= e((string) $obra_medidas['alto']) ?>"<?php endif; ?>
+                                     loading="lazy" decoding="async">
                             </picture>
                         <?php endif; ?>
 
@@ -243,7 +253,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                 Somos vendedores oficiales
             </h2>
 
-            <ul class="credenciales reticula">
+            <ul class="credenciales reticula reticula--celdas">
                 <?php foreach ($marcas as $marca): ?>
                     <li class="credenciales__item">
                         <?php if (($marca['logo'] ?? '') !== ''): ?>
@@ -271,7 +281,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                 Ya les vendimos
             </h2>
 
-            <ul class="credenciales reticula">
+            <ul class="credenciales reticula reticula--celdas">
                 <?php foreach ($clientes as $cliente): ?>
                     <li class="credenciales__item">
                         <?php if (($cliente['logo'] ?? '') !== ''): ?>
@@ -299,7 +309,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <?= e($nosotros['garantia']['titulo'] ?? '') ?>
             </h2>
 
-            <dl class="ficha-legal reticula">
+            <dl class="ficha-legal reticula reticula--celdas">
                 <?php foreach ($nosotros['garantia']['items'] as $item): ?>
                     <div class="ficha-legal__fila">
                         <dt class="ficha-legal__titulo t-mono-label"><?= e($item['titulo'] ?? '') ?></dt>
@@ -328,18 +338,23 @@ require RASTRO_VIEWS . '/layout/head.php';
 
         <div class="deposito">
             <?php if (($nosotros['donde_estamos']['foto'] ?? null) !== null): ?>
-                <?php $deposito_webp = imagen_webp((string) $nosotros['donde_estamos']['foto']); ?>
+                <?php
+                $deposito_foto    = (string) $nosotros['donde_estamos']['foto'];
+                $deposito_webp    = imagen_webp($deposito_foto);
+                $deposito_medidas = imagen_medidas($deposito_foto);
+                ?>
                 <picture class="deposito__foto">
                     <?php if ($deposito_webp !== null): ?>
                         <source srcset="<?= e($deposito_webp) ?>" type="image/webp">
                     <?php endif; ?>
-                    <img src="<?= e(asset((string) $nosotros['donde_estamos']['foto'])) ?>"
+                    <img src="<?= e(asset($deposito_foto)) ?>"
                          alt="<?= e($nosotros['donde_estamos']['foto_alt'] ?? '') ?>"
-                         width="928" height="1152" loading="lazy" decoding="async">
+                         <?php if ($deposito_medidas !== null): ?>width="<?= e((string) $deposito_medidas['ancho']) ?>" height="<?= e((string) $deposito_medidas['alto']) ?>"<?php endif; ?>
+                         loading="lazy" decoding="async">
                 </picture>
             <?php endif; ?>
 
-            <dl class="deposito__datos reticula">
+            <dl class="deposito__datos reticula reticula--celdas">
                 <div class="deposito__fila">
                     <dt class="t-mono-label">Depósito</dt>
                     <dd class="t-body-sm">

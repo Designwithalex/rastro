@@ -153,6 +153,32 @@ code, kbd, samp, pre {
   background-color: var(--color-bg-surface);
 }
 
+/* Variante para cuando la CANTIDAD de celdas la decide el cliente.
+   La retícula pintada da por sentado que la grilla está completa: pinta el
+   contenedor y deja que los hijos lo tapen. Con cinco marcas oficiales en
+   cuatro columnas, las tres celdas que faltan no las tapa nadie y queda una
+   losa de #1F1F1F de mil píxeles de ancho a la vista.
+
+   Acá la línea la dibujan las celdas: el contenedor cierra arriba y a la
+   izquierda, y cada hijo cierra a su derecha y abajo. Donde no hay celda no
+   hay línea, que es lo correcto —una fila incompleta se lee como lo que
+   es— y no queda ningún fondo pintado sin tapar.
+
+   Regla para elegir: cantidad fija por diseño -> .reticula.
+   Cantidad que sale de los datos -> .reticula--celdas. */
+.reticula--celdas {
+  gap: 0;
+  background-color: transparent;
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  border-left: var(--hairline) solid var(--color-border-subtle);
+}
+
+.reticula--celdas > * {
+  background-color: transparent;
+  border-right: var(--hairline) solid var(--color-border-subtle);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
 /* --- Utilidades ---------------------------------------------- */
 
 .visualmente-oculto {
