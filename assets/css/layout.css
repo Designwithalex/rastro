@@ -24,7 +24,10 @@
   min-width: max-content;
   padding-block: var(--espaciado-8);
   padding-right: var(--espaciado-16);
-  animation: marquee-desplazar 42s linear infinite;
+
+  /* La duración acompaña al ancho de la pista para que la velocidad no
+     cambie: ~53 px/s. Si se toca $repeticiones en marquee.php, se toca acá. */
+  animation: marquee-desplazar 74s linear infinite;
 }
 
 /* Tipografía: .t-display-xs y .t-mono-texto-sm, puestas en el marcado.
