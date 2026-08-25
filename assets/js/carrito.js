@@ -167,6 +167,13 @@
       return acumulado;
     }, { unidades: 0, subtotal: 0, subtotalTransferencia: 0 });
 
+    // TODO(backend): el umbral se compara contra el subtotal PUBLICADO, no
+    // contra el de transferencia. Un carrito de $170.000 publicado que paga
+    // $145.000 por transferencia hoy tiene envío gratis. Nadie definió si
+    // corresponde: está anotado en PENDIENTES #48 y lo decide el cliente.
+    // Si la respuesta es "contra lo que efectivamente paga", el único cambio
+    // es usar resumen.subtotalTransferencia en esta línea y el equivalente
+    // del lado de PHP cuando exista el checkout.
     var envioGratis = envioGratisDesde > 0 && resumen.subtotal >= envioGratisDesde;
     var envio = envioGratis ? 0 : costoEnvio;
 
