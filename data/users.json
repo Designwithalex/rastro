@@ -1,0 +1,40 @@
+[
+    {
+        "id": 1,
+        "nombre": "Juan Pedro",
+        "apellido": "Ramognino",
+        "email": "demo@rastrofitness.com.ar",
+        "password_hash": "$2y$12$MeVxXXaDWB6ZvVdnsTvmVuYvYhKEVuOr3X/bs8pvdqi76YXtevEP2",
+        "telefono": "+54 9 351 000 0000",
+        "rol": "cliente",
+        "empresa": null,
+        "cuit": null,
+        "direccion": {
+            "calle": "Av. Colón 1234, piso 3 D",
+            "ciudad": "Córdoba",
+            "provincia": "Córdoba",
+            "codigo_postal": "5000"
+        },
+        "creado": "2026-03-11",
+        "activo": true
+    },
+    {
+        "id": 2,
+        "nombre": "Santino",
+        "apellido": "Pantanali",
+        "email": "mayorista@rastrofitness.com.ar",
+        "password_hash": "$2y$12$TZ/AvMHIRrGFPLXjtDW.OucOvHsJs24MZA3Hqv3ETKIim/c8PI0EC",
+        "telefono": "+54 9 351 000 0001",
+        "rol": "mayorista",
+        "empresa": "Club Deportivo Norte",
+        "cuit": "30-00000000-1",
+        "direccion": {
+            "calle": "Ruta 9 km 12, Parque Industrial",
+            "ciudad": "Córdoba",
+            "provincia": "Córdoba",
+            "codigo_postal": "5010"
+        },
+        "creado": "2026-01-22",
+        "activo": true
+    }
+]

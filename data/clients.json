@@ -1,0 +1,10 @@
+[
+    { "id": 1, "nombre": "Cliente 1", "logo": "", "orden": 1 },
+    { "id": 2, "nombre": "Cliente 2", "logo": "", "orden": 2 },
+    { "id": 3, "nombre": "Cliente 3", "logo": "", "orden": 3 },
+    { "id": 4, "nombre": "Cliente 4", "logo": "", "orden": 4 },
+    { "id": 5, "nombre": "Cliente 5", "logo": "", "orden": 5 },
+    { "id": 6, "nombre": "Cliente 6", "logo": "", "orden": 6 },
+    { "id": 7, "nombre": "Cliente 7", "logo": "", "orden": 7 },
+    { "id": 8, "nombre": "Cliente 8", "logo": "", "orden": 8 }
+]

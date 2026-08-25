@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "titulo": "Equipamiento profesional para gimnasios que trabajan todo el día",
+        "imagen": "img/ambiente/ambiente-barra-en-rack.jpg",
+        "enlace": "/catalogo",
+        "posicion": "hero",
+        "activo": true,
+        "orden": 1
+    },
+    {
+        "id": 2,
+        "titulo": "¿Estás equipando un gimnasio, un club o un hotel?",
+        "imagen": "img/ambiente/ambiente-discos-en-gimnasio.jpg",
+        "enlace": "/mayoristas",
+        "posicion": "mayorista",
+        "activo": true,
+        "orden": 1
+    },
+    {
+        "id": 3,
+        "titulo": "15% de descuento pagando por transferencia o efectivo",
+        "imagen": "",
+        "enlace": "/catalogo",
+        "posicion": "franja",
+        "activo": true,
+        "orden": 1
+    }
+]

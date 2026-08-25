@@ -1,0 +1,103 @@
+[
+    {
+        "codigo": "RF-2026-0418",
+        "usuario_id": 1,
+        "fecha": "2026-04-18",
+        "estado": "entregado",
+        "medio_pago": "transferencia",
+        "items": [
+            {
+                "producto_id": 1,
+                "nombre": "Disco bumper Greencore 10 kg",
+                "sku": "RS-DB-010",
+                "cantidad": 2,
+                "precio_unitario": 74900
+            },
+            {
+                "producto_id": 25,
+                "nombre": "Straps de levantamiento",
+                "sku": "RS-AC-STRP",
+                "cantidad": 1,
+                "precio_unitario": 18900
+            }
+        ],
+        "subtotal": 168700,
+        "envio": 0,
+        "descuento_aplicado_pct": 15,
+        "total": 143395
+    },
+    {
+        "codigo": "RF-2026-0602",
+        "usuario_id": 1,
+        "fecha": "2026-06-02",
+        "estado": "en_camino",
+        "medio_pago": "mercado_pago",
+        "items": [
+            {
+                "producto_id": 7,
+                "nombre": "Barra olímpica Greencore 2,20 m · 20 kg",
+                "sku": "RS-BO-220",
+                "cantidad": 1,
+                "precio_unitario": 289000
+            }
+        ],
+        "subtotal": 289000,
+        "envio": 0,
+        "descuento_aplicado_pct": 0,
+        "total": 289000
+    },
+    {
+        "codigo": "RF-2026-0714",
+        "usuario_id": 1,
+        "fecha": "2026-07-14",
+        "estado": "cancelado",
+        "medio_pago": "transferencia",
+        "items": [
+            {
+                "producto_id": 24,
+                "nombre": "Estribo para polea",
+                "sku": "RS-AC-EST",
+                "cantidad": 2,
+                "precio_unitario": 12900
+            },
+            {
+                "producto_id": 30,
+                "nombre": "Magnesio en polvo 450 g",
+                "sku": "RS-AC-MAG",
+                "cantidad": 1,
+                "precio_unitario": 9900
+            }
+        ],
+        "subtotal": 35700,
+        "envio": 12500,
+        "descuento_aplicado_pct": 15,
+        "total": 42845
+    },
+    {
+        "codigo": "RF-2026-0731",
+        "usuario_id": 2,
+        "fecha": "2026-07-31",
+        "estado": "entregado",
+        "medio_pago": "transferencia",
+        "items": [
+            {
+                "producto_id": 4,
+                "nombre": "Set de discos bumper Greencore 5 a 25 kg · 150 kg",
+                "sku": "RS-DB-SET150",
+                "cantidad": 2,
+                "precio_unitario": 989000
+            },
+            {
+                "producto_id": 17,
+                "nombre": "Half rack de sentadillas",
+                "sku": "RS-RK-HALF",
+                "cantidad": 1,
+                "precio_unitario": 1290000
+            }
+        ],
+        "subtotal": 3268000,
+        "envio": 0,
+        "descuento_aplicado_pct": 15,
+        "total": 2777800
+    }
+]
