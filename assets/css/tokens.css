@@ -48,7 +48,7 @@
   --color-bg-surface: #0b0b0b;
   --color-bg-surface-alt: #151515;
   --color-border-focus: #ffffff;
-  --color-border-strong: #3d3d3d;
+  --color-border-strong: #666666;
   --color-border-subtle: #1f1f1f;
   --color-danger-border: #de6464;
   --color-danger-text: #de6464;
@@ -109,7 +109,7 @@
   --color-bg-surface: #ffffff;
   --color-bg-surface-alt: #e9e9e9;
   --color-border-focus: #151515;
-  --color-border-strong: #c4c4c4;
+  --color-border-strong: #8a8a8a;
   --color-border-subtle: #e0e0e0;
   --color-danger-text: #780606;
   --color-text-disabled: #8a8a8a;
