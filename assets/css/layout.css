@@ -62,7 +62,7 @@
      celular    [hamburguesa] [logo] [buscar] [carrito]
      escritorio [logo] [nav] [buscador] [cuenta] [carrito]
 
-   El corte es 1120 px, el mismo que usan nav.css y nav.js.
+   El corte es 1280 px, el mismo que usan nav.css y nav.js.
    ============================================================ */
 
 .cabecera {
@@ -288,7 +288,7 @@
    max-width. Arriba del corte el campo está siempre visible y el estado
    no significa nada; encerrarlo acá evita que quede pegado si alguien
    agranda la ventana con la búsqueda abierta. */
-@media (max-width: 1119px) {
+@media (max-width: 1279px) {
   .cabecera[data-buscando] .cabecera__hamburguesa,
   .cabecera[data-buscando] .cabecera__logo,
   .cabecera[data-buscando] .busqueda__abrir,
@@ -352,7 +352,7 @@
 
 /* --- Escritorio: una sola línea ------------------------------ */
 
-@media (min-width: 1120px) {
+@media (min-width: 1280px) {
   .cabecera__barra {
     grid-template-columns: auto auto minmax(0, 1fr);
     column-gap: var(--espaciado-32);

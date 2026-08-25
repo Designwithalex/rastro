@@ -360,7 +360,7 @@
 
     // Si la ventana se achica hasta el ancho del cajón, el panel deja de
     // existir en pantalla: hay que apagar el estado, no dejarlo colgado.
-    var escritorio = consulta('(min-width: 1120px)');
+    var escritorio = consulta('(min-width: 1280px)');
 
     escucharMedida(escritorio, function (evento) {
       if (!evento.matches) {
@@ -498,7 +498,7 @@
 
     // Si la ventana crece hasta el escritorio, el cajón ya no se ve: se
     // cierra para no dejar el scroll del cuerpo bloqueado.
-    var escritorio = consulta('(min-width: 1120px)');
+    var escritorio = consulta('(min-width: 1280px)');
 
     escucharMedida(escritorio, function (evento) {
       if (evento.matches && abierto) {
@@ -554,7 +554,7 @@
 
     // En escritorio el buscador está siempre abierto: el estado "buscando"
     // no significa nada ahí y no puede quedar pegado al agrandar la ventana.
-    var escritorio = consulta('(min-width: 1120px)');
+    var escritorio = consulta('(min-width: 1280px)');
 
     escucharMedida(escritorio, function (evento) {
       if (evento.matches) {

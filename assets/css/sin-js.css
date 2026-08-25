@@ -17,7 +17,7 @@
 /* --- Celular: el cajón se dibuja estático debajo de la cabecera ---
    No es un diálogo si no puede abrirse ni cerrarse: se lo trata como
    lo que queda, un bloque de navegación largo. */
-@media (max-width: 1119px) {
+@media (max-width: 1279px) {
   .cabecera__hamburguesa {
     display: none;
   }
@@ -62,7 +62,7 @@
    imprecisión conocida: sin JavaScript no hay quién lo actualice. Entre
    un atributo desactualizado y un menú de productos al que no se llega,
    la elección es fácil. Con JS —el caso normal— nada de esto se aplica. */
-@media (min-width: 1120px) {
+@media (min-width: 1280px) {
   .nav__item--mega:hover .mega[hidden],
   .nav__item--mega:focus-within .mega[hidden] {
     display: block;

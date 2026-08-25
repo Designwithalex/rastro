@@ -4,12 +4,24 @@
    precio, que viven los tres en la cabecera. Móvil primero.
    Ningún valor de marca literal: todo sale de tokens.css.
 
-   EL CORTE ES 1120 px. Abajo de eso manda el cajón; arriba, el
-   mega-menú. El número sale de sumar lo que la barra tiene que
-   poner en una línea: logo 130 + menú de cuatro puertas ~430 +
-   buscador 320 + cuenta y carrito ~200, más los tres huecos de 32
-   y los márgenes de 40. Con el menú fijo en cuatro ítems ese ancho
-   ya no depende de los datos, así que el punto de corte tampoco.
+   EL CORTE ES 1280 px. Abajo de eso manda el cajón; arriba, el
+   mega-menú.
+
+   Estuvo en 1120 y era una cuenta mal hecha: el menú medido en
+   pantalla mide 475 px y no los ~430 que estimé, y las acciones
+   —buscador, cuenta y carrito— necesitan 573. Con los márgenes y
+   los huecos, el mínimo real para que la barra entre en una línea
+   es 1220. Entre 1120 y 1200 las acciones se montaban sobre
+   04 CONTACTO: 81 px de solapamiento a 1120 y 53 a 1152, que es un
+   portátil corriente. Y no era solo feo: .nav__enlace es relative y
+   el buscador no está posicionado, así que el enlace se quedaba con
+   los clics y quien apuntaba a la mitad izquierda del campo de
+   búsqueda terminaba en /nosotros#contacto.
+
+   1280 es lo que decía la dirección UX v3 y deja 60 px de margen.
+   Bajarlo otra vez exige antes que la barra aguante de verdad.
+   El número está en este archivo, en layout.css, en sin-js.css y en
+   los tres matchMedia de nav.js: se cambian los seis juntos.
    ============================================================ */
 
 /* ============================================================
@@ -338,7 +350,7 @@
    con el panel abierto si no deja la página oscurecida sin motivo.
    El :not([hidden]) es para que el atributo siga mandando: sin él, el
    display:block de la clase le gana al display:none del atributo. */
-@media (min-width: 1120px) {
+@media (min-width: 1280px) {
   .mega__velo:not([hidden]) {
     display: block;
   }
@@ -544,11 +556,11 @@
 }
 
 .cajon__horario {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 /* Arriba del corte el cajón no existe: el menú es el de escritorio. */
-@media (min-width: 1120px) {
+@media (min-width: 1280px) {
   .cajon {
     display: none;
   }
