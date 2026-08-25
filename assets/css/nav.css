@@ -210,6 +210,17 @@
   height: 100%;
 }
 
+/* El display de una clase le gana al display:none que el navegador aplica
+   por el atributo hidden, que es hoja de usuario-agente. Sin esta regla,
+   grupo.hidden = true no apagaba nada y las seis categorías se dibujaban
+   apiladas: el panel medía 1232 en vez de 504, el texto pisaba el pie y
+   había 43 elementos enfocables en vez de trece. Misma trampa que el velo,
+   más abajo. Cada vez que a un elemento que se apaga con hidden se le pone
+   un display, hay que escribir su [hidden]. */
+.mega__grupo[hidden] {
+  display: none;
+}
+
 /* 2 subcolumnas de 322 con gutter de 24, filas de 64 sin hueco:
    la lista se lee como una tabla, no como ocho tarjetas. */
 .mega__productos {
