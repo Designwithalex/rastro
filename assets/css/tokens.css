@@ -1,0 +1,161 @@
+/* ============================================================
+   tokens.css — Rastro Fitness
+   NO EDITAR A MANO. Los valores salen de las variables de Figma:
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs
+   Si cambia un token en Figma, se actualiza acá y en ningún otro lado.
+   ============================================================ */
+
+/* --- tipografías, servidas desde el propio servidor --- */
+@font-face {
+  font-family: 'Michroma';
+  src: url('../fonts/michroma-400.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Saira';
+  src: url('../fonts/saira-400.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Saira';
+  src: url('../fonts/saira-600.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/jetbrains-mono-400.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/jetbrains-mono-700.woff2') format('woff2');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+:root {
+
+  /* --- color · modo Sitio (oscuro) --- */
+  --color-accent-base: #780606;
+  --color-accent-hover: #8f0808;
+  --color-accent-on: #ffffff;
+  --color-accent-pressed: #5c0404;
+  --color-accent-soft: #5c0404;
+  --color-accent-text: #de6464;
+  --color-bg-base: #000000;
+  --color-bg-elevated: #1f1f1f;
+  --color-bg-inverse: #ffffff;
+  --color-bg-product-well: #e9e9e9;
+  --color-bg-surface: #0b0b0b;
+  --color-bg-surface-alt: #151515;
+  --color-border-focus: #ffffff;
+  --color-border-strong: #666666;
+  --color-border-subtle: #1f1f1f;
+  --color-danger-border: #de6464;
+  --color-danger-text: #de6464;
+  --color-plata-1: #f2f2f2;
+  --color-plata-2: #c4c4c4;
+  --color-plata-3: #8a8a8a;
+  --color-text-disabled: #666666;
+  --color-text-inverse: #000000;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c4c4c4;
+
+  /* --- espaciado · escala de 4 --- */
+  --espaciado-4: 4px;
+  --espaciado-8: 8px;
+  --espaciado-12: 12px;
+  --espaciado-16: 16px;
+  --espaciado-20: 20px;
+  --espaciado-24: 24px;
+  --espaciado-32: 32px;
+  --espaciado-40: 40px;
+  --espaciado-48: 48px;
+  --espaciado-64: 64px;
+  --espaciado-80: 80px;
+  --espaciado-96: 96px;
+  --espaciado-120: 120px;
+
+  /* --- radio · el sistema es de canto vivo --- */
+  --radio-none: 0;
+  --radio-sm: 0;
+  --radio-md: 0;
+  --radio-lg: 0;
+  --radio-xl: 0;
+  --radio-full: 999px;
+
+  /* --- familias --- */
+  --fuente-display: 'Michroma', 'Arial Black', sans-serif;
+  --fuente-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --fuente-texto: 'Saira', system-ui, -apple-system, sans-serif;
+
+  /* --- medidas de layout --- */
+  --ancho-maximo: 1440px;
+  --margen-desktop: var(--espaciado-40);
+  --margen-mobile: var(--espaciado-20);
+  --hairline: 1px;
+
+  /* --- degradé plata del isotipo. Solo números y logo. --- */
+  --plata: linear-gradient(135deg, #ffffff 0%, var(--color-plata-2) 45%, #fafafa 55%, var(--color-plata-3) 100%);
+}
+
+/* El panel de administración usa los mismos tokens en claro.
+   Se activa con <html data-tema="admin">. */
+[data-tema="admin"] {
+  --color-accent-soft: #ffd9d9;
+  --color-accent-text: #780606;
+  --color-bg-base: #f4f4f4;
+  --color-bg-elevated: #ffffff;
+  --color-bg-inverse: #000000;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-alt: #e9e9e9;
+  --color-border-focus: #151515;
+  --color-border-strong: #8a8a8a;
+  --color-border-subtle: #e0e0e0;
+  --color-danger-text: #780606;
+  --color-text-disabled: #8a8a8a;
+  --color-text-inverse: #ffffff;
+  --color-text-primary: #151515;
+  --color-text-secondary: #666666;
+}
+
+
+/* ============================================================
+   Escala tipográfica
+   Una clase por estilo de Figma. Los pares desktop/mobile se
+   resuelven acá con una consulta de medios, no en las vistas.
+   ============================================================ */
+.t-display-xl { font-family: var(--fuente-display); font-weight: 400; font-size: 80px; line-height: 80px; letter-spacing: -2.4px; text-transform: uppercase; }
+.t-display-hero { font-family: var(--fuente-display); font-weight: 400; font-size: 48px; line-height: 56px; letter-spacing: -1px; text-transform: uppercase; }
+.t-display-l { font-family: var(--fuente-display); font-weight: 400; font-size: 32px; line-height: 40px; letter-spacing: -0.5px; text-transform: uppercase; }
+.t-display-m { font-family: var(--fuente-display); font-weight: 400; font-size: 24px; line-height: 32px; letter-spacing: -0.25px; text-transform: uppercase; }
+.t-display-s { font-family: var(--fuente-display); font-weight: 400; font-size: 16px; line-height: 22px; text-transform: uppercase; }
+.t-display-xs { font-family: var(--fuente-display); font-weight: 400; font-size: 10px; line-height: 14px; letter-spacing: 1.2px; text-transform: uppercase; }
+.t-precio-lg { font-family: var(--fuente-display); font-weight: 400; font-size: 40px; line-height: 44px; letter-spacing: -0.5px; }
+.t-precio-md { font-family: var(--fuente-display); font-weight: 400; font-size: 26px; line-height: 30px; letter-spacing: -0.25px; }
+.t-precio-sm { font-family: var(--fuente-display); font-weight: 400; font-size: 22px; line-height: 26px; }
+.t-precio-xs { font-family: var(--fuente-display); font-weight: 400; font-size: 14px; line-height: 18px; }
+.t-mono-label { font-family: var(--fuente-mono); font-weight: 700; font-size: 11px; line-height: 16px; letter-spacing: 1.2px; text-transform: uppercase; }
+.t-mono-label-sm { font-family: var(--fuente-mono); font-weight: 700; font-size: 10px; line-height: 14px; letter-spacing: 1.2px; text-transform: uppercase; }
+.t-mono-dato { font-family: var(--fuente-mono); font-weight: 700; font-size: 17px; line-height: 22px; }
+.t-mono-texto { font-family: var(--fuente-mono); font-weight: 400; font-size: 12px; line-height: 18px; letter-spacing: 0.6px; }
+.t-mono-texto-sm { font-family: var(--fuente-mono); font-weight: 400; font-size: 10px; line-height: 15px; letter-spacing: 0.5px; }
+.t-body-lg { font-family: var(--fuente-texto); font-weight: 400; font-size: 18px; line-height: 28px; }
+.t-body-md { font-family: var(--fuente-texto); font-weight: 400; font-size: 16px; line-height: 26px; }
+.t-body-sm { font-family: var(--fuente-texto); font-weight: 400; font-size: 14px; line-height: 22px; }
+.t-body-xs { font-family: var(--fuente-texto); font-weight: 400; font-size: 12px; line-height: 18px; }
+
+@media (max-width: 900px) {
+  .t-display-xl { font-size: 30px; line-height: 34px; letter-spacing: -0.9px; }
+  .t-display-hero { font-size: 28px; line-height: 34px; letter-spacing: -0.5px; }
+  .t-display-l { font-size: 22px; line-height: 28px; letter-spacing: -0.25px; }
+  .t-precio-lg { font-size: 26px; line-height: 30px; letter-spacing: -0.25px; }
+}
+
+/* Números en degradé plata. Se usa en precios y cifras grandes,
+   nunca en texto corrido. */
+.plata {
+  background: var(--plata);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

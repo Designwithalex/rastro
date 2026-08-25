@@ -20,3 +20,7 @@ node_modules/
 # Originales pesados sin optimizar
 assets/img/**/*.psd
 assets/img/**/*.ai
+
+# Fotos originales sin optimizar. bin/optimizar-imagenes.sh deja acá una copia
+# intacta antes de redimensionar. Pesan 29 MB: no van al repo ni al servidor.
+.originales-img/

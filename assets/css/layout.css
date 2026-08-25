@@ -1,0 +1,532 @@
+/* ============================================================
+   layout.css — Rastro Fitness
+   Las piezas que se repiten en todas las páginas: marquee,
+   cabecera y pie. Móvil primero. Ningún valor de marca literal.
+   ============================================================ */
+
+/* ============================================================
+   Marquee — la franja bordeaux de arriba de todo
+   ============================================================ */
+
+.marquee {
+  display: flex;
+  overflow: hidden;
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+  user-select: none;
+}
+
+.marquee__pista {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--espaciado-16);
+  min-width: max-content;
+  padding-block: var(--espaciado-8);
+  padding-right: var(--espaciado-16);
+
+  /* La duración acompaña al ancho de la pista para que la velocidad no
+     cambie: ~53 px/s. Si se toca $repeticiones en marquee.php, se toca acá. */
+  animation: marquee-desplazar 74s linear infinite;
+}
+
+/* Tipografía: .t-display-xs y .t-mono-texto-sm, puestas en el marcado.
+   Acá solo va lo que la escala no resuelve. */
+.marquee__item {
+  white-space: nowrap;
+}
+
+.marquee__barra {
+  opacity: 0.5;
+}
+
+@keyframes marquee-desplazar {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__pista {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   Cabecera
+   ============================================================ */
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--color-bg-base);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cabecera__barra {
+  display: grid;
+  grid-template-areas:
+    "logo acciones"
+    "buscador buscador"
+    "nav nav";
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: var(--espaciado-16);
+  row-gap: var(--espaciado-12);
+  padding-block: var(--espaciado-12);
+}
+
+.cabecera__logo {
+  grid-area: logo;
+  display: block;
+}
+
+.cabecera__logo img {
+  width: auto;
+  height: 22px;
+}
+
+.cabecera__acciones {
+  grid-area: acciones;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espaciado-12);
+}
+
+.cabecera__cuenta {
+  color: var(--color-text-secondary);
+  padding-block: var(--espaciado-8);
+  transition: color 0.15s ease;
+}
+
+.cabecera__cuenta:hover,
+.cabecera__cuenta.es-activo {
+  color: var(--color-text-primary);
+}
+
+/* --- Navegación con índice numerado -------------------------
+   En celular es una tira que se desplaza a lo ancho: sin menú
+   hamburguesa, sin JavaScript, y el índice sigue leyéndose. */
+
+.nav {
+  grid-area: nav;
+  min-width: 0;
+  margin-inline: calc(var(--margen-mobile) * -1);
+
+  /* La tira se desvanece contra el borde derecho para avisar que sigue.
+     "05 Mayoristas" es el último ítem y el canal mayorista es medio
+     negocio: no puede quedar escondido sin ninguna pista.
+     La máscara se esconde sola cuando no hace falta: si el menú entra
+     entero, en la zona del degradé no hay tinta que apagar. */
+  --nav-desvanecido: var(--espaciado-32);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--nav-desvanecido)), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--nav-desvanecido)), transparent 100%);
+}
+
+.nav__lista {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-20);
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  /* El relleno del final saca al último ítem de abajo del degradé
+     cuando la tira está desplazada hasta el tope. */
+  padding-inline: var(--margen-mobile) calc(var(--margen-mobile) + var(--nav-desvanecido));
+}
+
+.nav__lista::-webkit-scrollbar {
+  display: none;
+}
+
+.nav__enlace {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  white-space: nowrap;
+  padding-block: var(--espaciado-8);
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+/* text/secondary y no text/disabled: el índice es dato legible, no un
+   elemento apagado. CLAUDE.md §5.3 reserva disabled para lo inhabilitado. */
+.nav__indice {
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.nav__enlace:hover,
+.nav__enlace.es-activo {
+  color: var(--color-text-primary);
+}
+
+.nav__enlace:hover .nav__indice,
+.nav__enlace.es-activo .nav__indice {
+  color: var(--color-accent-text);
+}
+
+/* La sección activa se pone en blanco; la página en la que se está parado
+   suma el hairline bordeaux. Nunca un recuadro. */
+.nav__enlace.es-actual::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--color-accent-base);
+}
+
+/* --- Buscador ----------------------------------------------- */
+
+.buscador {
+  grid-area: buscador;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border: var(--hairline) solid var(--color-border-strong);
+  transition: border-color 0.15s ease;
+}
+
+.buscador:hover {
+  border-color: var(--color-plata-3);
+}
+
+.buscador:focus-within {
+  border-color: var(--color-border-focus);
+  outline: var(--hairline) solid var(--color-border-focus);
+  outline-offset: 0;
+}
+
+.buscador__campo {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--espaciado-8) var(--espaciado-12);
+  color: var(--color-text-primary);
+}
+
+.buscador__campo::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* El contorno del conjunto ya avisa que el campo tiene el foco. */
+.buscador__campo:focus-visible {
+  outline: none;
+}
+
+.buscador__boton {
+  flex: 0 0 auto;
+  padding-inline: var(--espaciado-12);
+  border-left: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.buscador__boton:hover {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+/* --- Botón de carrito --------------------------------------- */
+
+.boton-carrito {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-8) var(--espaciado-12);
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+  transition: background-color 0.15s ease;
+}
+
+.boton-carrito:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.boton-carrito:active {
+  background-color: var(--color-accent-pressed);
+}
+
+/* La familia la hereda de .t-mono-label; acá solo hace falta que el
+   contador no baile de ancho al pasar de [09] a [10]. */
+.boton-carrito__contador {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 640px) {
+  .boton-carrito {
+    padding-inline: var(--espaciado-16);
+  }
+}
+
+/* --- Tramo intermedio: el menú se lleva una fila entera --------
+   Entre 1040 y 1279 px no entra logo + menú + buscador + acciones en una
+   sola línea. Y el ancho del menú no es fijo: se arma con las tres
+   primeras categorías del panel, así que si el cliente sube "Racks y
+   jaulas" el renglón crece. En vez de calcular un punto de corte que
+   depende de los datos, acá el menú baja a su propia fila y deja de
+   competir por el ancho. */
+@media (min-width: 1040px) {
+  .cabecera__barra {
+    grid-template-areas:
+      "logo buscador acciones"
+      "nav  nav      nav";
+    grid-template-columns: auto minmax(180px, 1fr) auto;
+    column-gap: var(--espaciado-32);
+    row-gap: var(--espaciado-12);
+    padding-block: var(--espaciado-16);
+  }
+
+  .cabecera__logo img {
+    height: 26px;
+  }
+
+  .nav {
+    margin-inline: 0;
+  }
+
+  .nav__lista {
+    padding-inline: 0 var(--nav-desvanecido);
+    gap: var(--espaciado-24);
+  }
+
+  .buscador {
+    justify-self: end;
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+/* --- Escritorio: la cabecera vuelve a una sola línea -----------
+   El menú es el único track que puede achicarse —minmax(0, auto)—, así que
+   si algún día el contenido no entra, la tira se desplaza como en celular
+   y se desvanece contra el borde. Nunca se dibuja encima del buscador. */
+@media (min-width: 1280px) {
+  .cabecera__barra {
+    grid-template-areas: "logo nav buscador acciones";
+    grid-template-columns: auto minmax(0, auto) minmax(180px, 1fr) auto;
+    row-gap: 0;
+  }
+}
+
+/* ============================================================
+   Pie
+   ============================================================ */
+
+.pie {
+  position: relative;
+  margin-top: var(--espaciado-64);
+  background-color: var(--color-bg-surface);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.pie__cuerpo {
+  padding-block: var(--espaciado-40) var(--espaciado-24);
+}
+
+.pie__columnas {
+  grid-template-columns: 1fr;
+}
+
+.pie__columna {
+  padding: var(--espaciado-20) 0;
+}
+
+.pie__titulo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-12);
+  color: var(--color-text-primary);
+  margin-bottom: var(--espaciado-16);
+}
+
+.pie__letra {
+  color: var(--color-accent-text);
+}
+
+.pie__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.pie__enlace {
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.pie__enlace:hover {
+  color: var(--color-text-primary);
+}
+
+.pie__dato {
+  color: var(--color-text-secondary);
+}
+
+.pie__envio {
+  margin-top: var(--espaciado-24);
+  padding-top: var(--espaciado-20);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 640px) {
+  .pie__columnas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pie__columna {
+    padding: var(--espaciado-24);
+  }
+}
+
+@media (min-width: 1040px) {
+  .pie__cuerpo {
+    padding-block: var(--espaciado-64) var(--espaciado-32);
+  }
+
+  .pie__columnas {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* --- Barra de legales --------------------------------------- */
+
+.pie__legales {
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  background-color: var(--color-bg-base);
+}
+
+.pie__legales-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  padding-block: var(--espaciado-20);
+}
+
+/* Razón social y CUIT: por ley tienen que poder leerse. */
+.pie__razon {
+  color: var(--color-text-secondary);
+}
+
+.pie__legales-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-16);
+}
+
+.pie__legal {
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.pie__legal:hover {
+  color: var(--color-text-primary);
+}
+
+/* Obligatorio por ley y tiene que encontrarse a la primera. */
+.pie__arrepentimiento {
+  display: inline-block;
+  padding: var(--espaciado-8) var(--espaciado-12);
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.pie__arrepentimiento:hover {
+  border-color: var(--color-accent-text);
+  color: var(--color-accent-text);
+}
+
+/* --- La marca sangrando por el borde inferior ---------------- */
+
+.pie__marca {
+  overflow: hidden;
+  height: clamp(34px, 7vw, 96px);
+  background-color: var(--color-bg-base);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Único texto del sitio fuera de la escala tipográfica, y a propósito:
+   es una marca de agua a sangre que tiene que medir lo mismo que el ancho
+   de la ventana. Ninguna clase de la escala puede ser fluida. La familia
+   sí sale del token. */
+.pie__marca span {
+  display: block;
+  font-family: var(--fuente-display);
+  font-size: clamp(72px, 15vw, 208px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  opacity: 0.08;
+  transform: translateY(-0.19em);
+}
+
+/* ============================================================
+   Andamio de la Fase 2 — se borra cuando entren las páginas.
+   ============================================================ */
+
+.andamio {
+  display: flex;
+  align-items: center;
+  padding-block: var(--espaciado-64);
+}
+
+.andamio__caja {
+  max-width: 640px;
+}
+
+.andamio__indice {
+  color: var(--color-accent-text);
+  margin-bottom: var(--espaciado-16);
+}
+
+.andamio__titulo {
+  margin-bottom: var(--espaciado-16);
+}
+
+.andamio__texto {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--espaciado-32);
+}
+
+.andamio__ficha {
+  grid-template-columns: 1fr;
+  margin-bottom: var(--espaciado-32);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.andamio__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-8) var(--espaciado-24);
+  justify-content: space-between;
+  padding: var(--espaciado-12) var(--espaciado-16);
+}
+
+.andamio__fila dt {
+  color: var(--color-text-secondary);
+}
+
+.andamio__fila dd {
+  color: var(--color-text-primary);
+}
+
+.andamio__volver {
+  display: inline-block;
+  padding: var(--espaciado-12) var(--espaciado-20);
+  border: var(--hairline) solid var(--color-border-strong);
+  transition: border-color 0.15s ease;
+}
+
+.andamio__volver:hover {
+  border-color: var(--color-border-focus);
+}

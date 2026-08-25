@@ -1,0 +1,45 @@
+[
+    {
+        "id": 1,
+        "slug": "rastro",
+        "nombre": "Rastro",
+        "logo": "img/marca/rastro-horizontal-transparente.png",
+        "orden": 1,
+        "es_propia": true
+    },
+    {
+        "id": 2,
+        "slug": "greencore",
+        "nombre": "Greencore",
+        "logo": "",
+        "orden": 2
+    },
+    {
+        "id": 3,
+        "slug": "marca-oficial-3",
+        "nombre": "Marca oficial 3",
+        "logo": "",
+        "orden": 3
+    },
+    {
+        "id": 4,
+        "slug": "marca-oficial-4",
+        "nombre": "Marca oficial 4",
+        "logo": "",
+        "orden": 4
+    },
+    {
+        "id": 5,
+        "slug": "marca-oficial-5",
+        "nombre": "Marca oficial 5",
+        "logo": "",
+        "orden": 5
+    },
+    {
+        "id": 6,
+        "slug": "marca-oficial-6",
+        "nombre": "Marca oficial 6",
+        "logo": "",
+        "orden": 6
+    }
+]

@@ -1,0 +1,891 @@
+[
+    {
+        "id": 1,
+        "slug": "disco-bumper-greencore-10-kg",
+        "sku": "RS-DB-010",
+        "nombre": "Disco bumper Greencore 10 kg",
+        "categoria": "discos",
+        "marca": "greencore",
+        "descripcion_corta": "Caucho de alta densidad, buje de acero de 50 mm y rebote controlado.",
+        "descripcion": "Disco bumper de caucho virgen pensado para levantamiento olímpico y CrossFit. El buje de acero inoxidable de 50 mm va prensado al cuerpo, así que no se afloja aunque el disco se suelte desde altura todos los días. El rebote es bajo y parejo, y el canto plano permite apilarlo sin que se deforme. Tolerancia de peso de ±1%.",
+        "precio_lista": 74900,
+        "precio_mayorista": 58400,
+        "descuento_pct": null,
+        "stock": 24,
+        "destacado": true,
+        "nuevo": false,
+        "imagen": "img/productos/disco-bumper-greencore-10kg.jpg",
+        "imagenes": [
+            "img/productos/disco-bumper-greencore-10kg.jpg",
+            "img/productos/disco-bumper-greencore-10kg-alt.jpg",
+            "img/productos/disco-bumper-greencore-canto.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Caucho virgen de alta densidad" },
+            { "label": "Buje", "valor": "Acero inoxidable de 50 mm" },
+            { "label": "Diámetro", "valor": "45 cm" },
+            { "label": "Espesor", "valor": "3,2 cm" },
+            { "label": "Tolerancia", "valor": "±1%" },
+            { "label": "Uso", "valor": "Levantamiento olímpico y CrossFit" }
+        ],
+        "peso_kg": 10,
+        "activo": true
+    },
+    {
+        "id": 2,
+        "slug": "disco-bumper-greencore-15-kg",
+        "sku": "RS-DB-015",
+        "nombre": "Disco bumper Greencore 15 kg",
+        "categoria": "discos",
+        "marca": "greencore",
+        "descripcion_corta": "El paso intermedio de la serie bumper, mismo diámetro y más espesor.",
+        "descripcion": "Mismo cuerpo de caucho virgen y el mismo buje de acero de 50 mm que el de 10 kg, con más espesor. Mantener el diámetro de 45 cm en toda la serie es lo que permite armar cualquier combinación de peso sin que la barra cambie de altura respecto del piso.",
+        "precio_lista": 105900,
+        "precio_mayorista": 82600,
+        "descuento_pct": null,
+        "stock": 18,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/discos-bumper-greencore-apilados-detalle.jpg",
+        "imagenes": [
+            "img/productos/discos-bumper-greencore-apilados-detalle.jpg",
+            "img/productos/disco-bumper-greencore-canto.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Caucho virgen de alta densidad" },
+            { "label": "Buje", "valor": "Acero inoxidable de 50 mm" },
+            { "label": "Diámetro", "valor": "45 cm" },
+            { "label": "Espesor", "valor": "4,5 cm" },
+            { "label": "Tolerancia", "valor": "±1%" },
+            { "label": "Uso", "valor": "Levantamiento olímpico y CrossFit" }
+        ],
+        "peso_kg": 15,
+        "activo": true
+    },
+    {
+        "id": 3,
+        "slug": "disco-bumper-greencore-20-kg",
+        "sku": "RS-DB-020",
+        "nombre": "Disco bumper Greencore 20 kg",
+        "categoria": "discos",
+        "marca": "greencore",
+        "descripcion_corta": "El disco de trabajo de la sala. Aguanta caídas repetidas desde altura.",
+        "descripcion": "Es el disco que más rota en un gimnasio con clases todo el día. Cuerpo de caucho virgen, buje de acero prensado de 50 mm y canto plano para apilar. Soporta caídas repetidas desde sobre la cabeza sin deformarse ni abrir el buje.",
+        "precio_lista": 138900,
+        "precio_mayorista": 108300,
+        "descuento_pct": null,
+        "stock": 32,
+        "destacado": true,
+        "nuevo": false,
+        "imagen": "img/productos/discos-bumper-greencore-apilados.jpg",
+        "imagenes": [
+            "img/productos/discos-bumper-greencore-apilados.jpg",
+            "img/productos/disco-bumper-greencore-canto.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Caucho virgen de alta densidad" },
+            { "label": "Buje", "valor": "Acero inoxidable de 50 mm" },
+            { "label": "Diámetro", "valor": "45 cm" },
+            { "label": "Espesor", "valor": "5,8 cm" },
+            { "label": "Tolerancia", "valor": "±1%" },
+            { "label": "Uso", "valor": "Levantamiento olímpico y CrossFit" }
+        ],
+        "peso_kg": 20,
+        "activo": true
+    },
+    {
+        "id": 4,
+        "slug": "set-de-discos-bumper-greencore-5-a-25-kg",
+        "sku": "RS-DB-SET150",
+        "nombre": "Set de discos bumper Greencore 5 a 25 kg · 150 kg",
+        "categoria": "discos",
+        "marca": "greencore",
+        "descripcion_corta": "Cinco pares, 150 kg de disco. La forma más barata de armar una plataforma.",
+        "descripcion": "Set completo de la serie bumper: un par de 5, 10, 15, 20 y 25 kg, 150 kg en total. Es el arranque típico de una plataforma de levantamiento. Comprado como set sale bastante menos que disco por disco, y se entrega con los cinco pares en el mismo lote de producción, así que el color y la terminación son iguales en toda la serie.",
+        "precio_lista": 989000,
+        "precio_mayorista": 771400,
+        "descuento_pct": 25,
+        "stock": 6,
+        "destacado": true,
+        "nuevo": false,
+        "imagen": "img/productos/discos-bumper-greencore-set-5-a-25-kg.jpg",
+        "imagenes": [
+            "img/productos/discos-bumper-greencore-set-5-a-25-kg.jpg",
+            "img/productos/discos-bumper-greencore-apilados.jpg",
+            "img/productos/discos-bumper-greencore-apilados-detalle.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Composición", "valor": "Un par de 5, 10, 15, 20 y 25 kg" },
+            { "label": "Peso total", "valor": "150 kg" },
+            { "label": "Material", "valor": "Caucho virgen de alta densidad" },
+            { "label": "Buje", "valor": "Acero inoxidable de 50 mm" },
+            { "label": "Diámetro", "valor": "45 cm en toda la serie" },
+            { "label": "Entrega", "valor": "Sobre pallet, coordinada por WhatsApp" }
+        ],
+        "peso_kg": 150,
+        "activo": true
+    },
+    {
+        "id": 5,
+        "slug": "disco-de-fundicion-tres-agarres-10-kg",
+        "sku": "RS-DF-010",
+        "nombre": "Disco de fundición tres agarres 10 kg",
+        "categoria": "discos",
+        "marca": "rastro",
+        "descripcion_corta": "Fundición pintada con tres agarres. Para musculación, no para tirar al piso.",
+        "descripcion": "Disco macizo de fundición gris con tres agarres integrados, para poder levantarlo y trasladarlo con una mano. Terminación en pintura epoxi negra. Va en máquinas y barras de musculación clásica: no está pensado para soltarse desde altura como un bumper.",
+        "precio_lista": 46900,
+        "precio_mayorista": 36600,
+        "descuento_pct": null,
+        "stock": 41,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/disco-fundicion-tres-agarres-10kg.jpg",
+        "imagenes": [
+            "img/productos/disco-fundicion-tres-agarres-10kg.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición gris" },
+            { "label": "Terminación", "valor": "Pintura epoxi negra" },
+            { "label": "Agujero", "valor": "50 mm" },
+            { "label": "Agarres", "valor": "Tres, integrados a la pieza" },
+            { "label": "Uso", "valor": "Musculación" }
+        ],
+        "peso_kg": 10,
+        "activo": true
+    },
+    {
+        "id": 6,
+        "slug": "disco-de-fundicion-tres-agarres-20-kg",
+        "sku": "RS-DF-020",
+        "nombre": "Disco de fundición tres agarres 20 kg",
+        "categoria": "discos",
+        "marca": "rastro",
+        "descripcion_corta": "La versión de 20 kg del disco de fundición con tres agarres.",
+        "descripcion": "Mismo disco macizo de fundición con tres agarres, en 20 kg. Terminación en pintura epoxi negra y agujero de 50 mm. Para sala de musculación y máquinas de carga libre.",
+        "precio_lista": 89900,
+        "precio_mayorista": 70100,
+        "descuento_pct": null,
+        "stock": 27,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/disco-fundicion-tres-agarres-10kg.jpg",
+        "imagenes": [
+            "img/productos/disco-fundicion-tres-agarres-10kg.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición gris" },
+            { "label": "Terminación", "valor": "Pintura epoxi negra" },
+            { "label": "Agujero", "valor": "50 mm" },
+            { "label": "Agarres", "valor": "Tres, integrados a la pieza" },
+            { "label": "Uso", "valor": "Musculación" }
+        ],
+        "peso_kg": 20,
+        "activo": true
+    },
+    {
+        "id": 7,
+        "slug": "barra-olimpica-greencore-2-20-m",
+        "sku": "RS-BO-220",
+        "nombre": "Barra olímpica Greencore 2,20 m · 20 kg",
+        "categoria": "barras",
+        "marca": "greencore",
+        "descripcion_corta": "Acero de 190.000 PSI, ocho rulemanes de aguja y moleteado IWF.",
+        "descripcion": "Barra olímpica de competencia de 2,20 m y 20 kg. Eje de acero tratado de 190.000 PSI con ocho rulemanes de aguja: el giro es suave y sostenido, que es lo que hace que un arranque no te tire de la muñeca. Moleteado con marcas de agarre según norma IWF, sin moleteado central. Mangas de 50 mm con terminación cromada.",
+        "precio_lista": 289000,
+        "precio_mayorista": 225400,
+        "descuento_pct": null,
+        "stock": 9,
+        "destacado": true,
+        "nuevo": true,
+        "imagen": "img/productos/barra-olimpica-greencore-220m.jpg",
+        "imagenes": [
+            "img/productos/barra-olimpica-greencore-220m.jpg",
+            "img/productos/barra-olimpica-greencore-vertical.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Largo", "valor": "2,20 m" },
+            { "label": "Peso", "valor": "20 kg" },
+            { "label": "Acero", "valor": "190.000 PSI" },
+            { "label": "Giro", "valor": "Ocho rulemanes de aguja" },
+            { "label": "Diámetro del eje", "valor": "28 mm" },
+            { "label": "Mangas", "valor": "50 mm, cromadas" },
+            { "label": "Carga máxima", "valor": "680 kg" }
+        ],
+        "peso_kg": 20,
+        "activo": true
+    },
+    {
+        "id": 8,
+        "slug": "barra-olimpica-greencore-1-50-m",
+        "sku": "RS-BO-150",
+        "nombre": "Barra olímpica Greencore 1,50 m · 12 kg",
+        "categoria": "barras",
+        "marca": "greencore",
+        "descripcion_corta": "Barra corta para racks angostos, entrenamiento en casa y trabajo unilateral.",
+        "descripcion": "Versión de 1,50 m y 12 kg de la barra olímpica, para salas donde una barra de 2,20 m no entra o para trabajo unilateral. Mismo eje de acero tratado y mangas de 50 mm, con bujes de bronce en vez de rulemanes: gira menos libre, pero aguanta mejor el uso intensivo sin mantenimiento.",
+        "precio_lista": 219000,
+        "precio_mayorista": 170800,
+        "descuento_pct": null,
+        "stock": 14,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/barra-olimpica-greencore-vertical.jpg",
+        "imagenes": [
+            "img/productos/barra-olimpica-greencore-vertical.jpg",
+            "img/productos/barra-olimpica-greencore-220m.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Largo", "valor": "1,50 m" },
+            { "label": "Peso", "valor": "12 kg" },
+            { "label": "Acero", "valor": "160.000 PSI" },
+            { "label": "Giro", "valor": "Bujes de bronce" },
+            { "label": "Diámetro del eje", "valor": "28 mm" },
+            { "label": "Mangas", "valor": "50 mm, cromadas" },
+            { "label": "Carga máxima", "valor": "300 kg" }
+        ],
+        "peso_kg": 12,
+        "activo": true
+    },
+    {
+        "id": 9,
+        "slug": "landmine-para-barra-olimpica",
+        "sku": "RS-BA-LMN",
+        "nombre": "Landmine para barra olímpica",
+        "categoria": "barras",
+        "marca": "rastro",
+        "descripcion_corta": "Anclaje giratorio de piso para trabajar la barra en ángulo.",
+        "descripcion": "Anclaje de acero con rótula giratoria que recibe la manga de una barra olímpica de 50 mm y la deja moverse en todos los ángulos. Sirve para remo a un brazo, press rotacional y prensa de piernas invertida. Se apoya en el piso con la base cargada por un disco o se amura al rack.",
+        "precio_lista": 84900,
+        "precio_mayorista": 66200,
+        "descuento_pct": null,
+        "stock": 11,
+        "destacado": false,
+        "nuevo": true,
+        "imagen": "img/productos/especiales-landmine-para-barra-olimpica.jpg",
+        "imagenes": [
+            "img/productos/especiales-landmine-para-barra-olimpica.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Acero SAE 1010 de 3 mm" },
+            { "label": "Terminación", "valor": "Pintura epoxi negra" },
+            { "label": "Compatibilidad", "valor": "Barras de manga de 50 mm" },
+            { "label": "Giro", "valor": "360°, rótula esférica" },
+            { "label": "Montaje", "valor": "Piso lastrado o amurado al rack" }
+        ],
+        "peso_kg": 3.4,
+        "activo": true
+    },
+    {
+        "id": 10,
+        "slug": "mancuerna-hexagonal-greencore-10-kg",
+        "sku": "RS-MH-010",
+        "nombre": "Mancuerna hexagonal Greencore 10 kg",
+        "categoria": "mancuernas",
+        "marca": "greencore",
+        "descripcion_corta": "Fundición revestida en caucho, mango moleteado y cabezas hexagonales.",
+        "descripcion": "Mancuerna de una sola pieza con núcleo de fundición y revestimiento de caucho: no marca el piso y no hace ruido. Las cabezas hexagonales evitan que ruede y permiten usarla de apoyo en flexiones. El mango de acero moleteado va cromado y tiene el diámetro justo para agarre completo sin fatigar el antebrazo.",
+        "precio_lista": 79900,
+        "precio_mayorista": 62300,
+        "descuento_pct": null,
+        "stock": 22,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/mancuerna-hexagonal-greencore-unidad.jpg",
+        "imagenes": [
+            "img/productos/mancuerna-hexagonal-greencore-unidad.jpg",
+            "img/productos/mancuerna-hexagonal-greencore-detalle-mango.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición revestida en caucho" },
+            { "label": "Mango", "valor": "Acero cromado moleteado, 30 mm" },
+            { "label": "Forma", "valor": "Cabezas hexagonales" },
+            { "label": "Venta", "valor": "Por unidad" },
+            { "label": "Uso", "valor": "Musculación y funcional" }
+        ],
+        "peso_kg": 10,
+        "activo": true
+    },
+    {
+        "id": 11,
+        "slug": "par-de-mancuernas-hexagonales-greencore-5-kg",
+        "sku": "RS-MH-P05",
+        "nombre": "Par de mancuernas hexagonales Greencore 5 kg",
+        "categoria": "mancuernas",
+        "marca": "greencore",
+        "descripcion_corta": "Las dos mancuernas de 5 kg, 10 kg en total.",
+        "descripcion": "El par de 5 kg de la línea hexagonal, la medida que más se usa en clases grupales y en entrada en calor. Mismo revestimiento de caucho y mango cromado que el resto de la serie. Se vende de a par.",
+        "precio_lista": 84900,
+        "precio_mayorista": 66200,
+        "descuento_pct": null,
+        "stock": 16,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/mancuernas-hexagonales-greencore-par.jpg",
+        "imagenes": [
+            "img/productos/mancuernas-hexagonales-greencore-par.jpg",
+            "img/productos/mancuerna-hexagonal-greencore-detalle-mango.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición revestida en caucho" },
+            { "label": "Mango", "valor": "Acero cromado moleteado, 28 mm" },
+            { "label": "Forma", "valor": "Cabezas hexagonales" },
+            { "label": "Venta", "valor": "Por par" },
+            { "label": "Peso total", "valor": "10 kg" }
+        ],
+        "peso_kg": 10,
+        "activo": true
+    },
+    {
+        "id": 12,
+        "slug": "mancuerna-hexagonal-greencore-20-kg",
+        "sku": "RS-MH-020",
+        "nombre": "Mancuerna hexagonal Greencore 20 kg",
+        "categoria": "mancuernas",
+        "marca": "greencore",
+        "descripcion_corta": "La medida pesada de la serie hexagonal. Sin stock, reponemos en 15 días.",
+        "descripcion": "Mancuerna hexagonal de 20 kg con núcleo de fundición y revestimiento de caucho. Es la medida que primero se agota en un gimnasio con sala de musculación. Mango de acero cromado moleteado de 32 mm.",
+        "precio_lista": 152900,
+        "precio_mayorista": 119300,
+        "descuento_pct": null,
+        "stock": 0,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/mancuerna-hexagonal-greencore-detalle-mango.jpg",
+        "imagenes": [
+            "img/productos/mancuerna-hexagonal-greencore-detalle-mango.jpg",
+            "img/productos/mancuerna-hexagonal-greencore-unidad.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición revestida en caucho" },
+            { "label": "Mango", "valor": "Acero cromado moleteado, 32 mm" },
+            { "label": "Forma", "valor": "Cabezas hexagonales" },
+            { "label": "Venta", "valor": "Por unidad" },
+            { "label": "Reposición", "valor": "15 días" }
+        ],
+        "peso_kg": 20,
+        "activo": true
+    },
+    {
+        "id": 13,
+        "slug": "set-de-mancuernas-con-barra-y-discos",
+        "sku": "RS-MC-SET",
+        "nombre": "Set de mancuernas con barra y discos · 30 kg",
+        "categoria": "mancuernas",
+        "marca": "rastro",
+        "descripcion_corta": "Dos mancuernas, una barra corta y discos intercambiables en un solo estuche.",
+        "descripcion": "Kit de mancuernas ajustables: dos ejes cortos con trabas a rosca, un eje largo para usarlos como barra y el juego de discos de fundición revestidos. Suma 30 kg de carga combinable. Es el arranque típico de un gimnasio en casa y el regalo que más sale en temporada.",
+        "precio_lista": 129900,
+        "precio_mayorista": 101300,
+        "descuento_pct": null,
+        "stock": 13,
+        "destacado": true,
+        "nuevo": false,
+        "imagen": "img/productos/set-mancuerna-disco-barra.jpg",
+        "imagenes": [
+            "img/productos/set-mancuerna-disco-barra.jpg",
+            "img/productos/set-mancuerna-disco-barra-alt.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Carga total", "valor": "30 kg" },
+            { "label": "Ejes", "valor": "Dos cortos y uno largo, 25 mm" },
+            { "label": "Discos", "valor": "Fundición revestida en PVC" },
+            { "label": "Trabas", "valor": "A rosca" },
+            { "label": "Incluye", "valor": "Estuche rígido" }
+        ],
+        "peso_kg": 30,
+        "activo": true
+    },
+    {
+        "id": 14,
+        "slug": "kettlebell-de-fundicion-12-kg",
+        "sku": "RS-KB-012",
+        "nombre": "Kettlebell de fundición 12 kg",
+        "categoria": "kettlebells",
+        "marca": "rastro",
+        "descripcion_corta": "Una sola pieza de fundición, asa ancha y base plana.",
+        "descripcion": "Kettlebell fundida en una sola pieza, sin soldaduras ni uniones: el asa y el cuerpo son la misma colada. El asa es ancha y de sección plana en la parte alta para que entren las dos manos en el swing. Base plana rectificada, apoya sin bailar. Terminación en pintura epoxi negra texturada.",
+        "precio_lista": 68900,
+        "precio_mayorista": 53700,
+        "descuento_pct": null,
+        "stock": 19,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/sin-foto.svg",
+        "imagenes": [
+            "img/productos/sin-foto.svg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición gris, pieza única" },
+            { "label": "Terminación", "valor": "Epoxi negro texturado" },
+            { "label": "Asa", "valor": "35 mm, sección plana" },
+            { "label": "Base", "valor": "Plana, rectificada" },
+            { "label": "Uso", "valor": "Entrenamiento funcional" }
+        ],
+        "peso_kg": 12,
+        "activo": true
+    },
+    {
+        "id": 15,
+        "slug": "kettlebell-de-fundicion-16-kg",
+        "sku": "RS-KB-016",
+        "nombre": "Kettlebell de fundición 16 kg",
+        "categoria": "kettlebells",
+        "marca": "rastro",
+        "descripcion_corta": "El pood clásico. La medida con la que empieza casi todo el mundo.",
+        "descripcion": "Los 16 kg son el pood ruso, la medida de referencia del kettlebell. Fundida en una sola pieza, con asa ancha de sección plana y base rectificada. Terminación epoxi negra texturada, que da agarre incluso con la mano transpirada.",
+        "precio_lista": 88900,
+        "precio_mayorista": 69300,
+        "descuento_pct": null,
+        "stock": 15,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/sin-foto.svg",
+        "imagenes": [
+            "img/productos/sin-foto.svg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Fundición gris, pieza única" },
+            { "label": "Terminación", "valor": "Epoxi negro texturado" },
+            { "label": "Asa", "valor": "35 mm, sección plana" },
+            { "label": "Base", "valor": "Plana, rectificada" },
+            { "label": "Uso", "valor": "Entrenamiento funcional" }
+        ],
+        "peso_kg": 16,
+        "activo": true
+    },
+    {
+        "id": 16,
+        "slug": "saco-bulgaro-10-kg",
+        "sku": "RS-KB-SB10",
+        "nombre": "Saco búlgaro 10 kg",
+        "categoria": "kettlebells",
+        "marca": "rastro",
+        "descripcion_corta": "Cuero sintético reforzado y dos manijas laterales. Carga inestable.",
+        "descripcion": "Saco búlgaro relleno de arena calibrada, con funda de cuero sintético y costuras dobles reforzadas. Las dos manijas laterales permiten girarlo sobre los hombros. Al ser una carga que se mueve dentro de la funda, obliga a estabilizar todo el tiempo: es el complemento típico del trabajo con kettlebell.",
+        "precio_lista": 96900,
+        "precio_mayorista": 75600,
+        "descuento_pct": null,
+        "stock": 7,
+        "destacado": false,
+        "nuevo": true,
+        "imagen": "img/productos/pelotas-con-peso-saco-bulgaro.jpg",
+        "imagenes": [
+            "img/productos/pelotas-con-peso-saco-bulgaro.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Cuero sintético reforzado" },
+            { "label": "Relleno", "valor": "Arena calibrada" },
+            { "label": "Manijas", "valor": "Dos laterales, costura doble" },
+            { "label": "Largo", "valor": "95 cm" },
+            { "label": "Uso", "valor": "Funcional y acondicionamiento" }
+        ],
+        "peso_kg": 10,
+        "activo": true
+    },
+    {
+        "id": 17,
+        "slug": "half-rack-de-sentadillas",
+        "sku": "RS-RK-HALF",
+        "nombre": "Half rack de sentadillas",
+        "categoria": "racks-y-jaulas",
+        "marca": "rastro",
+        "descripcion_corta": "Perfil de 75 × 75 mm, barra de dominadas y perforación cada 5 cm.",
+        "descripcion": "Estructura de dos columnas en caño estructural de 75 × 75 mm y 3 mm de pared, con base ampliada para trabajar sin amurar. Perforación cada 5 cm con numeración grabada, para volver siempre a la misma altura. Incluye un par de ganchos en J con protección de nylon y la barra de dominadas superior. Se entrega desarmado con la tornillería y el plano.",
+        "precio_lista": 1290000,
+        "precio_mayorista": 1006200,
+        "descuento_pct": null,
+        "stock": 4,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/sin-foto.svg",
+        "imagenes": [
+            "img/productos/sin-foto.svg"
+        ],
+        "especificaciones": [
+            { "label": "Perfil", "valor": "75 × 75 mm, pared de 3 mm" },
+            { "label": "Alto", "valor": "2,30 m" },
+            { "label": "Perforación", "valor": "Cada 5 cm, numerada" },
+            { "label": "Incluye", "valor": "Par de ganchos en J y barra de dominadas" },
+            { "label": "Carga máxima", "valor": "450 kg" },
+            { "label": "Entrega", "valor": "Desarmado, con plano y tornillería" }
+        ],
+        "peso_kg": 118,
+        "activo": true
+    },
+    {
+        "id": 18,
+        "slug": "jaula-de-potencia-power-cage",
+        "sku": "RS-RK-CAGE",
+        "nombre": "Jaula de potencia · power cage",
+        "categoria": "racks-y-jaulas",
+        "marca": "rastro",
+        "descripcion_corta": "Cuatro columnas, barras de seguridad y dos alturas de dominadas.",
+        "descripcion": "Jaula de cuatro columnas en caño estructural de 75 × 75 mm con travesaños superiores y dos barras de dominadas a distinta altura, una recta y una angulada. El par de barras de seguridad pasantes permite entrenar al fallo sin ayudante. Perforación numerada cada 5 cm en las cuatro columnas y placas de anclaje al piso.",
+        "precio_lista": 1890000,
+        "precio_mayorista": 1474200,
+        "descuento_pct": null,
+        "stock": 2,
+        "destacado": true,
+        "nuevo": true,
+        "imagen": "img/productos/sin-foto.svg",
+        "imagenes": [
+            "img/productos/sin-foto.svg"
+        ],
+        "especificaciones": [
+            { "label": "Perfil", "valor": "75 × 75 mm, pared de 3 mm" },
+            { "label": "Medidas", "valor": "1,40 × 1,25 × 2,30 m" },
+            { "label": "Perforación", "valor": "Cada 5 cm, numerada" },
+            { "label": "Incluye", "valor": "Ganchos en J, barras de seguridad y dos barras de dominadas" },
+            { "label": "Carga máxima", "valor": "700 kg" },
+            { "label": "Entrega", "valor": "Desarmada, con plano y tornillería" }
+        ],
+        "peso_kg": 196,
+        "activo": true
+    },
+    {
+        "id": 19,
+        "slug": "exhibidor-de-kettlebells",
+        "sku": "RS-RK-EXKB",
+        "nombre": "Exhibidor de kettlebells",
+        "categoria": "racks-y-jaulas",
+        "marca": "rastro",
+        "descripcion_corta": "Estante de acero con labio de contención para seis kettlebells.",
+        "descripcion": "Estante de chapa plegada con labio de contención en los dos bordes, para que la kettlebell no se venga al piso cuando alguien la apoya de apuro. Entran seis piezas de hasta 24 kg. Patas plegadas de la misma chapa, apoyo directo al piso sin amurar. Pintura epoxi negra.",
+        "precio_lista": 189000,
+        "precio_mayorista": 147400,
+        "descuento_pct": null,
+        "stock": 8,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/exhibidor-de-kettlebells-pesas-rusas.jpg",
+        "imagenes": [
+            "img/productos/exhibidor-de-kettlebells-pesas-rusas.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Chapa plegada de 2 mm" },
+            { "label": "Terminación", "valor": "Pintura epoxi negra" },
+            { "label": "Capacidad", "valor": "Seis kettlebells de hasta 24 kg" },
+            { "label": "Largo", "valor": "1,20 m" },
+            { "label": "Montaje", "valor": "Apoyo al piso, sin amurar" }
+        ],
+        "peso_kg": 21,
+        "activo": true
+    },
+    {
+        "id": 20,
+        "slug": "soporte-de-pared-para-bandas-de-suspension",
+        "sku": "RS-RK-SBS",
+        "nombre": "Soporte de pared para bandas de suspensión",
+        "categoria": "racks-y-jaulas",
+        "marca": "rastro",
+        "descripcion_corta": "Anclaje de acero con dos puntos de enganche y brochas incluidas.",
+        "descripcion": "Placa de acero con dos ojales de enganche para colgar bandas de suspensión, anillas o sogas. Se amura a pared de ladrillo u hormigón con las cuatro brochas que vienen con el soporte. Terminación en pintura epoxi negra.",
+        "precio_lista": 42900,
+        "precio_mayorista": 33500,
+        "descuento_pct": null,
+        "stock": 25,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/suspension-soporte-banda-de-suspension.jpg",
+        "imagenes": [
+            "img/productos/suspension-soporte-banda-de-suspension.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Acero de 5 mm" },
+            { "label": "Puntos de enganche", "valor": "Dos ojales" },
+            { "label": "Carga máxima", "valor": "200 kg" },
+            { "label": "Incluye", "valor": "Cuatro brochas de expansión" },
+            { "label": "Montaje", "valor": "Pared de ladrillo u hormigón" }
+        ],
+        "peso_kg": 2.1,
+        "activo": true
+    },
+    {
+        "id": 21,
+        "slug": "soga-de-triceps-para-polea",
+        "sku": "RS-AC-STR",
+        "nombre": "Soga de tríceps para polea",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Nylon trenzado con topes de goma y mosquetón giratorio.",
+        "descripcion": "Soga de nylon trenzado de alta densidad con topes de goma rígida en las puntas, para que la mano no se corra al final del recorrido. El mosquetón central gira, así la soga acompaña la rotación de la muñeca en extensiones y jalones al rostro.",
+        "precio_lista": 34900,
+        "precio_mayorista": 27200,
+        "descuento_pct": null,
+        "stock": 34,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/agarres-para-polea-jalon-soga-de-triceps.jpg",
+        "imagenes": [
+            "img/productos/agarres-para-polea-jalon-soga-de-triceps.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Nylon trenzado de alta densidad" },
+            { "label": "Largo", "valor": "70 cm" },
+            { "label": "Topes", "valor": "Goma rígida" },
+            { "label": "Enganche", "valor": "Mosquetón giratorio" }
+        ],
+        "peso_kg": 0.9,
+        "activo": true
+    },
+    {
+        "id": 22,
+        "slug": "barra-para-dorsales-120-cm",
+        "sku": "RS-AC-BD120",
+        "nombre": "Barra para dorsales 120 cm",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Barra larga con puntas anguladas y moleteado en toda la zona de agarre.",
+        "descripcion": "Barra de jalón de 120 cm con las puntas anguladas hacia abajo, para tomar en pronación abierta sin forzar la muñeca. Moleteado en toda la zona de agarre y anillo central giratorio. Acero cromado.",
+        "precio_lista": 58900,
+        "precio_mayorista": 45900,
+        "descuento_pct": null,
+        "stock": 12,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/agarres-para-polea-barra-para-dorsales.jpg",
+        "imagenes": [
+            "img/productos/agarres-para-polea-barra-para-dorsales.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Acero cromado" },
+            { "label": "Largo", "valor": "120 cm" },
+            { "label": "Agarre", "valor": "Moleteado, puntas anguladas" },
+            { "label": "Enganche", "valor": "Anillo central giratorio" }
+        ],
+        "peso_kg": 3.2,
+        "activo": true
+    },
+    {
+        "id": 23,
+        "slug": "agarre-en-v-para-triceps",
+        "sku": "RS-AC-AGV",
+        "nombre": "Agarre en V para tríceps",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Agarre corto en V con manijas revestidas en goma.",
+        "descripcion": "Agarre corto en V para extensiones de tríceps en polea alta y remo cerrado en polea baja. Manijas revestidas en goma antideslizante y anillo de enganche soldado. Acero con pintura epoxi negra.",
+        "precio_lista": 26900,
+        "precio_mayorista": 21000,
+        "descuento_pct": null,
+        "stock": 29,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/agarres-para-polea-agarre-en-v-para-triceps.jpg",
+        "imagenes": [
+            "img/productos/agarres-para-polea-agarre-en-v-para-triceps.jpg",
+            "img/productos/agarres-para-polea-triceps-w.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Acero con pintura epoxi" },
+            { "label": "Manijas", "valor": "Goma antideslizante" },
+            { "label": "Ancho", "valor": "23 cm" },
+            { "label": "Enganche", "valor": "Anillo soldado" }
+        ],
+        "peso_kg": 1.4,
+        "activo": true
+    },
+    {
+        "id": 24,
+        "slug": "estribo-para-polea",
+        "sku": "RS-AC-EST",
+        "nombre": "Estribo para polea",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Manija individual con giro libre, para trabajo a un brazo.",
+        "descripcion": "Estribo de una mano con manija revestida en goma y eslabón giratorio, para todo el trabajo unilateral en polea. Se vende por unidad: para trabajo simultáneo a dos brazos hay que llevar dos.",
+        "precio_lista": 12900,
+        "precio_mayorista": 10100,
+        "descuento_pct": null,
+        "stock": 48,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/agarres-para-polea-estribo.jpg",
+        "imagenes": [
+            "img/productos/agarres-para-polea-estribo.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Acero con pintura epoxi" },
+            { "label": "Manija", "valor": "Goma antideslizante" },
+            { "label": "Enganche", "valor": "Eslabón giratorio" },
+            { "label": "Venta", "valor": "Por unidad" }
+        ],
+        "peso_kg": 0.4,
+        "activo": true
+    },
+    {
+        "id": 25,
+        "slug": "straps-de-levantamiento",
+        "sku": "RS-AC-STRP",
+        "nombre": "Straps de levantamiento",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Par de cinchas de algodón con neoprene en la muñeca.",
+        "descripcion": "Par de straps de cincha de algodón de 38 mm con refuerzo de neoprene en la zona de la muñeca. Cuando el agarre se termina antes que la espalda, estos resuelven: se enrollan a la barra y sostienen el peso sin que los dedos hagan fuerza. Largo de 55 cm, sirven para barra, mancuerna y polea.",
+        "precio_lista": 18900,
+        "precio_mayorista": 14700,
+        "descuento_pct": 20,
+        "stock": 62,
+        "destacado": true,
+        "nuevo": false,
+        "imagen": "img/productos/straps-levantamiento-par.jpg",
+        "imagenes": [
+            "img/productos/straps-levantamiento-par.jpg",
+            "img/productos/straps-levantamiento-cruzados.jpg",
+            "img/productos/straps-levantamiento-detalle-tejido.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Cincha de algodón de 38 mm" },
+            { "label": "Refuerzo", "valor": "Neoprene en la muñeca" },
+            { "label": "Largo", "valor": "55 cm" },
+            { "label": "Venta", "valor": "Por par" }
+        ],
+        "peso_kg": 0.2,
+        "activo": true
+    },
+    {
+        "id": 26,
+        "slug": "set-de-bandas-elasticas-greencore",
+        "sku": "RS-AC-BEL",
+        "nombre": "Set de bandas elásticas Greencore",
+        "categoria": "accesorios",
+        "marca": "greencore",
+        "descripcion_corta": "Par de bandas largas de látex en capas, para asistencia y resistencia.",
+        "descripcion": "Bandas largas de látex natural en capas, sin uniones ni pegado: la capa es continua en toda la vuelta, que es lo que evita que la banda se abra por un costado. Sirven para asistir dominadas, agregar resistencia a la barra o entrar en calor. Se venden de a par.",
+        "precio_lista": 44900,
+        "precio_mayorista": 35000,
+        "descuento_pct": null,
+        "stock": 31,
+        "destacado": true,
+        "nuevo": false,
+        "imagen": "img/productos/bandas-elasticas-greencore-par.jpg",
+        "imagenes": [
+            "img/productos/bandas-elasticas-greencore-par.jpg",
+            "img/productos/banda-elastica-greencore-enrollada.jpg",
+            "img/productos/banda-elastica-greencore-lazo.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Látex natural en capas continuas" },
+            { "label": "Largo", "valor": "2,08 m de perímetro" },
+            { "label": "Resistencia", "valor": "11 a 36 kg" },
+            { "label": "Venta", "valor": "Por par" }
+        ],
+        "peso_kg": 0.6,
+        "activo": true
+    },
+    {
+        "id": 27,
+        "slug": "bandas-circulares-greencore-tres-tensiones",
+        "sku": "RS-AC-BCI",
+        "nombre": "Bandas circulares Greencore · tres tensiones",
+        "categoria": "accesorios",
+        "marca": "greencore",
+        "descripcion_corta": "Tres mini bandas de tela con silicona interior, no se enrollan.",
+        "descripcion": "Juego de tres mini bandas circulares de tela con banda de silicona en la cara interna: no se suben ni se enrollan en el muslo, que es el problema de las de látex. Vienen en tensión suave, media y fuerte, identificadas por color. Para activación de glúteo, cadera y hombro.",
+        "precio_lista": 29900,
+        "precio_mayorista": 23300,
+        "descuento_pct": null,
+        "stock": 44,
+        "destacado": false,
+        "nuevo": true,
+        "imagen": "img/productos/bandas-circulares-greencore-tres-tensiones.jpg",
+        "imagenes": [
+            "img/productos/bandas-circulares-greencore-tres-tensiones.jpg",
+            "img/productos/banda-circular-greencore-enrollada.jpg",
+            "img/productos/banda-circular-greencore-detalle-textura.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Tela con silicona interior" },
+            { "label": "Tensiones", "valor": "Suave, media y fuerte" },
+            { "label": "Ancho", "valor": "8 cm" },
+            { "label": "Venta", "valor": "Juego de tres" }
+        ],
+        "peso_kg": 0.4,
+        "activo": true
+    },
+    {
+        "id": 28,
+        "slug": "battle-rope-de-manila-38-mm-x-12-m",
+        "sku": "RS-AC-BR38",
+        "nombre": "Battle rope de manila 38 mm × 12 m",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Soga trenzada de manila con puntas termoselladas y funda.",
+        "descripcion": "Soga de manila trenzada de 38 mm y 12 m con puntas termoselladas y funda de goma en los agarres. Se ancla al piso o a la base del rack y se trabaja de a olas, latigazos o círculos. Es de las pocas herramientas que suben pulsaciones sin cargar la columna.",
+        "precio_lista": 168900,
+        "precio_mayorista": 131800,
+        "descuento_pct": null,
+        "stock": 5,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/sogas-battle-rope-manila-38-mm.jpg",
+        "imagenes": [
+            "img/productos/sogas-battle-rope-manila-38-mm.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Manila trenzada" },
+            { "label": "Diámetro", "valor": "38 mm" },
+            { "label": "Largo", "valor": "12 m" },
+            { "label": "Puntas", "valor": "Termoselladas con funda de goma" }
+        ],
+        "peso_kg": 14,
+        "activo": true
+    },
+    {
+        "id": 29,
+        "slug": "rolo-de-espuma-90-cm",
+        "sku": "RS-AC-RF90",
+        "nombre": "Rolo de espuma 90 cm",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "EVA de alta densidad, largo entero para apoyar toda la columna.",
+        "descripcion": "Rolo de EVA de alta densidad de 90 cm: el largo entero permite acostarse a lo largo y apoyar toda la columna, no solo pasar una zona. Superficie lisa, sin relieves agresivos. Para liberación miofascial y movilidad torácica.",
+        "precio_lista": 38900,
+        "precio_mayorista": 30300,
+        "descuento_pct": null,
+        "stock": 17,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/rolos-rolo-foam.jpg",
+        "imagenes": [
+            "img/productos/rolos-rolo-foam.jpg",
+            "img/productos/rolos-barra-masajeadora.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "EVA de alta densidad" },
+            { "label": "Largo", "valor": "90 cm" },
+            { "label": "Diámetro", "valor": "15 cm" },
+            { "label": "Superficie", "valor": "Lisa" }
+        ],
+        "peso_kg": 0.9,
+        "activo": true
+    },
+    {
+        "id": 30,
+        "slug": "magnesio-en-polvo-450-g",
+        "sku": "RS-AC-MAG",
+        "nombre": "Magnesio en polvo 450 g",
+        "categoria": "accesorios",
+        "marca": "rastro",
+        "descripcion_corta": "Carbonato de magnesio puro. Producto discontinuado.",
+        "descripcion": "Carbonato de magnesio en polvo, sin aditivos, en pote de 450 g. Producto discontinuado: queda en el catálogo para el historial de pedidos, pero no se muestra ni se vende. Sirve de caso de prueba del estado inactivo.",
+        "precio_lista": 9900,
+        "precio_mayorista": 7700,
+        "descuento_pct": null,
+        "stock": 0,
+        "destacado": false,
+        "nuevo": false,
+        "imagen": "img/productos/especiales-magnesio.jpg",
+        "imagenes": [
+            "img/productos/especiales-magnesio.jpg"
+        ],
+        "especificaciones": [
+            { "label": "Material", "valor": "Carbonato de magnesio" },
+            { "label": "Contenido", "valor": "450 g" },
+            { "label": "Presentación", "valor": "Pote con tapa a rosca" }
+        ],
+        "peso_kg": 0.5,
+        "activo": false
+    }
+]

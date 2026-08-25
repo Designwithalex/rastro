@@ -41,8 +41,10 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 
 | # | Tema |
 |---|---|
-| 19 | Optimizar imágenes: 29 MB sin comprimir. Redimensionar + WebP antes del deploy. |
-| 20 | Los PNG transparentes pesan ~1 MB c/u. Recomprimir. |
+| ~~19~~ | ~~Optimizar imágenes~~ → resuelto el 2026-08-25, ver abajo. |
+| ~~20~~ | ~~Recomprimir los PNG transparentes~~ → resuelto el 2026-08-25, ver abajo. |
+| 46 | `docs/DATA-CONTRACT.md` y `docs/HANDOFF.md` todavía no existen. `repository.php` ya los referencia. Se escriben al cerrar la Fase 2. |
+| 47 | No hay `views/errors/404.php`: hoy el 404 cae en el andamio `views/partials/en-construccion.php` con el código correcto. Entra con el bloque de páginas. |
 
 ---
 
@@ -64,14 +66,13 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 
 ---
 
-## Resueltos
+Los nueve que siguen salieron de la misma revisión, pero son datos que tiene
+que cargar el cliente y no decisiones de diseño: por eso van sin la columna de
+"por qué importa". Estaban quedando debajo de "Resueltos" sin encabezado, lo
+que los hacía parecer cerrados. **Están los nueve abiertos.**
 
-| Fecha | Tema | Decisión |
+| # | Tema | Decisión provisoria |
 |---|---|---|
-| 2026-08-20 | Paleta verde (el brandbook traía `#00674F` y `#2E6F40`) | **Descartado.** El cliente no quiere verde. La paleta es negro + plata/grises + bordeaux, con bordeaux como único acento. Ver `CLAUDE.md` §5.3. |
-| 2026-08-23 | Dirección de diseño: clásica (v1) o ficha técnica (v2) | **v2.** Canto vivo, retícula de hairlines, titular a 80 px, datos técnicos por producto y JetBrains Mono para los números. Foundations y los 5 componentes ya están migrados. Ver `CLAUDE.md` §5.6. |
-| 2026-08-23 | #30 Destacados en mobile a 1 columna | Confirmado en la v2: una columna a sangre, cards separadas por hairline. Con el bloque de precio nuevo entra cómodo. |
-
 | 31 | **Código, stock y medida por producto.** La v2 los muestra en cada card. | Hoy son datos verosímiles inventados. `repository.php` ya los expone (`sku`, `stock`), así que no hay cambio de contrato: falta que el cliente cargue los reales. |
 | 32 | **Dónde se retira.** La ficha dice "En depósito, sin cargo. Córdoba capital". | Inventado por el diseño. Falta la dirección real y si hay retiro en más de un punto. |
 | 33 | **Política de garantía.** La ficha dice 12 meses por defecto de fabricación. | Inventado. Confirmar plazo real y qué cubre. |
@@ -81,3 +82,31 @@ Surgidos al revisar los assets reales y las referencias antes de maquetar la hom
 | 37 | **A qué correo llega el formulario mayorista** y qué campos son obligatorios. | Maqueta con cinco campos. El backend conecta el envío; a futuro alimenta el cotizador con PDF. |
 | 38 | **¿Direcciones múltiples en Mi cuenta?** La navegación tiene la sección pero no está diseñada. | Depende de si un cliente puede tener más de un lugar de entrega. Si es una sola, se saca del menú. |
 | 39 | **Registro: "Para un gimnasio o empresa".** El selector está diseñado. | Falta definir qué pasa después: ¿el usuario queda marcado como mayorista y ve precios distintos, o solo dispara un aviso al equipo? |
+
+---
+
+## Abiertos por la Fase 2 de frontend
+
+Surgidos al armar la capa de datos y el layout compartido.
+
+| # | Tema | Por qué importa | Decisión provisoria |
+|---|---|---|---|
+| 40 | **Faltan fotos de producto en dos categorías enteras.** De las 68 fotos que mandó el cliente, ninguna es una kettlebell, un half rack ni una jaula de potencia.<br><br>**Categorías afectadas:** `kettlebells` (2 de 3 productos sin foto) y `racks-y-jaulas` (2 de 4).<br><br>**Los 4 productos:** `RS-KB-012` Kettlebell de fundición 12 kg · `RS-KB-016` Kettlebell de fundición 16 kg · `RS-RK-HALF` Half rack de sentadillas · `RS-RK-CAGE` Jaula de potencia.<br><br>**Qué se necesita:** una toma frontal sobre fondo claro por producto, mínimo 1000 px de lado largo. Para el rack y la jaula, además una toma de ambiente: son las dos piezas de mayor ticket del catálogo y se venden mostrando la escala. | Son dos de las seis categorías de la home, y `racks-y-jaulas` concentra los dos productos más caros ($1.290.000 y $1.890.000). Un rack sin foto no se vende: el comprador de un club necesita ver la estructura antes de escribir por WhatsApp. | Las seis categorías quedan como están, no se achica ninguna. Los 4 productos apuntan a `assets/img/productos/sin-foto.svg`, un marcador que usa el mismo *image well* claro (`#E9E9E9`) que la card, así el hueco se lee como una decisión y no como una imagen rota. Se reemplaza archivo por archivo a medida que lleguen las fotos, sin tocar código. |
+| 43 | **Rutas legales agregadas al router**: `/terminos` y `/arrepentimiento`. | El botón de arrepentimiento es obligatorio en todas las páginas (Res. 424/2020) y el pie tiene que enlazar a algún lado. | Las rutas existen y hoy muestran el andamio. Las páginas se maquetan cuando el cliente pase el texto legal (#10). |
+| 44 | **Los recortes con transparencia quedaron solo en WebP** (`assets/img/productos/png/*.webp`). | Los PNG originales pesaban hasta 1,5 MB cada uno. | Cada recorte tiene su gemelo `.jpg` sobre blanco en la carpeta de arriba, que sirve de respaldo. Hoy los mocks usan el `.jpg`; los recortes quedan disponibles para el hero y el bento. |
+| 48 | **¿Contra qué subtotal se mide el envío gratis?** Hoy el umbral de $150.000 se compara contra el subtotal **publicado** (precio Mercado Pago), no contra el de transferencia. Un carrito de **$170.000 publicado / $144.500 por transferencia** hoy tiene envío gratis: superó el umbral con un precio que el cliente no llega a pagar. Ni #8 ni #35 lo definen. | Toca la plata de verdad y aparece en la ficha, en el carrito y en el checkout. Es la clase de detalle que nadie discute hasta que un pedido sale con el envío mal cobrado. | **Se mantiene el comportamiento actual** (se mide contra el publicado) y queda marcado con `TODO(backend)` en `assets/js/carrito.js`. Las dos opciones:<br><br>**A · Contra el publicado (lo que hay hoy).** Más carritos califican, el envío gratis se siente más accesible y empuja el ticket. Costo: Rastro regala envíos en compras que facturan por debajo del umbral.<br>**B · Contra lo que efectivamente paga.** El umbral se cumple con plata real. Costo: pagar por transferencia —que es lo que a Rastro le conviene— te puede sacar el envío gratis, y eso es un mensaje contradictorio en el carrito.<br><br>Si sale B, el cambio es una línea en `calcularTotales()` y su equivalente en PHP cuando exista el checkout. |
+| 45 | **Usuarios de prueba con contraseña conocida** en `data/users.json`: `demo@rastrofitness.com.ar` y `mayorista@rastrofitness.com.ar`, los dos con `rastro2026`. | Es un mock, pero viaja en el repo y se despliega. | Se guardan como hash bcrypt, no en texto plano. El backend dev tiene que borrar el archivo al conectar la base real. |
+
+---
+
+## Resueltos
+
+| Fecha | Tema | Decisión |
+|---|---|---|
+| 2026-08-20 | Paleta verde (el brandbook traía `#00674F` y `#2E6F40`) | **Descartado.** El cliente no quiere verde. La paleta es negro + plata/grises + bordeaux, con bordeaux como único acento. Ver `CLAUDE.md` §5.3. |
+| 2026-08-23 | Dirección de diseño: clásica (v1) o ficha técnica (v2) | **v2.** Canto vivo, retícula de hairlines, titular a 80 px, datos técnicos por producto y JetBrains Mono para los números. Foundations y los 5 componentes ya están migrados. Ver `CLAUDE.md` §5.6. |
+| 2026-08-23 | #30 Destacados en mobile a 1 columna | Confirmado en la v2: una columna a sangre, cards separadas por hairline. Con el bloque de precio nuevo entra cómodo. |
+| 2026-08-25 | #19 y #20 Peso de las imágenes | **Resuelto.** `bin/optimizar-imagenes.sh` deja las fotos de producto en 1000 px de lado largo, las de ambiente en 1600 y la marca en 600, y genera un `.webp` al lado de cada archivo. Los PNG con transparencia quedan solo en WebP. De 29 MB a 9,4 MB, con el archivo más pesado en 298 KB. Los originales se guardan en `.originales-img/`, fuera del repo. |
+| 2026-08-25 | #41 ¿Rastro va en la franja de "vendedores oficiales"? | **No.** Esa franja dice "somos vendedores oficiales de estas marcas": son marcas de terceros, y la línea propia ahí le saca el sentido a la frase. La marca queda en `brands.json` con `es_propia: true` para que los 18 productos de línea propia resuelvan su nombre, pero `repo_brands()` la filtra y no la devuelve. El nombre de la marca de un producto viene en el propio producto, en `marca_nombre`, que el repository resuelve contra la tabla completa. Sin funciones nuevas en el contrato. |
+| 2026-08-25 | #42 Falta un Michroma chico en la escala | **Resuelto.** Se creó `display/xs` en Figma (Michroma 10/14, tracking 1.2, mayúsculas) y `.t-display-xs` en `tokens.css`. El marquee usa la clase y ya no hay ningún override de familia en CSS. |
+| 2026-08-25 | #4 Tipografías self-hosted | **Parcial.** Michroma, Saira y JetBrains Mono se sirven desde `assets/fonts/` en WOFF2, subconjunto latin, 88 KB en total. Sigue abierta la licencia de Eurostile. Ver `assets/fonts/LICENCIAS.txt`. |

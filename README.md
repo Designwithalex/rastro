@@ -12,8 +12,13 @@ gimnasio. PHP 8 como capa de vistas, HTML/CSS/JS vanilla, datos mock en JSON.
 ## Correr local
 
 ```bash
-php -S localhost:8000
+php -S localhost:8000 bin/server.php
 ```
+
+El router es obligatorio. `php -S localhost:8000` a secas sirve el árbol de
+archivos tal cual y entrega `data/users.json`, `data/settings.json` y el
+código de `app/` a cualquiera que los pida: en producción eso lo tapa el
+`.htaccess` de cada carpeta privada, que el servidor embebido de PHP ignora.
 
 Requiere PHP 8+. No hay build step, no hay dependencias.
 

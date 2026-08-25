@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "slug": "discos",
+        "nombre": "Discos",
+        "descripcion": "Bumper de caucho y fundición con tres agarres. Buje de 50 mm, tolerancia controlada.",
+        "pictograma": "img/iconos/icono-disco-blanco.png",
+        "orden": 1,
+        "productos_count": 6
+    },
+    {
+        "id": 2,
+        "slug": "barras",
+        "nombre": "Barras",
+        "descripcion": "Barras olímpicas de acero con rulemanes y accesorios de anclaje.",
+        "pictograma": "img/iconos/icono-barra-blanco.png",
+        "orden": 2,
+        "productos_count": 3
+    },
+    {
+        "id": 3,
+        "slug": "mancuernas",
+        "nombre": "Mancuernas",
+        "descripcion": "Hexagonales con revestimiento de caucho y sets con barra y discos.",
+        "pictograma": "img/iconos/icono-mancuerna-blanco.png",
+        "orden": 3,
+        "productos_count": 4
+    },
+    {
+        "id": 4,
+        "slug": "kettlebells",
+        "nombre": "Kettlebells",
+        "descripcion": "Fundición de una sola pieza y peso libre para entrenamiento funcional.",
+        "pictograma": "img/iconos/icono-kettlebell-blanco.png",
+        "orden": 4,
+        "productos_count": 3
+    },
+    {
+        "id": 5,
+        "slug": "racks-y-jaulas",
+        "nombre": "Racks y jaulas",
+        "descripcion": "Estructuras de acero para sentadilla, dominadas y almacenamiento.",
+        "pictograma": "img/iconos/icono-rack-blanco.png",
+        "orden": 5,
+        "productos_count": 4
+    },
+    {
+        "id": 6,
+        "slug": "accesorios",
+        "nombre": "Accesorios",
+        "descripcion": "Agarres de polea, bandas, sogas y todo lo que completa la sala.",
+        "pictograma": "img/iconos/icono-contenedor-blanco.png",
+        "orden": 6,
+        "productos_count": 9
+    }
+]

@@ -25,7 +25,11 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
-          protocol: ftp
+          # FTPS: la sesión va cifrada con TLS sobre el puerto 21 (explícito).
+          # Con `ftp` a secas, el usuario y la contraseña de Hostinger viajan
+          # en texto plano por la red del runner. Si un deploy falla acá con un
+          # error de handshake TLS, ver docs/DEPLOY.md antes de volver a `ftp`.
+          protocol: ftps
           server-dir: /public_html/
           # Sube solo lo que el sitio necesita para correr.
           # app/config.php NO se sincroniza: vive únicamente en el servidor.
@@ -36,6 +40,7 @@ jobs:
             **/.DS_Store
             **/docs/**
             **/design/**
+            **/bin/**
             **/*.md
             **/app/config.php
             **/node_modules/**

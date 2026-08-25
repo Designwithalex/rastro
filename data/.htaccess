@@ -1,0 +1,9 @@
+# Carpeta privada. Se despliega dentro de public_html pero no se sirve
+# por HTTP: acá solo entra PHP desde el front controller.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

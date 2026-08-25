@@ -1,0 +1,34 @@
+Tipografías de Rastro Fitness
+=============================
+
+Las tres familias se sirven desde este mismo servidor: no hay pedidos a
+Google Fonts ni a ningún otro dominio (ver la Content-Security-Policy del
+.htaccess de la raíz).
+
+  michroma-400.woff2         Michroma Regular
+  saira-400.woff2            Saira Regular
+  saira-600.woff2            Saira SemiBold
+  jetbrains-mono-400.woff2   JetBrains Mono Regular
+  jetbrains-mono-700.woff2   JetBrains Mono Bold
+
+Todas están bajo SIL Open Font License 1.1, que permite el uso comercial y
+el alojamiento propio:
+
+  Michroma        © Vernon Adams · https://fonts.google.com/specimen/Michroma
+  Saira           © Omnibus-Type · https://fonts.google.com/specimen/Saira
+  JetBrains Mono  © JetBrains     · https://fonts.google.com/specimen/JetBrains+Mono
+
+Subconjunto latin, una instancia estática por peso.
+
+Nota de dónde salieron los archivos
+-----------------------------------
+La API de Google Fonts (css2) hoy devuelve la fuente VARIABLE para las tres
+familias: pedir wght@400;700 da dos @font-face que apuntan al mismo archivo.
+tokens.css espera una instancia estática por peso, así que los WOFF2 se
+bajaron de Fontsource (@fontsource/*, mismos originales de Google, misma OFL),
+que sí publica los estáticos por peso y subconjunto.
+
+Si el cliente confirma la licencia web de Eurostile (PENDIENTES.md #4), se
+reemplazan michroma-400.woff2 y las clases .t-display-* de tokens.css sin
+tocar ninguna vista: la escala está armada para que el cambio de familia no
+mueva el layout.
