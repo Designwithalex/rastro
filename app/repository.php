@@ -38,6 +38,25 @@
  *     el precio de hoy no es el precio al que se vendió en abril.
  *   · Las funciones nunca devuelven el `password_hash` de un usuario.
  *
+ * AMPLIACIÓN DEL CONTRATO — 2026-08-25, `repo_nosotros()`
+ *
+ *   El contrato original de CLAUDE.md §4.2 cubría catálogo, prueba social,
+ *   configuración, cuenta y carrito. La página /nosotros necesita contenido
+ *   que no entra en ninguno de esos grupos —fundadores, hitos, obras y
+ *   cuatro cifras— y se agrega UNA sola función que devuelve todo el
+ *   contenido de esa sección de una vez.
+ *
+ *   Una y no tres a propósito: `repo_fundadores()`, `repo_hitos()` y
+ *   `repo_obras()` serían tres consultas y tres pantallas de ABM para lo que
+ *   el cliente piensa como una sola cosa, "la página de Nosotros". Del lado
+ *   del panel es una sección con varios bloques, no tres secciones.
+ *
+ *   TODO(backend): esto es la NOVENA sección del panel de administración.
+ *   Las ocho diseñadas son Dashboard, Productos, Pedidos, Marcas oficiales,
+ *   Logos de clientes, Banners, Categorías y Configuración; falta dibujar
+ *   "Nosotros" (PENDIENTES #49). Mientras tanto el contenido vive en
+ *   data/nosotros.json y todo lo que está en null es un hueco declarado.
+ *
  * MARCA PROPIA vs. MARCA DE TERCEROS  (`brands.es_propia`)
  *
  *   Rastro vende dos cosas distintas y la UI no las puede mezclar:
@@ -396,6 +415,93 @@ function repo_banners(): array
                                       <=> [(string) ($b['posicion'] ?? ''), (int) ($b['orden'] ?? 0)]);
 
     return $banners;
+}
+
+/* ==========================================================================
+   Contenido de página
+   ========================================================================== */
+
+/**
+ * Todo el contenido de la sección "Nosotros", de una sola vez.
+ *
+ * Alimenta las dos piezas que usan ese contenido con roles distintos: la
+ * página /nosotros completa y la franja de la home. Por eso devuelve el
+ * paquete entero y no un pedazo por llamada.
+ *
+ * @return array{
+ *     provisorio:bool,
+ *     encabezado:array{kicker:string,titulo:string,declaracion:string},
+ *     cifras:array<int,array{clave:string,rotulo:string,valor:?int}>,
+ *     fundadores:array{titulo:string,texto:string,foto:?string,foto_alt:?string,personas:array},
+ *     historia:array{titulo:string,texto:string,hitos:array},
+ *     como_trabajamos:array{titulo:string,texto:string,pasos:array},
+ *     obras:array{titulo:string,texto:string,items:array},
+ *     garantia:array{titulo:string,items:array},
+ *     donde_estamos:array{titulo:string,texto:string,direccion:?string,foto:?string,foto_alt:?string},
+ *     cierre:array{titulo:string,texto:string,acciones:array},
+ *     franja:array{titulo:string,texto:string,enlace_texto:string}
+ * }
+ *
+ * Reglas que la vista puede dar por sentadas:
+ *
+ *   · Un valor en null es un hueco DECLARADO, no un error: la vista lo
+ *     dibuja como marcador visible en vez de esconder la fila. Hoy son las
+ *     tres cifras que el cliente no pasó, los años de los hitos y la
+ *     dirección del depósito.
+ *   · `obras.items` puede venir vacío y eso NO es un estado de error: la
+ *     página esconde la sección entera. Una sección de obras vacía es peor
+ *     que no tenerla.
+ *   · `fundadores.foto` puede ser null y la página colapsa ese bloque a un
+ *     párrafo firmado con los dos nombres. No se reemplaza por un retrato
+ *     de archivo: una página sin foto es honesta.
+ *   · La cifra `productos_en_catalogo` NO se carga a mano. Se resuelve acá
+ *     contra el catálogo, porque un número escrito en un JSON al lado de la
+ *     tabla que lo contradice queda desactualizado el mismo día.
+ *
+ * TODO(backend): pasa a ser la novena sección del panel. Cada bloque de
+ * este array es un grupo de campos de esa pantalla; `productos_en_catalogo`
+ * no lleva campo, es un COUNT.
+ */
+function repo_nosotros(): array
+{
+    $contenido = _repo_json('nosotros');
+
+    // El comentario del mock no es parte del contrato.
+    unset($contenido['_comentario']);
+
+    $contenido['provisorio'] = (bool) ($contenido['provisorio'] ?? false);
+
+    // Forma garantizada: la vista no tiene que preguntar si existe la clave,
+    // solo si está vacía. Es la diferencia entre un estado vacío y un error.
+    $contenido['encabezado']      = (array) ($contenido['encabezado'] ?? []);
+    $contenido['cifras']          = array_values((array) ($contenido['cifras'] ?? []));
+    $contenido['fundadores']      = (array) ($contenido['fundadores'] ?? []);
+    $contenido['historia']        = (array) ($contenido['historia'] ?? []);
+    $contenido['como_trabajamos'] = (array) ($contenido['como_trabajamos'] ?? []);
+    $contenido['obras']           = (array) ($contenido['obras'] ?? []);
+    $contenido['garantia']        = (array) ($contenido['garantia'] ?? []);
+    $contenido['donde_estamos']   = (array) ($contenido['donde_estamos'] ?? []);
+    $contenido['cierre']          = (array) ($contenido['cierre'] ?? []);
+    $contenido['franja']          = (array) ($contenido['franja'] ?? []);
+
+    $contenido['fundadores']['personas']   = array_values((array) ($contenido['fundadores']['personas'] ?? []));
+    $contenido['historia']['hitos']        = array_values((array) ($contenido['historia']['hitos'] ?? []));
+    $contenido['como_trabajamos']['pasos'] = array_values((array) ($contenido['como_trabajamos']['pasos'] ?? []));
+    $contenido['obras']['items']           = array_values((array) ($contenido['obras']['items'] ?? []));
+    $contenido['garantia']['items']        = array_values((array) ($contenido['garantia']['items'] ?? []));
+    $contenido['cierre']['acciones']       = array_values((array) ($contenido['cierre']['acciones'] ?? []));
+
+    // La única cifra que no se carga: sale del catálogo.
+    // TODO(backend): SELECT COUNT(*) FROM productos WHERE activo = 1.
+    $total_catalogo = repo_products([], 1, 1)['total'];
+
+    foreach ($contenido['cifras'] as $i => $cifra) {
+        if (($cifra['clave'] ?? '') === 'productos_en_catalogo') {
+            $contenido['cifras'][$i]['valor'] = $total_catalogo;
+        }
+    }
+
+    return $contenido;
 }
 
 /* ==========================================================================

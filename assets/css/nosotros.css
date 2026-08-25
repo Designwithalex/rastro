@@ -1,0 +1,499 @@
+/* ============================================================
+   nosotros.css — Rastro Fitness
+   La página /nosotros y la franja de la home, que comparten las
+   cuatro cifras. La carga solo la vista que las usa, con
+   $estilos = ['nosotros'] antes de layout/head.php.
+   Móvil primero. Ningún valor de marca literal.
+   ============================================================ */
+
+/* --- Índice de sección: [ 03 ] CÓMO EMPEZÓ ------------------- */
+
+.indice-seccion {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-12);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--espaciado-16);
+}
+
+.indice-seccion .indice {
+  color: var(--color-accent-text);
+}
+
+/* --- Huecos declarados ---------------------------------------
+   Un dato que el cliente todavía no pasó se dibuja, no se esconde.
+   Una celda ausente no la reclama nadie; un [ DATO ] en bordeaux
+   en el medio de la página se pregunta en la primera revisión. */
+
+.cifras__pendiente,
+.fundadores__rol--pendiente,
+.linea-tiempo__anio--pendiente,
+.dato-pendiente {
+  color: var(--color-accent-text);
+}
+
+/* ============================================================
+   Las cuatro cifras
+   ============================================================ */
+
+.cifras {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cifras__celda {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--espaciado-8);
+  min-height: 120px;
+  padding: var(--espaciado-16);
+}
+
+.cifras__valor {
+  font-variant-numeric: tabular-nums;
+}
+
+.cifras__rotulo {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .cifras--barra {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cifras--franja .cifras__celda {
+    min-height: 140px;
+    padding: var(--espaciado-20);
+  }
+}
+
+/* ============================================================
+   Franja de la home
+   ============================================================ */
+
+.franja-nosotros {
+  border-block: var(--hairline) solid var(--color-border-subtle);
+  margin-block: var(--espaciado-64);
+}
+
+.franja-nosotros__interior {
+  display: grid;
+  gap: var(--espaciado-32);
+  padding-block: var(--espaciado-40);
+}
+
+.franja-nosotros__titulo {
+  margin-bottom: var(--espaciado-16);
+}
+
+.franja-nosotros__bajada {
+  color: var(--color-text-secondary);
+  max-width: 46ch;
+  margin-bottom: var(--espaciado-24);
+}
+
+.franja-nosotros__enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  min-height: 44px;
+  color: var(--color-accent-text);
+  transition: gap 0.15s ease;
+}
+
+.franja-nosotros__enlace:hover {
+  gap: var(--espaciado-12);
+}
+
+/* Cols 1-5 para el texto y 7-12 para las cifras: la columna 6 queda
+   vacía a propósito, es el respiro entre el argumento y los números. */
+@media (min-width: 900px) {
+  .franja-nosotros__interior {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--espaciado-24);
+    align-items: center;
+    min-height: 320px;
+    padding-block: 0;
+  }
+
+  .franja-nosotros__texto {
+    grid-column: 1 / span 5;
+    padding-block: var(--espaciado-40);
+  }
+
+  .franja-nosotros__cifras {
+    grid-column: 7 / -1;
+  }
+}
+
+/* ============================================================
+   Página /nosotros
+   ============================================================ */
+
+.nosotros__aviso {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-12) var(--margen-mobile);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+  background-color: var(--color-bg-surface);
+  color: var(--color-accent-text);
+}
+
+.nosotros__encabezado {
+  padding-block: var(--espaciado-48) var(--espaciado-32);
+}
+
+.nosotros__titulo {
+  margin-bottom: var(--espaciado-24);
+}
+
+.nosotros__declaracion {
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+  margin-bottom: var(--espaciado-32);
+}
+
+.nosotros__seccion {
+  padding-block: var(--espaciado-48);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* La cabecera es sticky: sin esto, el enlace 04 CONTACTO deja el título de
+   la sección tapado abajo del menú. */
+.nosotros__seccion[id] {
+  scroll-margin-top: calc(var(--espaciado-80) + var(--espaciado-16));
+}
+
+.nosotros__subtitulo {
+  max-width: 30ch;
+  margin-bottom: var(--espaciado-32);
+}
+
+@media (min-width: 900px) {
+  .nosotros__aviso {
+    padding-inline: var(--margen-desktop);
+  }
+
+  .nosotros__encabezado {
+    padding-block: var(--espaciado-80) var(--espaciado-48);
+  }
+
+  .nosotros__seccion {
+    padding-block: var(--espaciado-64);
+  }
+}
+
+/* --- Fundadores ---------------------------------------------
+   Dos formas vivas. Con foto, retrato a la izquierda y texto a la
+   derecha. Sin foto, el bloque colapsa a un párrafo firmado: no se
+   rellena el hueco con un retrato de archivo. */
+
+.fundadores {
+  display: grid;
+  gap: var(--espaciado-32);
+}
+
+.fundadores__foto img {
+  width: 100%;
+  height: auto;
+  background-color: var(--color-bg-surface-alt);
+}
+
+.fundadores__texto {
+  max-width: 52ch;
+  margin-bottom: var(--espaciado-32);
+}
+
+.fundadores__personas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-24) var(--espaciado-48);
+}
+
+.fundadores__persona {
+  padding-left: var(--espaciado-16);
+  border-left: 2px solid var(--color-accent-base);
+}
+
+.fundadores__nombre {
+  margin-bottom: var(--espaciado-4);
+}
+
+.fundadores__rol {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .fundadores--con-foto {
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: var(--espaciado-48);
+    align-items: start;
+  }
+}
+
+/* --- Línea de tiempo ----------------------------------------- */
+
+.linea-tiempo {
+  grid-template-columns: 1fr;
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.linea-tiempo__hito {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-20);
+}
+
+.linea-tiempo__anio {
+  color: var(--color-text-primary);
+}
+
+.linea-tiempo__texto {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .linea-tiempo {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* --- Cómo trabajamos ----------------------------------------- */
+
+.pasos {
+  grid-template-columns: 1fr;
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.pasos__paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-20);
+}
+
+.pasos__letra {
+  color: var(--color-accent-text);
+}
+
+.pasos__texto {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 640px) {
+  .pasos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .pasos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* --- Obras ---------------------------------------------------
+   Hoy no se dibuja: no hay obras cargadas y la vista esconde la
+   sección entera. Las reglas quedan listas para cuando lleguen. */
+
+.obras {
+  grid-template-columns: 1fr;
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.obras__obra {
+  display: flex;
+  flex-direction: column;
+}
+
+.obras__foto img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background-color: var(--color-bg-surface-alt);
+}
+
+.obras__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-20);
+}
+
+.obras__lugar {
+  color: var(--color-text-disabled);
+}
+
+.obras__texto {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .obras {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* --- Credenciales: marcas y clientes -------------------------
+   Los logos todavía no llegaron. Mientras tanto va el nombre en
+   tipografía técnica, que es honesto: no hay logo que mostrar. */
+
+.credenciales {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.credenciales__item {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: var(--espaciado-16);
+}
+
+.credenciales__logo {
+  width: auto;
+  max-height: 40px;
+  object-fit: contain;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.credenciales__item:hover .credenciales__logo {
+  opacity: 1;
+}
+
+.credenciales__nombre {
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .credenciales {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* --- Garantía, envíos y posventa ----------------------------- */
+
+.ficha-legal {
+  grid-template-columns: 1fr;
+  border: var(--hairline) solid var(--color-border-subtle);
+  margin-bottom: var(--espaciado-24);
+}
+
+.ficha-legal__fila {
+  display: grid;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-20);
+}
+
+.ficha-legal__titulo {
+  color: var(--color-text-primary);
+}
+
+.ficha-legal__texto {
+  color: var(--color-text-secondary);
+  max-width: 68ch;
+}
+
+@media (min-width: 900px) {
+  .ficha-legal__fila {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--espaciado-24);
+    align-items: baseline;
+  }
+}
+
+/* --- Dónde estamos ------------------------------------------- */
+
+.deposito {
+  display: grid;
+  gap: var(--espaciado-32);
+}
+
+.deposito__foto img {
+  width: 100%;
+  height: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  background-color: var(--color-bg-surface-alt);
+}
+
+.deposito__datos {
+  grid-template-columns: 1fr;
+  border: var(--hairline) solid var(--color-border-subtle);
+  align-content: start;
+}
+
+.deposito__fila {
+  display: grid;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-16) var(--espaciado-20);
+}
+
+.deposito__fila dt {
+  color: var(--color-text-disabled);
+}
+
+.deposito__enlace {
+  color: var(--color-text-primary);
+  border-bottom: var(--hairline) solid var(--color-border-strong);
+  transition: border-color 0.15s ease;
+}
+
+.deposito__enlace:hover {
+  border-color: var(--color-accent-text);
+}
+
+@media (min-width: 900px) {
+  .deposito {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+    gap: var(--espaciado-24);
+  }
+
+  .deposito__fila {
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: var(--espaciado-16);
+    align-items: baseline;
+  }
+}
+
+/* --- Cierre de doble puerta ---------------------------------- */
+
+.nosotros__puertas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-16);
+}
+
+.puerta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  min-height: 52px;
+  padding-inline: var(--espaciado-24);
+  border: var(--hairline) solid var(--color-border-strong);
+  transition: background-color 0.15s ease, border-color 0.15s ease, gap 0.15s ease;
+}
+
+.puerta:hover {
+  gap: var(--espaciado-12);
+}
+
+.puerta--principal {
+  background-color: var(--color-accent-base);
+  border-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.puerta--principal:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.puerta--secundario:hover {
+  border-color: var(--color-border-focus);
+}
