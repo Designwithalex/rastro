@@ -19,7 +19,7 @@
     },
     {
         "id": 3,
-        "titulo": "15% de descuento pagando por transferencia o efectivo",
+        "titulo": "{descuento} de descuento pagando por transferencia o efectivo",
         "imagen": "",
         "enlace": "/catalogo",
         "posicion": "franja",

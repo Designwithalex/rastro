@@ -9,10 +9,11 @@
 
 declare(strict_types=1);
 
-$settings   = repo_settings();
-$categorias = repo_categories();
+$settings = repo_settings();
 
-$columnas = [
+$layout_whatsapp = whatsapp_link($settings);
+
+$layout_columnas = [
     [
         'letra'   => 'A',
         'titulo'  => 'Catálogo',
@@ -21,7 +22,7 @@ $columnas = [
                 'texto' => $c['nombre'],
                 'ruta'  => '/catalogo/' . $c['slug'],
             ],
-            $categorias
+            repo_categories()
         ),
     ],
     [
@@ -52,17 +53,17 @@ $columnas = [
     <div class="pie__cuerpo contenedor">
         <div class="pie__columnas reticula reticula--superficie">
 
-            <?php foreach ($columnas as $columna): ?>
+            <?php foreach ($layout_columnas as $layout_columna): ?>
                 <section class="pie__columna">
                     <h2 class="pie__titulo t-mono-label">
-                        <span class="pie__letra"><?= e($columna['letra']) ?></span>
-                        <?= e($columna['titulo']) ?>
+                        <span class="pie__letra"><?= e($layout_columna['letra']) ?></span>
+                        <?= e($layout_columna['titulo']) ?>
                     </h2>
                     <ul class="pie__lista">
-                        <?php foreach ($columna['enlaces'] as $enlace): ?>
+                        <?php foreach ($layout_columna['enlaces'] as $layout_enlace): ?>
                             <li>
-                                <a class="pie__enlace t-body-sm" href="<?= e(url($enlace['ruta'])) ?>">
-                                    <?= e($enlace['texto']) ?>
+                                <a class="pie__enlace t-body-sm" href="<?= e(url($layout_enlace['ruta'])) ?>">
+                                    <?= e($layout_enlace['texto']) ?>
                                 </a>
                             </li>
                         <?php endforeach; ?>
@@ -76,13 +77,17 @@ $columnas = [
                     Contacto
                 </h2>
                 <ul class="pie__lista">
-                    <li>
-                        <a class="pie__enlace t-body-sm" href="<?= e(whatsapp_link($settings)) ?>"
-                           rel="noopener" target="_blank">
-                            WhatsApp <?= e($settings['whatsapp'] ?? '') ?>
-                            <span class="visualmente-oculto">(abre WhatsApp en una pestaña nueva)</span>
-                        </a>
-                    </li>
+                    <?php /* Sin número cargado no se dibuja el enlace: mandar a
+                             wa.me sin destinatario es peor que no ofrecerlo. */ ?>
+                    <?php if ($layout_whatsapp !== null): ?>
+                        <li>
+                            <a class="pie__enlace t-body-sm" href="<?= e($layout_whatsapp) ?>"
+                               rel="noopener" target="_blank">
+                                WhatsApp <?= e($settings['whatsapp'] ?? '') ?>
+                                <span class="visualmente-oculto">(abre WhatsApp en una pestaña nueva)</span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <li>
                         <a class="pie__enlace t-body-sm" href="mailto:<?= e($settings['email'] ?? '') ?>">
                             <?= e($settings['email'] ?? '') ?>
@@ -101,9 +106,7 @@ $columnas = [
         </div>
 
         <p class="pie__envio t-mono-texto">
-            Envío sin cargo en compras desde <?= e(moneda($settings['envio_gratis_desde'] ?? 0)) ?>.
-            <?= e(descuento_global($settings)) ?>% de descuento
-            pagando por transferencia o efectivo.
+            <?= e(interpolar('Envío sin cargo en compras desde {envio_gratis}. {descuento} de descuento pagando por transferencia o efectivo.', $settings)) ?>
         </p>
     </div>
 
