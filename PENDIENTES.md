@@ -112,10 +112,26 @@ Surgidos al armar la capa de datos y el layout compartido.
 
 ---
 
+## Abiertos por el hero v3
+
+El cliente mandó una referencia el 26/08/2026 y pidió cambiar sólo el bloque de texto
+del hero. Se hizo en Figma, escritorio y celular. Lo que quedó colgando:
+
+| # | Tema | Por qué importa | Decisión provisoria |
+|---|---|---|---|
+| 55 | **Saira Condensed Black no está self-hosteada.** Figma la toma de Google Fonts. En `assets/fonts/` hoy están Michroma, Saira y JetBrains Mono, pero no el corte Condensed. | **Bloquea el maquetado del hero**, igual que antes lo bloqueaba `Urban Thunder Demo` — con la diferencia de que esto se resuelve solo, sin depender del cliente: Saira es OFL. | Bajar el WOFF2 subconjunto latin de Saira Condensed Black y sumarlo a `assets/fonts/` y a `LICENCIAS.txt`. Son ~30 KB. |
+| 56 | **`MARCA EL CAMINO.` va en bordeaux `#780606` sobre negro: contraste ≈ 2:1.** | Es el claim de marca del hero. La referencia del cliente lo tiene así, y el titular anterior (`QUE AGUANTA`) también, pero ahí lo salvaba un contorno blanco que ahora no está. | **Se mantiene el rojo de la referencia.** Es texto decorativo y el mensaje no depende de él. Si el cliente lo quiere más legible, la salida es `bordeaux/700` (`#8f0808`) o sumarle el contorno. Confirmar viéndolo en pantalla, no en captura. |
+| 57 | **Se perdió el ojal "Vendedores oficiales · Argentina".** La referencia pone `EQUIPAMIENTO` en ese lugar. | Era una línea de credibilidad arriba de todo. | El dato sigue en el marquee de la barra superior y en la sección `[ 09 ] Vendedores oficiales`. Si el cliente lo reclama en el hero, entra como tercera línea de la barra de datos, no arriba del titular. |
+| 58 | **El botón secundario del hero quedó con el relleno del sistema** (blanco 10%), no con el contorno de 1 px de la referencia. | Cambiarlo acá desincroniza el hero del componente `Botón`, que usa el mismo estilo en todo el sitio. | Se deja el del sistema. Si se quiere el contorno, se cambia en el componente y baja a las nueve pantallas de una. |
+
+---
+
 ## Resueltos
 
 | Fecha | Tema | Decisión |
 |---|---|---|
+| 2026-08-26 | Licencia de `Urban Thunder Demo`, que bloqueaba el maquetado del hero | **Resuelto por el camino largo: la fuente ya no se usa.** El hero v3 que pidió el cliente cambia el titular por Saira Condensed Black. Se verificaron las 17 páginas del archivo de Figma y no queda un solo nodo de texto con esa familia. La anotación vieja del titular quedó reescrita con las decisiones nuevas. Sigue abierta la licencia de Eurostile (#4), que es otra cosa. |
+| 2026-08-26 | Cómo se resuelve la textura de metal del titular | **Relleno de imagen, no degradé.** El cliente mandó una referencia con chapa fotográfica. Se generó `assets/img/texturas/acero-cepillado.jpg` (1200 × 147, 30 KB) y se aplica como relleno `IMAGE` en modo Recortar con matriz identidad, así el archivo se estira al alto de cada línea. El degradé plata sigue reservado a precios y cifras (`CLAUDE.md` §5.6). |
 | 2026-08-25 | Observación 3 del QA: el orden de foco no coincidía con el orden visual de la cabecera abajo de 1280 | **Resuelto con la cabecera nueva.** Quedó abierta a propósito porque la cabecera se rehacía. Ahora los elementos están en el marcado en el mismo orden en el que se ven y lo que no corresponde a un ancho se apaga con `display:none`, que además lo saca del árbol de accesibilidad. Ninguna regla de CSS reordena la barra. El buscador de celular tampoco empuja una segunda fila: se despliega y se queda con la barra entera. |
 | 2026-08-20 | Paleta verde (el brandbook traía `#00674F` y `#2E6F40`) | **Descartado.** El cliente no quiere verde. La paleta es negro + plata/grises + bordeaux, con bordeaux como único acento. Ver `CLAUDE.md` §5.3. |
 | 2026-08-23 | Dirección de diseño: clásica (v1) o ficha técnica (v2) | **v2.** Canto vivo, retícula de hairlines, titular a 80 px, datos técnicos por producto y JetBrains Mono para los números. Foundations y los 5 componentes ya están migrados. Ver `CLAUDE.md` §5.6. |

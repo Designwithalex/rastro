@@ -116,8 +116,9 @@ de Figma sin traducir a mano.
 - `Espaciado` — escala de 4, de 4 a 120.
 - `Radio` — todo en 0. Sólo sobrevive `radio/full` para pastillas y avatares.
 
-**26 estilos de texto** en tres familias: Michroma (display y precios),
-JetBrains Mono (datos) y Saira (texto corrido).
+**31 estilos de texto** en cuatro familias: Michroma (display y precios),
+JetBrains Mono (datos), Saira (texto corrido) y Saira Condensed (los cuatro
+`display/hero*`, que son sólo del titular del hero).
 
 ## Reglas del lenguaje
 
@@ -133,6 +134,33 @@ JetBrains Mono (datos) y Saira (texto corrido).
 7. **Las secciones van numeradas** con el índice `[ 01 ]`.
 8. **Las maquetas de formulario llevan una nota** en pantalla diciendo qué tiene que
    conectar el backend. No se entrega un formulario sin decir qué hace.
+9. **La textura de chapa es exclusiva del titular del hero.** En ningún otro lado del
+   sitio entra una foto adentro de una letra.
+
+## Hero v3 · 26/08/2026
+
+El cliente mandó una referencia y pidió cambiar **sólo el bloque de texto** del hero.
+Foto de fondo, carrusel y barra de datos quedaron intactos. Quedó así:
+
+```
+[ 00 ] EQUIPAMIENTO          JetBrains Mono Bold · bordeaux
+PROFESIONAL                  display/hero      · textura de chapa
+───────                      regla 88 × 2 px   · bordeaux
+RASTRO.                      display/hero-sub  · textura de chapa
+MARCA EL CAMINO.             display/hero-sub  · bordeaux
+Equipamiento diseñado para   body/md           · texto secundario
+cada etapa de tu entrenamiento.
+[ VER CATÁLOGO → ]  [ SOY MAYORISTA → ]
+```
+
+Dos cosas que salieron de acá:
+
+- **Se fue `Urban Thunder Demo`.** El titular pasó a Saira Condensed Black, que es el
+  corte condensado de una familia que el sitio ya usa. La licencia de la fuente local
+  dejó de bloquear el maquetado.
+- **Apareció una textura.** `assets/img/texturas/acero-cepillado.jpg` (1200 × 147, 30 KB).
+  En Figma es un relleno `IMAGE` en modo Recortar con matriz identidad: el archivo se
+  estira al alto de cada línea de texto. En el front va con `background-clip: text`.
 
 ## Qué falta
 
@@ -174,13 +202,14 @@ La página está construida y funciona con los datos que hay. Lo que falta es co
 del cliente, y se ve como hueco a propósito —`[ DATO ]`, `[ ROL ]`, `[ AÑO ]`— tanto en
 la página como en la pantalla 08 del panel:
 
-1. **Licencia web de la tipografía del hero.** Es `Urban Thunder Demo`, instalada solo
-   en la máquina de Ale. El sufijo "Demo" casi siempre significa uso personal, sin
-   derecho comercial ni webfont. **Bloquea el maquetado del hero.**
-2. **Tres obras** con foto, club, ciudad, qué se entregó y autorización para publicarlo.
+1. **Tres obras** con foto, club, ciudad, qué se entregó y autorización para publicarlo.
    Es lo que más vende de toda la página.
-3. **Foto de Santino y Juan Pedro**, misma toma y mismo fondo, y el rol de cada uno.
-4. **Los tres números** de la barra: años en el rubro, gimnasios equipados y provincias.
+2. **Foto de Santino y Juan Pedro**, misma toma y mismo fondo, y el rol de cada uno.
+3. **Los tres números** de la barra: años en el rubro, gimnasios equipados y provincias.
    El cuarto sale solo del catálogo.
-5. **¿Rastro fabrica, importa o revende? ¿Instala? ¿Hay repuestos?** Define la sección
+4. **¿Rastro fabrica, importa o revende? ¿Instala? ¿Hay repuestos?** Define la sección
    "Cómo trabajamos" entera y también el argumento de la landing mayorista.
+
+> La licencia de `Urban Thunder Demo` ya no está en esta lista. El hero v3 la sacó y
+> hoy no queda un solo nodo con esa fuente en ninguna de las 17 páginas del archivo.
+> Ver `PENDIENTES.md`, resueltos del 26/08/2026.

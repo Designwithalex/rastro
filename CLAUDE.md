@@ -143,6 +143,7 @@ Tres familias, con roles que no se pisan:
 | **Michroma** | Display y precios. Reemplaza a Eurostile Extended. | `display/xl` `display/l` `display/m` `display/s` · `precio/lg` `precio/md` `precio/sm` |
 | **JetBrains Mono** | Todo lo que es dato: rótulos, códigos, especificaciones, precio por transferencia, índices de sección. | `mono/label` `mono/label-sm` `mono/dato` `mono/texto` `mono/texto-sm` |
 | **Saira** | Texto corrido y párrafos largos. | `body/lg` `body/md` `body/sm` `body/xs` |
+| **Saira Condensed** | Sólo el titular del hero, en Black. Entró el 26/08/2026 con el hero v3 y reemplazó a `Urban Thunder Demo`. | `display/hero` `display/hero-sub` `display/hero-m` `display/hero-sub-m` |
 
 El brandbook pide **Eurostile** y **Eurostile Extended**, que son pagas (Linotype).
 Michroma y Saira son el reemplazo hasta confirmar si el cliente tiene licencia web
@@ -208,11 +209,15 @@ propuesta. Las reglas que la definen:
 - **Retícula de hairlines.** Las piezas no se separan con recuadros propios: el
   contenedor se pinta de `border/subtle` y los hijos van con 1 px de gap. Esa línea
   continua es lo que le da unidad al sitio.
-- **Tipografía sobredimensionada.** El titular del hero es 80 px en escritorio y
-  30 px en celular, en mayúsculas.
+- **Tipografía sobredimensionada.** El titular del hero es 148 px en escritorio y
+  70 px en celular, en mayúsculas, en Saira Condensed Black. Los titulares de
+  sección siguen en Michroma a 48 px.
 - **Composición asimétrica.** Bento en hero y categorías, no grillas parejas.
 - **Números en degradé plata.** El degradé del isotipo sale del logo y pasa a los
   precios y las cifras grandes. Es el único lugar donde se usa.
+- **Chapa sólo en el titular del hero.** `PROFESIONAL` y `RASTRO.` van con relleno
+  de textura (`assets/img/texturas/acero-cepillado.jpg`), no con el degradé. Es el
+  único punto del sitio con textura fotográfica adentro del texto.
 - **Fotos de ambiente en duotono bordeaux**; fotos de producto sobre **blanco pleno**.
 - **Secciones numeradas** con el índice `[ 01 ]` en tipografía técnica.
 - **Datos visibles**: cada producto muestra código, stock y medida, no solo nombre
