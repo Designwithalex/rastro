@@ -31,8 +31,17 @@ DirectoryIndex index.php
 
     # El sitio no usa CDN ni scripts de terceros: todo sale de su propio origen.
     # Ojo: con esta política no se pueden usar atributos style="" ni <script> en
-    # línea. Si el checkout de Mercado Pago necesita su dominio, se agrega acá.
-    # TODO(backend): sumar los orígenes de Mercado Pago cuando se integre el pago.
+    # línea.
+    #
+    # MERCADO PAGO NO NECESITA NINGUNA EXCEPCIÓN ACÁ, y esa es una de las
+    # razones por las que se eligió Checkout Pro sobre Bricks: el pago pasa
+    # por una redirección del servidor al dominio de Mercado Pago, que es una
+    # navegación y no la gobierna el CSP. No se carga ningún script suyo ni se
+    # embebe ningún iframe.
+    #
+    # Si algún día se prueba Bricks (el checkout embebido), hay que sumar
+    # https://sdk.mercadopago.com a script-src y sus dominios a connect-src y
+    # frame-src. Está anotado en docs/MERCADOPAGO.md.
     Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'"
 
     # Las tipografías propias se pueden cachear un año: el nombre no cambia.
@@ -79,7 +88,9 @@ RedirectMatch 404 /\.git(/|$)
 # Los .json van acá aparte del Require all denied de data/: si un día alguien
 # mueve o renombra ese archivo, los mocks —settings con el WhatsApp, users con
 # los hashes— no quedan colgando de una sola línea de defensa.
-<FilesMatch "\.json$">
+# Los .log entraron con el checkout: data/mp-eventos.log guarda qué pasó con
+# cada pago, y ahí figuran códigos de pedido e ids de operación.
+<FilesMatch "\.(json|log)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

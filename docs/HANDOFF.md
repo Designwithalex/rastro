@@ -73,6 +73,23 @@ precio con descuento. No lo toques para conectar la base.
 Están ordenadas por lo que desbloquea a lo demás. Cada una tiene un
 `TODO(backend)` en el código, en el lugar exacto.
 
+> **Actualización del 27/08/2026 — el checkout ya no es tuyo.**
+> El pago con Mercado Pago está integrado y andando en ambiente de prueba:
+> Checkout Pro, creación de la preferencia, página de retorno y webhook con
+> validación de firma. La tabla de alcance de `CLAUDE.md` §2 lo daba de tu
+> lado y ya no hace falta.
+>
+> Lo que sí sigue siendo tuyo, y está detallado en
+> [`docs/MERCADOPAGO.md`](MERCADOPAGO.md) §8: **sesión** (que es 3.2 y traba
+> el token CSRF del checkout), **reserva y descuento de stock**, **pasar los
+> pedidos a MySQL**, **los mails de confirmación**, **el costo de envío** y
+> **una tarea de conciliación** para los pagos cuyo webhook nunca llegue.
+>
+> Antes de tocar nada del checkout, leé las tres reglas de la §3 de ese
+> documento. Las dos primeras —el precio lo pone el servidor, y el estado del
+> pago se pregunta por API en vez de leerse de la URL— son las que sostienen
+> que esto no se pueda romper desde la consola del navegador.
+
 ### 3.1 Conexión PDO — `app/repository.php:_repo_json()`
 
 Es el andamio del mock: lee un JSON y lo cachea en memoria por request.
@@ -240,6 +257,7 @@ Los que más pesan:
 | | |
 |---|---|
 | Contrato de datos | [`docs/DATA-CONTRACT.md`](DATA-CONTRACT.md) |
+| **Mercado Pago y checkout** | [`docs/MERCADOPAGO.md`](MERCADOPAGO.md) |
 | Despliegue y credenciales | [`docs/DEPLOY.md`](DEPLOY.md) |
 | Levantar el proyecto | [`docs/SETUP-MAQUINA.md`](SETUP-MAQUINA.md) |
 | Contexto del proyecto y marca | [`CLAUDE.md`](../CLAUDE.md) |

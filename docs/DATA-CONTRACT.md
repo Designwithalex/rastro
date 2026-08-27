@@ -286,9 +286,121 @@ Un pedido por su código (`RF-2026-0418`).
 
 ### Estados de pedido
 
-`en_camino` | `entregado` | `cancelado`. Son los del mock. **Confirmar cuáles
-maneja el negocio de verdad (#36):** si aparecen más, se suma una variante del
-chip en `cuenta.css` y la tabla no se toca.
+Los del mock son `en_camino` | `entregado` | `cancelado`. El checkout sumó los
+que necesita un pago para existir:
+
+| Estado | Cuándo |
+|---|---|
+| `pendiente_pago` | Pedido creado, esperando que Mercado Pago confirme. |
+| `pendiente_transferencia` | Se eligió transferencia; se coordina por WhatsApp. |
+| `pagado` | El pago está `approved` o `authorized`. |
+| `cancelado` | El pago se rechazó o se anuló. |
+| `en_disputa` | El comprador abrió un reclamo (`in_mediation`). |
+| `devuelto` | Devolución o contracargo. |
+| `en_camino`, `entregado` | Los pone Rastro a mano, después de cobrar. |
+
+La traducción de estados de Mercado Pago a estos vive en **un solo lugar**,
+`mp_estado_pedido()` de `app/mercadopago.php`. **Confirmar cuáles maneja el
+negocio de verdad (#36):** si aparecen más, se suma una variante del chip en
+`cuenta.css` y la tabla no se toca.
+
+---
+
+## 6 bis. Pedidos del checkout
+
+Ampliación del contrato del **27/08/2026**, con la integración de Mercado Pago.
+El contrato original tenía pedidos de sólo lectura; para cobrar hace falta
+crearlos y actualizarlos. El detalle de la integración está en
+`docs/MERCADOPAGO.md`.
+
+**Por qué existen estas funciones:** la preferencia de pago necesita un
+`external_reference`, y la notificación que vuelve trae ese dato y el id del
+pago, nada más. Sin un pedido guardado **antes** de mandar a nadie a pagar,
+cuando Mercado Pago avisa "el pago 123 se aprobó" no hay contra qué cruzarlo.
+
+Hoy escriben `data/pedidos.json`, que está en `.gitignore` porque tiene datos de
+compradores y lo escribe el sitio, no una persona. `data/orders.json` sigue
+siendo el mock versionado.
+
+### `repo_order_create(array $pedido): array`
+
+Guarda un pedido nuevo. Devuelve `['ok'=>bool, 'pedido'=>?array, 'error'=>?string]`.
+
+Le pone `codigo`, `fecha`, `creado` y `referencia` si no vienen. **No valida
+precios ni stock**: eso ya lo hizo `app/checkout.php`. Esta función persiste.
+
+Si devuelve `ok: false`, la vista **no manda a nadie a pagar**: un pago que
+vuelve con una referencia inexistente no se puede reconciliar con nada.
+
+### `repo_order_update(string $codigo, array $cambios): ?array`
+
+Pisa las claves que le pasen y devuelve el pedido actualizado, o `null` si no
+existe o no se pudo guardar.
+
+Los arrays se mezclan **a un nivel**: pasar `pago` reemplaza sólo las claves que
+vengan. Eso permite que el webhook escriba `pago.estado` sin borrar
+`pago.preferencia`, que lo escribió el checkout minutos antes.
+
+### `repo_order_by_reference(string $referencia): ?array`
+
+Por el `external_reference` que se le mandó a Mercado Pago. **Es la función del
+webhook**: la notificación no trae el código de Rastro, trae el id del pago, y
+del pago se lee la referencia.
+
+### `repo_order_local(string $codigo): ?array`
+
+Un pedido creado por el sitio, por su código. Complementa a `repo_order()`, que
+sólo mira el mock versionado.
+
+> Cuando el panel de administración muestre pedidos, tiene que leer **las dos**
+> fuentes o va a listar tres compras de ejemplo y ninguna real
+> (`PENDIENTES.md` #73).
+
+### `repo_order_next_code(): string`
+
+`RF-2026-4F7A`. Cuatro caracteres al azar de un alfabeto sin `0/O` ni `1/I`,
+porque estos códigos se dictan por teléfono.
+
+Los del mock eran `RF-año-ddmm`: se repiten si dos personas compran el mismo día
+y se enumeran con sólo saber la fecha. Con MySQL el que manda es el id
+autoincremental, pero **el código visible conviene que siga siendo aleatorio**:
+es el que se filtra por mail y por WhatsApp.
+
+### `repo_log_pago(string $que, array $contexto = []): void`
+
+Una línea JSON por evento en `data/mp-eventos.log`. Es la única forma de
+reconstruir qué pasó con un pago cuando alguien reclama.
+
+**Nunca se loguea el access token ni el cuerpo completo de un pago**: ahí viajan
+los últimos cuatro dígitos de la tarjeta y el mail del comprador.
+
+### Lo que agrega un pedido del checkout
+
+Sobre la forma de `data/orders.json`, tres bloques nuevos. Son bloques aparte a
+propósito: un pedido viejo sin ellos se sigue leyendo igual.
+
+```php
+'referencia' => 'RF-2026-4F7A',   // external_reference; por defecto, el código
+'comprador'  => ['nombre', 'apellido', 'email', 'telefono', 'documento'],
+'entrega'    => ['calle', 'localidad', 'provincia', 'codigo_postal', 'notas'],
+'pago'       => [
+    'proveedor'   => 'mercado_pago',  // null si es transferencia
+    'entorno'     => 'test',          // o 'produccion'
+    'preferencia' => '17849...-abc',  // id de la preferencia
+    'payment_id'  => '1234567890',    // id del pago
+    'estado'      => 'approved',      // status crudo de Mercado Pago
+    'detalle'     => 'accredited',    // status_detail
+    'metodo'      => 'visa',
+    'tipo'        => 'credit_card',
+    'cuotas'      => 3,
+    'monto'       => 372980.0,
+    'actualizado' => '2026-08-27T18:27:21-03:00',
+],
+```
+
+Se guarda el `estado` crudo además del estado traducido del pedido porque son
+dos vocabularios distintos y el de Mercado Pago es el que hay que citar cuando
+se abre un reclamo.
 
 ---
 
@@ -370,11 +482,23 @@ usuarios       id, nombre, apellido, email UNIQUE, password_hash,
                telefono, rol, empresa NULL, cuit NULL, creado, activo
 direcciones    id, usuario_id, calle, ciudad, provincia, codigo_postal
 
-pedidos        id, codigo UNIQUE, usuario_id, fecha, estado, medio_pago,
+pedidos        id, codigo UNIQUE, referencia UNIQUE, usuario_id NULL, fecha,
+               creado, actualizado, estado, medio_pago,
                subtotal INT, envio INT, descuento_aplicado_pct DECIMAL(5,2),
-               total INT
+               total INT,
+               comprador_nombre, comprador_apellido, comprador_email,
+               comprador_telefono, comprador_documento,
+               entrega_calle, entrega_localidad, entrega_provincia,
+               entrega_codigo_postal, entrega_notas TEXT NULL
 pedido_items   id, pedido_id, producto_id, nombre, sku, cantidad,
                precio_unitario INT
+
+-- Un pedido puede acumular varios intentos de pago: alguien que reintenta
+-- después de un rechazo deja dos. Por eso es una tabla y no columnas de
+-- `pedidos`. El estado del pedido lo decide el pago aprobado, si hay uno.
+pedido_pagos   id, pedido_id, proveedor, entorno, preferencia_id,
+               payment_id UNIQUE NULL, estado, detalle, metodo, tipo,
+               cuotas INT, monto DECIMAL(12,2), actualizado
 
 settings       clave PK, valor
 nosotros       (una fila por bloque, o JSON: lo edita una sola pantalla)
@@ -396,8 +520,12 @@ Dos columnas que no están en los mocks y conviene sumar:
 | # | Tema | Dónde está anotado |
 |---|---|---|
 | 11 | ¿El precio mayorista se muestra alguna vez? | `PENDIENTES.md` |
-| 13 | Checkout Pro o Bricks | `views/carrito.php` |
+| ~~13~~ | ~~Checkout Pro o Bricks~~ → **Checkout Pro**, integrado el 27/08/2026. Ver `docs/MERCADOPAGO.md`. |
 | 21 | Cuotas sin interés: tercera línea del bloque de precio | `bloque-precio.php` |
+| 68 | Si se anuncian cuotas sin interés, hay que configurarlas en la cuenta | `docs/MERCADOPAGO.md` |
+| 69 | La página de retorno se puede abrir con un código ajeno (falta sesión) | `checkout/retorno.php` |
+| 70 | El stock no se reserva al crear el pedido | `app/checkout.php` |
+| 73 | El panel todavía no lee los pedidos del checkout | `PENDIENTES.md` |
 | 36 | Qué estados de pedido maneja el negocio | `cuenta/index.php` |
 | 38 | ¿Direcciones múltiples? | `cuenta/index.php` |
 | 39 | Qué pasa con una cuenta marcada como mayorista | `auth/registro.php` |

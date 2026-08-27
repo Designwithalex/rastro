@@ -171,13 +171,15 @@ $whatsapp_carrito = whatsapp_link($settings, 'Hola Rastro, quiero coordinar el p
                 <p class="resumen__nota t-mono-texto-sm" data-carrito-nota-ahorro></p>
             </div>
 
-            <?php /* TODO(backend): este botón todavía no lleva a ningún lado.
-                     Lo cablea el backend dev cuando entre Mercado Pago, y ahí
-                     se define si va Checkout Pro o Bricks (PENDIENTES #13). */ ?>
-            <button class="boton boton--acento resumen__pagar" type="button" data-carrito-pagar>
-                <span class="t-mono-label">Pagar con Mercado Pago</span>
+            <?php /* Desde el 27/08/2026 el botón lleva al checkout de verdad:
+                     /checkout pide los datos, crea el pedido y abre Checkout
+                     Pro. Es un enlace y no un <button> porque no dispara
+                     ninguna acción: navega. Así funciona también con el clic
+                     del medio y con "abrir en pestaña nueva". */ ?>
+            <a class="boton boton--acento resumen__pagar" href="<?= e(url('/checkout')) ?>">
+                <span class="t-mono-label">Finalizar compra</span>
                 <span class="boton__flecha" aria-hidden="true">→</span>
-            </button>
+            </a>
 
             <?php if ($whatsapp_carrito !== null): ?>
                 <a class="boton boton--fantasma resumen__transferir"
@@ -190,12 +192,6 @@ $whatsapp_carrito = whatsapp_link($settings, 'Hola Rastro, quiero coordinar el p
             <p class="resumen__legal t-mono-texto-sm">
                 Al pagar por transferencia o efectivo te contactamos para coordinar.
                 El descuento se aplica sobre el precio publicado.
-            </p>
-
-            <p class="nota t-mono-texto-sm">
-                <strong>Para el backend:</strong> el botón de Mercado Pago todavía no
-                dispara nada. Falta definir Checkout Pro o Bricks y cablear la creación
-                de la preferencia con las líneas de este carrito.
             </p>
         </aside>
     </div>

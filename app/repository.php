@@ -716,3 +716,281 @@ function repo_cart_items(array $ids): array
 
     return $items;
 }
+
+/* ==========================================================================
+   Pedidos del checkout — AMPLIACIÓN DEL CONTRATO, 2026-08-27
+
+   El contrato de CLAUDE.md §4.2 tenía pedidos de sólo lectura: repo_orders()
+   y repo_order() leen data/orders.json, que son tres compras de ejemplo para
+   dibujar la pantalla de /cuenta. No había forma de CREAR un pedido, porque
+   hasta ahora el carrito terminaba en un botón que no llevaba a ningún lado.
+
+   La integración con Mercado Pago obliga a que exista un pedido ANTES de
+   mandar a nadie a pagar: la preferencia necesita un `external_reference`, y
+   la notificación que vuelve trae ese dato y el id del pago, nada más. Sin un
+   pedido guardado, cuando Mercado Pago avisa "el pago 123 se aprobó" no hay
+   contra qué cruzarlo.
+
+   Estas funciones son ese mínimo:
+
+     repo_order_create()        alta
+     repo_order_update()        cambio de estado / datos del pago
+     repo_order_by_reference()  búsqueda por external_reference
+     repo_order_next_code()     el código del pedido
+     repo_log_pago()            bitácora de lo que dice Mercado Pago
+
+   ALMACENAMIENTO — data/pedidos.json, aparte de orders.json
+
+   Se guardan en un archivo distinto a propósito. data/orders.json es un mock
+   escrito a mano que se versiona y que sirve de ejemplo para el panel;
+   data/pedidos.json lo escribe el sitio, cambia en cada prueba y está en
+   .gitignore. Mezclarlos ensucia el mock y llena el repositorio de pedidos
+   de prueba.
+
+   TODO(backend): esto es UNA tabla, `pedidos`, con su `pedido_items`. Las
+   funciones pasan a ser INSERT, UPDATE y dos SELECT, y data/pedidos.json
+   desaparece. La estructura sugerida está en docs/DATA-CONTRACT.md.
+
+   POR QUÉ UN ARCHIVO Y NO UNA SESIÓN
+
+   Un pedido tiene que sobrevivir a que la persona cierre el navegador en el
+   medio del pago, y sobre todo tiene que existir para el webhook, que llega
+   como un request de Mercado Pago sin ninguna cookie encima. Guardarlo en
+   $_SESSION lo haría invisible justo para quien más lo necesita.
+   ========================================================================== */
+
+/** Ruta del archivo donde se guardan los pedidos que crea el sitio. */
+function _repo_pedidos_ruta(): string
+{
+    return dirname(__DIR__) . '/data/pedidos.json';
+}
+
+/**
+ * Lee el archivo de pedidos. Sin la caché estática de _repo_json(): el
+ * webhook y la página de retorno pueden escribir en el mismo segundo, y una
+ * lectura cacheada devolvería un pedido viejo.
+ */
+function _repo_pedidos_leer(): array
+{
+    $ruta = _repo_pedidos_ruta();
+
+    if (!is_file($ruta)) {
+        return [];
+    }
+
+    $datos = json_decode((string) file_get_contents($ruta), true);
+
+    return is_array($datos) ? $datos : [];
+}
+
+/**
+ * Escribe el archivo de pedidos.
+ *
+ * Va con LOCK_EX porque hay dos escritores que no se conocen: el visitante
+ * volviendo de Mercado Pago y la notificación del webhook, que llegan casi
+ * juntas. Sin lock, la última en cerrar el archivo pisa a la otra y se pierde
+ * el estado del pago.
+ *
+ * TODO(backend): con MySQL esto es una transacción y el lock desaparece.
+ */
+function _repo_pedidos_guardar(array $pedidos): bool
+{
+    $json = json_encode(
+        array_values($pedidos),
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    if ($json === false) {
+        error_log('repo: no se pudo serializar data/pedidos.json');
+
+        return false;
+    }
+
+    if (@file_put_contents(_repo_pedidos_ruta(), $json . "\n", LOCK_EX) === false) {
+        // Un checkout que no puede guardar el pedido no puede cobrar: la
+        // vista tiene que enterarse y frenar ANTES de mandar a nadie a pagar.
+        error_log('repo: data/pedidos.json no es escribible.');
+
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * El código del próximo pedido: RF-2026-4F7A.
+ *
+ * Los códigos del mock son RF-año-ddmm (RF-2026-0418), que se repite si dos
+ * personas compran el mismo día y —peor— es adivinable: con la fecha alcanza
+ * para enumerar pedidos ajenos. Ese riesgo ya está anotado en el TODO de
+ * repo_order(). Los códigos nuevos llevan cuatro caracteres al azar.
+ *
+ * TODO(backend): con MySQL el que manda es el id autoincremental, pero el
+ * código visible conviene que siga siendo aleatorio: es el que se filtra por
+ * mail y por WhatsApp.
+ */
+function repo_order_next_code(): string
+{
+    $existentes = [];
+
+    foreach (array_merge(_repo_json('orders'), _repo_pedidos_leer()) as $pedido) {
+        $existentes[(string) ($pedido['codigo'] ?? '')] = true;
+    }
+
+    // El alfabeto no tiene 0/O ni 1/I: estos códigos se dictan por teléfono.
+    $alfabeto = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    $largo    = strlen($alfabeto);
+
+    for ($intento = 0; $intento < 50; $intento++) {
+        $sufijo = '';
+
+        for ($i = 0; $i < 4; $i++) {
+            $sufijo .= $alfabeto[random_int(0, $largo - 1)];
+        }
+
+        $codigo = 'RF-' . date('Y') . '-' . $sufijo;
+
+        if (!isset($existentes[$codigo])) {
+            return $codigo;
+        }
+    }
+
+    // 32^4 es un millón de combinaciones: llegar acá significa que el archivo
+    // se llenó o que random_int devuelve siempre lo mismo. En los dos casos
+    // el timestamp desempata y el pedido no se pierde.
+    return 'RF-' . date('Y') . '-' . strtoupper(dechex(time() % 65536));
+}
+
+/**
+ * Guarda un pedido nuevo y lo devuelve con su código puesto.
+ *
+ * El pedido llega ya armado y validado por app/checkout.php: acá no se
+ * calculan precios ni se valida stock. Esta función persiste, nada más.
+ *
+ * @return array{ok:bool, pedido:?array, error:?string}
+ */
+function repo_order_create(array $pedido): array
+{
+    $pedidos = _repo_pedidos_leer();
+
+    $pedido['codigo'] ??= repo_order_next_code();
+    $pedido['fecha']  ??= date('Y-m-d');
+    $pedido['creado'] ??= date('c');
+
+    // La referencia externa es lo que viaja a Mercado Pago y lo único que
+    // vuelve identificando al pedido. Por defecto es el propio código.
+    $pedido['referencia'] ??= $pedido['codigo'];
+
+    $pedidos[] = $pedido;
+
+    if (!_repo_pedidos_guardar($pedidos)) {
+        return ['ok' => false, 'pedido' => null, 'error' => 'No se pudo guardar el pedido.'];
+    }
+
+    return ['ok' => true, 'pedido' => $pedido, 'error' => null];
+}
+
+/**
+ * Actualiza un pedido existente y devuelve la versión nueva.
+ *
+ * Los cambios se mezclan a un nivel de profundidad: pasar `pago` reemplaza
+ * las claves que vengan y deja las demás. Eso permite que el webhook escriba
+ * `pago.estado` sin borrar `pago.preferencia_id`, que lo escribió el checkout.
+ *
+ * @param array $cambios Claves de primer nivel a pisar.
+ */
+function repo_order_update(string $codigo, array $cambios): ?array
+{
+    $pedidos = _repo_pedidos_leer();
+
+    foreach ($pedidos as $i => $pedido) {
+        if ((string) ($pedido['codigo'] ?? '') !== $codigo) {
+            continue;
+        }
+
+        foreach ($cambios as $clave => $valor) {
+            $pedidos[$i][$clave] = is_array($valor) && is_array($pedido[$clave] ?? null)
+                ? array_merge($pedido[$clave], $valor)
+                : $valor;
+        }
+
+        $pedidos[$i]['actualizado'] = date('c');
+
+        if (!_repo_pedidos_guardar($pedidos)) {
+            return null;
+        }
+
+        return $pedidos[$i];
+    }
+
+    return null;
+}
+
+/**
+ * Busca un pedido por el `external_reference` que se le mandó a Mercado Pago.
+ *
+ * Es la función que usa el webhook: la notificación no trae el código de
+ * Rastro, trae el id del pago, y del pago se lee `external_reference`.
+ */
+function repo_order_by_reference(string $referencia): ?array
+{
+    if ($referencia === '') {
+        return null;
+    }
+
+    foreach (_repo_pedidos_leer() as $pedido) {
+        if ((string) ($pedido['referencia'] ?? '') === $referencia) {
+            return $pedido;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Un pedido creado por el sitio, por su código. Complementa a repo_order(),
+ * que sólo mira el mock versionado.
+ */
+function repo_order_local(string $codigo): ?array
+{
+    if ($codigo === '') {
+        return null;
+    }
+
+    foreach (_repo_pedidos_leer() as $pedido) {
+        if ((string) ($pedido['codigo'] ?? '') === $codigo) {
+            return $pedido;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Deja un registro de la conversación con Mercado Pago.
+ *
+ * Es la única forma de reconstruir qué pasó con un pago cuando alguien
+ * reclama: qué notificación llegó, cuándo, y qué se hizo con ella. Va a
+ * data/mp-eventos.log, dentro de una carpeta con `Require all denied`, así
+ * que no se puede leer desde el navegador.
+ *
+ * NUNCA se loguea el access token ni el cuerpo completo de un pago: ahí
+ * viajan los últimos cuatro dígitos de la tarjeta y el mail del comprador.
+ */
+function repo_log_pago(string $que, array $contexto = []): void
+{
+    $linea = json_encode(
+        ['cuando' => date('c'), 'que' => $que] + $contexto,
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    if ($linea === false) {
+        return;
+    }
+
+    @file_put_contents(
+        dirname(__DIR__) . '/data/mp-eventos.log',
+        $linea . "\n",
+        FILE_APPEND | LOCK_EX
+    );
+}

@@ -25,7 +25,7 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 |---|---|---|
 | 11 | El panel guarda **precio minorista y mayorista**, pero el mayorista contacta por WhatsApp. ¿El precio mayorista se muestra alguna vez? | Se guarda en el JSON pero **no se muestra público**. Preparado para mostrarse a usuarios con rol `mayorista` logueados. |
 | 12 | **Registro de usuario**: ¿para qué sirve hoy? ¿Historial de pedidos, checkout más rápido, precios mayoristas? | Vistas maquetadas con historial de pedidos + datos. Lógica la conecta el backend dev. |
-| 13 | **Checkout**: ¿Mercado Pago Checkout Pro (redirect) o Bricks (embebido)? | El carrito termina en un CTA que el backend dev cablea. Lo define él. |
+| 13 | **Checkout**: ¿Mercado Pago Checkout Pro (redirect) o Bricks (embebido)? | **Resuelto el 27/08/2026: Checkout Pro.** Integrado y andando en ambiente de prueba. Ver la fila del 27/08 en "Resueltos" y `docs/MERCADOPAGO.md`. |
 | 14 | **Cotizador por proyecto con PDF por mail** (pedido "a futuro" en Notion) | Fuera de alcance de esta etapa. Anotado para fase 2 del producto. |
 | 15 | **Banners editables** desde el panel | `repo_banners()` los expone; el ABM lo hace el backend dev. |
 
@@ -143,10 +143,32 @@ del hero. Se hizo en Figma, escritorio y celular. Lo que quedó colgando:
 
 ---
 
+## Abiertos por el checkout con Mercado Pago
+
+Integración de prueba cerrada el 27/08/2026. El detalle técnico está en
+`docs/MERCADOPAGO.md`; acá queda lo que necesita una decisión o una credencial
+que no tenemos.
+
+| # | Tema | Por qué importa | Decisión provisoria |
+|---|---|---|---|
+| 67 | **Faltan las credenciales de Mercado Pago del cliente.** Hoy no hay ninguna cargada: sin `mp_access_token` el checkout muestra únicamente el camino por transferencia. | Es lo único que separa la integración de estar andando. Son cinco minutos del cliente y no se pueden pedir por Notion ni por mail. | Se piden **las de prueba primero** —Tus integraciones → Credenciales de prueba— para dejar el flujo demostrable en el sitio provisorio. Las de producción entran al final, por canal seguro, y las carga quien tenga acceso al servidor. Van a `app/config.php`, que no está en el repo. |
+| 68 | **¿Se muestran cuotas sin interés?** Es #21 otra vez, ahora con plata de por medio: la preferencia acepta `payment_methods.installments` y hoy no se limita nada, así que Checkout Pro ofrece todos los planes de la cuenta. | Las cuotas con interés las paga el comprador y las sin interés las paga Rastro. Si el cliente publicita "12 sin interés" hay que configurarlo en la cuenta **y** decirlo en el bloque de precio, que es el componente más repetido del sitio. | Se deja como está —lo que ofrezca la cuenta— y no se anuncia nada en el sitio. Sumar la línea de cuotas es una decisión comercial del cliente, no del frontend. |
+| 69 | **La página de retorno se puede abrir con un código de pedido ajeno.** El código viaja en la URL y todavía no hay sesión que lo ate a nadie. | Es el mismo problema que ya estaba anotado en `repo_order()`, ahora con pedidos reales adentro. | **Mitigado, no resuelto.** Los códigos nuevos son aleatorios (`RF-2026-4F7A`) y la página **no imprime dirección, teléfono ni apellido**: sólo código, líneas, total y estado. Se cierra cuando exista sesión: exigir que el pedido sea del usuario logueado, o firmar el código. |
+| 70 | **El stock no se reserva.** `checkout_lineas()` lo valida al armar el pedido y no lo toca. | Dos personas pueden pagar la última unidad con segundos de diferencia y las dos ven "pago aprobado". Con 24 discos en depósito es improbable; con un rack del que queda uno, no. | Backend dev: reservar al crear el pedido y descontar cuando el pago se aprueba, en una transacción. Está en `docs/MERCADOPAGO.md` §8. |
+| 71 | **No hay mail de confirmación.** Ni al comprador ni a Rastro. | Hoy alguien paga y lo único que se entera es `data/pedidos.json`. Nadie en Rastro recibe un aviso. | Backend dev. Va en el webhook pero **fuera** del request: Mercado Pago corta a los 22 segundos. |
+| 72 | **Falta conciliación.** Un pago que quede `in_process` y cuyo webhook nunca llegue queda colgado para siempre. | Los reintentos de Mercado Pago se terminan a las 96 horas. Después, nadie más avisa. | Backend dev: una tarea diaria que busque pedidos `pendiente_pago` de más de una hora y los consulte por API. `mp_obtener_pago()` ya está. |
+| 73 | **El panel todavía no ve los pedidos del checkout.** `/admin/pedidos` lee el mock versionado; el checkout escribe en `data/pedidos.json`. | Son dos ramas que avanzaron en paralelo. Al integrarlas, la pantalla de pedidos tiene que leer las dos fuentes o el panel muestra tres compras de ejemplo y ninguna real. | `repo_order_local()` y `repo_order_by_reference()` están puestas para eso. Se resuelve al mergear. |
+
+---
+
 ## Resueltos
 
 | Fecha | Tema | Decisión |
 |---|---|---|
+| 2026-08-27 | #13 **Checkout Pro o Bricks** | **Checkout Pro, y ya está integrado en ambiente de prueba.** Lo decidieron tres cosas del proyecto, no una preferencia: con la redirección los datos de tarjeta nunca tocan el servidor de Rastro (sin alcance PCI), no entra un solo script de terceros y **el CSP del `.htaccess` no se toca**. Bricks obligaba a abrir `script-src`, `connect-src` y `frame-src` justo en la página donde eso importa. El costo aceptado es real: la persona sale del sitio para pagar. Si mañana se quiere Bricks, la preferencia es la misma y lo que cambia es la vista de `/checkout` más el CSP. Todo el detalle en `docs/MERCADOPAGO.md`. |
+| 2026-08-27 | Qué precio se cobra por cada medio de pago | **Publicado por Mercado Pago, con descuento por transferencia**, que es la regla de `CLAUDE.md` §1 llevada a código en `checkout_medios()`. Estaba escrita en el copy del sitio y en ningún lado del código, porque hasta ahora no había nada que cobrara. Cobrar el precio con descuento por Mercado Pago sería regalar el porcentaje que justamente cubre la comisión de la pasarela. El descuento lo sigue calculando `precio_con_descuento()` y nadie más: `checkout.php` elige cuál de los dos números usar, no multiplica. |
+| 2026-08-27 | Sin SDK de Mercado Pago | **Cliente propio con cURL, con fallback a streams.** `mercadopago/dx-php` necesita Composer, `vendor/` y un autoloader; el proyecto no tiene build step (`CLAUDE.md` §3) y son tres endpoints. El fallback a streams no es adorno: varios PHP de escritorio vienen sin cURL, y un checkout que no se puede probar en local no se prueba. |
+| 2026-08-27 | Los códigos de pedido eran adivinables | **Los nuevos son `RF-2026-4F7A`.** Los del mock eran `RF-año-ddmm`, que se repiten si dos personas compran el mismo día y se enumeran con sólo saber la fecha. Cuatro caracteres al azar de un alfabeto sin `0/O` ni `1/I`, porque estos códigos se dictan por teléfono. El riesgo ya estaba anotado en el TODO de `repo_order()`. |
 | 2026-08-26 | #55 Saira Condensed Black self-hosteada | **Resuelto, y sin depender del cliente.** WOFF2 subconjunto latin de Fontsource, 18 KB, OFL. Desbloquea el maquetado del hero. Se precarga **sólo en la home**, con `$precargar_titular` en `layout/head.php`: es la única página con titular, y bajarla en el catálogo sería pagar por una fuente que esa página no dibuja. `.t-display-hero` estaba declarada en `tokens.css` y sin usar, así que se reutilizó en vez de inventar un nombre nuevo. |
 | 2026-08-26 | **Fase 2 cerrada.** Las doce rutas del router tienen su vista | **Resuelto.** Home, catálogo, ficha, carrito, mayoristas, nosotros, ingresar, registro, mi cuenta, términos, arrepentimiento y 404. Todo el contenido sale de `repository.php`. Se borró el andamio `views/partials/en-construccion.php` y su bloque en `layout.css`: ya no hay ruta que caiga ahí. Cuando falta un archivo de vista, `index.php` devuelve 500 con log —es un despliegue a medias, no una página que no existe— en vez de un 404 bonito que esconde el problema. |
 | 2026-08-26 | #46 `docs/DATA-CONTRACT.md` y `docs/HANDOFF.md` | **Escritos.** El contrato documenta las 17 funciones del repository, la forma de cada respuesta, las convenciones que el backend tiene que sostener y una estructura de tablas sugerida. El handoff ordena lo que falta por lo que desbloquea a lo demás, y arranca por la sesión, que es lo que traba login, cuenta y checkout. |

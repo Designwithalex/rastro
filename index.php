@@ -36,6 +36,14 @@ require __DIR__ . '/app/helpers.php';
 require __DIR__ . '/app/repository.php';
 require __DIR__ . '/app/router.php';
 
+/* El checkout y su cliente de Mercado Pago se cargan siempre, no sólo en las
+   rutas de pago: el header muestra el contador del carrito en todas las
+   páginas y mañana va a querer saber si el pago online está habilitado.
+   Son dos archivos de funciones sueltas, sin efectos al incluirse.
+   mp_config() lee $config, que existe en el ámbito global desde acá arriba. */
+require __DIR__ . '/app/mercadopago.php';
+require __DIR__ . '/app/checkout.php';
+
 /* --- Base del sitio ------------------------------------------------------
    Si el proyecto queda colgado de un subdirectorio, todos los enlaces se
    corrigen solos porque url() y asset() anteponen esta base. */
