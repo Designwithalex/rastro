@@ -28,6 +28,11 @@ $descripcion = 'Creá tu cuenta para seguir tus pedidos y comprar más rápido.'
 $clase_body  = 'pagina-auth';
 $estilos     = ['componentes', 'catalogo', 'cuenta'];
 
+if (sesion_hay_usuario()) {
+    header('Location: ' . url(sesion_es_admin() ? '/admin' : '/cuenta'), true, 302);
+    exit;
+}
+
 $enviado  = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 $errores  = [];
 $creado   = null;
@@ -42,6 +47,8 @@ $valores  = [
 ];
 
 if ($enviado) {
+    csrf_exigir();
+
     foreach ($valores as $clave => $_) {
         $valores[$clave] = $clave === 'es_empresa'
             ? !empty($_POST['es_empresa'])
@@ -50,7 +57,17 @@ if ($enviado) {
 
     $resultado = repo_register($valores + ['password' => (string) ($_POST['password'] ?? '')]);
     $errores   = $resultado['errores'];
-    $creado    = $resultado['ok'] ? $resultado['usuario'] : null;
+
+    if ($resultado['ok']) {
+        /* Se entra directo: pedirle que vuelva a escribir el correo y la
+           contraseña que acaba de elegir es un paso que no aporta nada.
+           El rol lo puso repo_register() del lado del servidor, nunca el
+           formulario. */
+        sesion_abrir($resultado['usuario']);
+
+        header('Location: ' . url('/cuenta'), true, 302);
+        exit;
+    }
 }
 
 require RASTRO_VIEWS . '/layout/head.php';
@@ -84,13 +101,7 @@ $campos = [
                 Con una cuenta seguís tus pedidos y no volvés a cargar tus datos.
             </p>
 
-            <?php if ($creado !== null): ?>
-                <p class="mensaje mensaje--ok t-mono-texto" role="status">
-                    <span class="mensaje__marca" aria-hidden="true">✓</span>
-                    Los datos pasan la validación, <?= e($creado['nombre']) ?>. La cuenta
-                    todavía no se guarda: falta que el backend la persista y abra la sesión.
-                </p>
-            <?php elseif ($errores !== []): ?>
+            <?php if ($errores !== []): ?>
                 <p class="mensaje mensaje--error t-mono-texto" role="alert">
                     <span class="mensaje__marca" aria-hidden="true">!</span>
                     Revisá los campos marcados.
@@ -98,6 +109,8 @@ $campos = [
             <?php endif; ?>
 
             <form class="formulario formulario--auth" method="post" action="<?= e(url('/registro')) ?>" novalidate>
+                <?= csrf_campo() ?>
+
 
                 <?php foreach ($campos as $campo): ?>
                     <?php $tiene_error = isset($errores[$campo['nombre']]); ?>
@@ -187,11 +200,13 @@ $campos = [
             </p>
 
             <?php
-            $nota_maqueta = 'La validación de repo_register() ya corre y los errores que '
-                          . 'ves son los reales. Falta que el backend guarde el usuario con '
-                          . 'password_hash(), mande el mail de bienvenida y abra la sesión. '
-                          . 'Qué pasa con una cuenta marcada como mayorista sigue abierto '
-                          . '(PENDIENTES #39).';
+            /* Lo único que sigue abierto de esta pantalla: qué pasa después
+               con una cuenta marcada como mayorista. El alta ya guarda y ya
+               abre sesión. */
+            $nota_maqueta = 'La cuenta se crea y se entra al toque. Lo que falta definir es '
+                          . 'qué pasa con una marcada como "para un gimnasio o empresa": si '
+                          . 've precios distintos o si sólo dispara un aviso al equipo '
+                          . '(PENDIENTES #39). Falta también el mail de bienvenida.';
             require RASTRO_VIEWS . '/partials/nota-maqueta.php';
             ?>
         </div>

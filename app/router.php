@@ -32,7 +32,24 @@ function router_tabla(): array
 
         '#^/ingresar$#'                => ['auth/ingresar',          []],
         '#^/registro$#'                => ['auth/registro',          []],
+        '#^/salir$#'                   => ['auth/salir',             []],
         '#^/cuenta$#'                  => ['cuenta/index',           []],
+
+        // Panel de administración. Todas exigen sesión con rol admin: el
+        // guard está en views/admin/_guard.php, que incluye cada vista.
+        // Una sección desconocida cae en el 404 del sitio, no en el panel.
+        '#^/admin$#'                   => ['admin/dashboard',        []],
+        '#^/admin/productos$#'         => ['admin/productos',        []],
+        '#^/admin/productos/nuevo$#'   => ['admin/producto-editar',  []],
+        '#^/admin/productos/(\d+)$#'   => ['admin/producto-editar',  ['id']],
+        '#^/admin/pedidos$#'           => ['admin/pedidos',          []],
+        '#^/admin/pedidos/([A-Za-z0-9-]+)$#' => ['admin/pedido-detalle', ['codigo']],
+        '#^/admin/categorias$#'        => ['admin/categorias',       []],
+        '#^/admin/marcas$#'            => ['admin/marcas',           []],
+        '#^/admin/clientes$#'          => ['admin/clientes',         []],
+        '#^/admin/banners$#'           => ['admin/banners',          []],
+        '#^/admin/nosotros$#'          => ['admin/nosotros',         []],
+        '#^/admin/configuracion$#'     => ['admin/configuracion',    []],
 
         // Obligatorias por la ley argentina de defensa del consumidor.
         // El enlace al botón de arrepentimiento tiene que estar en el pie de

@@ -1,0 +1,546 @@
+/* ============================================================
+   admin.css — Rastro Fitness
+   El panel de administración. Sólo escritorio: es una herramienta
+   de trabajo con tablas y formularios largos, y abajo de 900 px
+   una tabla de pedidos no se lee, se sufre.
+
+   Usa los MISMOS tokens que el sitio, en su variante clara, que
+   activa <html data-tema="admin"> en tokens.css. No hay un segundo
+   sistema de diseño: hay dos modos del mismo.
+
+   Referencia: página "Admin · Panel" de Figma.
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=80-43
+   ============================================================ */
+
+.pagina-admin {
+  background-color: var(--color-bg-base);
+}
+
+.admin {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100svh;
+}
+
+/* ============================================================
+   Barra lateral
+   ============================================================ */
+
+.admin__lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-24);
+  padding-block: var(--espaciado-24);
+  background-color: var(--color-bg-surface);
+  border-right: var(--hairline) solid var(--color-border-subtle);
+}
+
+.admin__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-16);
+  padding-inline: var(--espaciado-24);
+}
+
+.admin__logo img {
+  width: auto;
+  height: 28px;
+}
+
+.admin__insignia {
+  padding: var(--espaciado-4) var(--espaciado-8);
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+/* --- Menú ---------------------------------------------------- */
+
+.admin__nav {
+  flex: 1 1 auto;
+}
+
+.admin__item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-16);
+  min-height: 44px;
+  padding-inline: var(--espaciado-24);
+  color: var(--color-text-secondary);
+  border-left: 3px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin__item:hover {
+  background-color: var(--color-bg-surface-alt);
+  color: var(--color-text-primary);
+}
+
+/* El activo lleva fondo y barra, no sólo color: en una lista de nueve
+   ítems del mismo largo, un cambio de color solo se pierde. */
+.admin__item.es-activo {
+  background-color: var(--color-accent-soft);
+  border-left-color: var(--color-accent-base);
+  color: var(--color-accent-text);
+}
+
+.admin__numero {
+  color: var(--color-text-disabled);
+}
+
+.admin__item.es-activo .admin__numero,
+.admin__item:hover .admin__numero {
+  color: var(--color-accent-text);
+}
+
+/* --- Quién está adentro --------------------------------------- */
+
+.admin__usuario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-20) var(--espaciado-24) 0;
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.admin__nombre {
+  color: var(--color-text-primary);
+}
+
+.admin__salir {
+  align-self: flex-start;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.admin__salir:hover {
+  color: var(--color-accent-text);
+}
+
+/* ============================================================
+   Barra de página
+   ============================================================ */
+
+.admin__cuerpo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-24) var(--espaciado-32);
+  background-color: var(--color-bg-surface);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.admin__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-12);
+}
+
+.admin__ver-sitio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  min-height: 44px;
+  padding-inline: var(--espaciado-16);
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease;
+}
+
+.admin__ver-sitio:hover {
+  border-color: var(--color-text-primary);
+}
+
+.admin__panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--espaciado-32);
+}
+
+/* ============================================================
+   Avisos de una acción anterior
+   ============================================================ */
+
+.admin-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaciado-12);
+  margin-bottom: var(--espaciado-24);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  background-color: var(--color-bg-surface);
+  border-left: 3px solid var(--color-border-strong);
+}
+
+.admin-aviso__marca {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radio-full);
+  color: var(--color-accent-on);
+  font-weight: 700;
+}
+
+.admin-aviso--ok {
+  border-left-color: var(--color-text-primary);
+}
+
+.admin-aviso--ok .admin-aviso__marca {
+  background-color: var(--color-text-primary);
+}
+
+.admin-aviso--error {
+  border-left-color: var(--color-accent-base);
+  color: var(--color-accent-text);
+}
+
+.admin-aviso--error .admin-aviso__marca {
+  background-color: var(--color-accent-base);
+}
+
+/* ============================================================
+   Cifras del dashboard
+   ============================================================ */
+
+.cifras-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--espaciado-16);
+  margin-bottom: var(--espaciado-32);
+}
+
+.cifra-admin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-20) var(--espaciado-24);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cifra-admin__rotulo {
+  color: var(--color-text-secondary);
+}
+
+.cifra-admin__valor {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cifra-admin__pie {
+  color: var(--color-text-secondary);
+}
+
+/* Una cifra que pide acción se marca; el resto son informativas. */
+.cifra-admin--atencion .cifra-admin__pie {
+  color: var(--color-accent-text);
+}
+
+/* ============================================================
+   Tablas del panel
+   ============================================================ */
+
+.admin__seccion {
+  margin-bottom: var(--espaciado-16);
+  color: var(--color-text-primary);
+}
+
+.tabla-admin {
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+  overflow-x: auto;
+}
+
+.tabla-admin table {
+  min-width: 720px;
+}
+
+.tabla-admin th,
+.tabla-admin td {
+  padding: var(--espaciado-16);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabla-admin thead th {
+  background-color: var(--color-bg-surface-alt);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.tabla-admin tbody tr {
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.tabla-admin tbody tr:hover {
+  background-color: var(--color-bg-surface-alt);
+}
+
+.tabla-admin td {
+  color: var(--color-text-secondary);
+}
+
+.tabla-admin__principal {
+  color: var(--color-text-primary);
+  font-weight: inherit;
+}
+
+.tabla-admin__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tabla-admin__acciones {
+  display: flex;
+  gap: var(--espaciado-12);
+  justify-content: flex-end;
+}
+
+.tabla-admin__accion {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.tabla-admin__accion:hover {
+  color: var(--color-accent-text);
+}
+
+.tabla-admin__accion--peligro:hover {
+  color: var(--color-accent-base);
+}
+
+/* La miniatura de la fila: la foto es la forma más rápida de encontrar un
+   producto en una lista de doscientos. */
+.tabla-admin__foto {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  background-color: var(--color-bg-surface-alt);
+}
+
+/* ============================================================
+   Chips de estado
+
+   Los mismos tres estados que la cuenta del cliente. Si el negocio
+   suma uno, se agrega una variante acá (PENDIENTES #36).
+   ============================================================ */
+
+.estado-admin {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espaciado-4) var(--espaciado-8);
+  border: var(--hairline) solid currentColor;
+  white-space: nowrap;
+}
+
+.estado-admin--pendiente  { color: var(--color-accent-text); }
+.estado-admin--en_camino  { color: var(--color-text-primary); }
+.estado-admin--entregado  { color: var(--color-text-secondary); }
+.estado-admin--cancelado  { color: var(--color-text-disabled); }
+
+/* Un producto dado de baja se lee de un vistazo en la lista. */
+.es-inactivo {
+  opacity: 0.55;
+}
+
+/* ============================================================
+   Formularios del panel
+   ============================================================ */
+
+.form-admin {
+  display: grid;
+  gap: var(--espaciado-24);
+  max-width: 1040px;
+}
+
+.form-admin__bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-24);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.form-admin__leyenda {
+  color: var(--color-text-primary);
+  margin-bottom: var(--espaciado-4);
+}
+
+.form-admin__grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--espaciado-16);
+}
+
+.form-admin__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  min-width: 0;
+}
+
+.form-admin__campo--ancho {
+  grid-column: 1 / -1;
+}
+
+.form-admin__etiqueta {
+  color: var(--color-text-secondary);
+}
+
+.form-admin__ayuda {
+  color: var(--color-text-disabled);
+}
+
+.form-admin__error {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  color: var(--color-accent-text);
+}
+
+.form-admin__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  padding-top: var(--espaciado-8);
+}
+
+.form-admin__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-12);
+}
+
+/* Las casillas del panel: fila alta y clicable entera, no un cuadradito
+   de 13 px al lado de un texto. Se cargan doscientos productos con esto. */
+.opcion-admin {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.opcion-admin input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent-base);
+}
+
+/* Filas repetibles: especificaciones, imágenes. Las agrega admin.js. */
+.repetible {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.repetible__fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  gap: var(--espaciado-8);
+  align-items: center;
+}
+
+.repetible__quitar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: var(--hairline) solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.repetible__quitar:hover {
+  border-color: var(--color-accent-base);
+  color: var(--color-accent-base);
+}
+
+.repetible__sumar {
+  align-self: flex-start;
+}
+
+/* ============================================================
+   Estado vacío del panel
+   ============================================================ */
+
+.vacio-admin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaciado-12);
+  padding: var(--espaciado-48);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) dashed var(--color-border-strong);
+}
+
+.vacio-admin__texto {
+  max-width: 52ch;
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   Escritorio
+
+   El panel se diseñó sólo para escritorio. Abajo de 900 la barra
+   lateral pasa arriba y el menú va en fila: no es una versión de
+   celular, es que la herramienta siga siendo usable si alguien la
+   abre desde una tablet.
+   ============================================================ */
+
+@media (max-width: 899px) {
+  .admin__lateral {
+    border-right: 0;
+    border-bottom: var(--hairline) solid var(--color-border-subtle);
+  }
+
+  .admin__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espaciado-4);
+    padding-inline: var(--espaciado-16);
+  }
+
+  .admin__item {
+    padding-inline: var(--espaciado-12);
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+
+  .admin__item.es-activo {
+    border-left: 0;
+    border-bottom-color: var(--color-accent-base);
+  }
+
+  .admin__panel,
+  .admin__barra {
+    padding-inline: var(--espaciado-16);
+  }
+}
+
+@media (min-width: 900px) {
+  .admin {
+    grid-template-columns: 233px minmax(0, 1fr);
+  }
+
+  .admin__lateral {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+  }
+}

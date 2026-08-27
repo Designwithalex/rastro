@@ -161,13 +161,33 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                 </form>
             </div>
 
-            <?php /* TODO(backend): con sesión abierta este enlace va a /cuenta
-                     y muestra el nombre del usuario en vez de "Cuenta". */ ?>
-            <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/ingresar'))) ?>"
-               href="<?= e(url('/ingresar')) ?>"
-               <?= es_ruta_exacta('/ingresar') ? 'aria-current="page"' : '' ?>>
-                Cuenta
-            </a>
+            <?php $layout_usuario = sesion_usuario(); ?>
+
+            <?php if ($layout_usuario === null): ?>
+                <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/ingresar'))) ?>"
+                   href="<?= e(url('/ingresar')) ?>"
+                   <?= es_ruta_exacta('/ingresar') ? 'aria-current="page"' : '' ?>>
+                    Cuenta
+                </a>
+            <?php else: ?>
+                <?php /* Con sesión abierta el enlace lleva a /cuenta y dice el
+                         nombre de pila. El apellido no entra: en la barra
+                         compite con el buscador y no agrega nada. */ ?>
+                <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/cuenta'))) ?>"
+                   href="<?= e(url('/cuenta')) ?>"
+                   <?= es_ruta_exacta('/cuenta') ? 'aria-current="page"' : '' ?>>
+                    <?= e($layout_usuario['nombre']) ?>
+                </a>
+
+                <?php if (($layout_usuario['rol'] ?? '') === 'admin'): ?>
+                    <?php /* El acceso al panel sólo se dibuja para quien puede
+                             entrar. Para el resto, esa ruta no existe. */ ?>
+                    <a class="<?= e(trim('cabecera__admin t-mono-label ' . activo('/admin'))) ?>"
+                       href="<?= e(url('/admin')) ?>">
+                        Panel
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
 
             <a class="<?= e(trim('boton-carrito t-mono-label ' . activo('/carrito'))) ?>"
                href="<?= e(url('/carrito')) ?>"

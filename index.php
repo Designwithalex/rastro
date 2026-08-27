@@ -35,6 +35,7 @@ if ($entorno === 'local') {
 require __DIR__ . '/app/helpers.php';
 require __DIR__ . '/app/repository.php';
 require __DIR__ . '/app/router.php';
+require __DIR__ . '/app/sesion.php';
 
 /* --- Base del sitio ------------------------------------------------------
    Si el proyecto queda colgado de un subdirectorio, todos los enlaces se
@@ -68,6 +69,14 @@ if ($camino !== '/' && str_ends_with($camino, '/')) {
 
 $camino = '/' . trim($camino, '/');
 define('RASTRO_RUTA', $camino);
+
+/* --- Sesión --------------------------------------------------------------
+   Se abre en todos los requests, antes de cualquier salida. Podría abrirse
+   sólo donde hace falta, pero la cabecera está en todas las páginas y tiene
+   que saber si mostrar "Cuenta" o el nombre de quien entró: "donde hace
+   falta" termina siendo en todos lados, y una regla que aplica siempre no
+   se la olvida nadie. Ver app/sesion.php. */
+sesion_iniciar();
 
 /* --- Despacho ------------------------------------------------------------ */
 $ruta   = router_resolver(RASTRO_RUTA);

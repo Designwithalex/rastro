@@ -5,40 +5,73 @@
  * Sigue el frame "Login · Desktop 1440".
  * https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-3
  *
- * QUÉ HACE Y QUÉ NO
+ * DE ACÁ SE SALE LOGUEADO. El POST verifica contra `repo_login()`, abre
+ * la sesión con `sesion_abrir()` —que regenera el id— y redirige. Si
+ * alguien llegó acá desde una página que exigía sesión, vuelve a esa
+ * página; si no, va a /cuenta. Y si es admin, al panel.
  *
- * El POST llega hasta `repo_login()`, que verifica el hash de verdad, y
- * la vista dibuja el resultado. Lo que NO hace es abrir sesión: no hay
- * `session_start()` en ningún lado del proyecto todavía. Un login que
- * dice "listo" y no deja a nadie adentro sería peor que uno que dice qué
- * le falta, así que lo dice.
+ * TRES DEFENSAS EN ESTE FORMULARIO
  *
- * TODO(backend): abrir la sesión, regenerar el id de sesión, sumar un
- * token CSRF al formulario y límite de intentos por IP y por correo.
- * `repo_login()` ya gasta el mismo tiempo cuando el correo no existe,
- * para no filtrar qué direcciones están registradas.
+ * 1. Token CSRF. Sin él, un formulario en otro sitio puede loguear a
+ *    alguien con una cuenta ajena y hacerle creer que es la suya.
+ * 2. Límite de intentos, por correo y por IP (app/sesion.php).
+ * 3. El mensaje de error NUNCA dice cuál de los dos campos estuvo mal.
+ *    "Ese correo no existe" le confirma a cualquiera qué direcciones
+ *    tienen cuenta acá.
  *
- * NUNCA se dice cuál de los dos campos estuvo mal. "El correo no existe"
- * le confirma a cualquiera qué direcciones tienen cuenta acá.
+ * Se responde con el mismo texto y en el mismo tiempo esté mal el correo
+ * o la contraseña: `repo_login()` calcula un hash igual cuando el correo
+ * no existe, para que no se note por la demora.
  */
 
 declare(strict_types=1);
+
+/* Quien ya entró no tiene nada que hacer acá. */
+if (sesion_hay_usuario()) {
+    header('Location: ' . url(sesion_es_admin() ? '/admin' : '/cuenta'), true, 302);
+    exit;
+}
 
 $titulo      = 'Ingresar';
 $descripcion = 'Entrá a tu cuenta para ver tus pedidos y comprar más rápido.';
 $clase_body  = 'pagina-auth';
 $estilos     = ['componentes', 'catalogo', 'cuenta'];
 
-$enviado = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
-$email   = $enviado ? trim((string) ($_POST['email'] ?? '')) : '';
-$usuario = null;
-$error   = null;
+$email = '';
+$error = null;
 
-if ($enviado) {
-    $usuario = repo_login($email, (string) ($_POST['password'] ?? ''));
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    csrf_exigir();
 
-    if ($usuario === null) {
-        $error = 'No pudimos entrar con esos datos. Revisá el correo y la contraseña.';
+    $email = trim((string) ($_POST['email'] ?? ''));
+
+    if (login_bloqueado($email)) {
+        /* Se dice que está bloqueado y no "contraseña incorrecta": quien
+           se equivocó de verdad necesita saber por qué dejó de andar, y a
+           quien está probando contraseñas el aviso no le sirve de nada,
+           porque ya no puede seguir. */
+        $error = 'Demasiados intentos. Esperá unos minutos y probá de nuevo.';
+    } else {
+        $usuario = repo_login($email, (string) ($_POST['password'] ?? ''));
+
+        if ($usuario === null) {
+            login_anotar_fallo($email);
+            $error = 'No pudimos entrar con esos datos. Revisá el correo y la contraseña.';
+        } else {
+            login_limpiar($email);
+            sesion_abrir($usuario);
+
+            /* Un admin entra al panel; el resto, a donde venía o a su
+               cuenta. sesion_destino_post_login() sólo acepta rutas
+               internas: si el destino saliera de la URL sin filtrar,
+               sería un redirect abierto listo para un correo falso. */
+            $destino = ($usuario['rol'] ?? '') === 'admin'
+                ? url('/admin')
+                : sesion_destino_post_login();
+
+            header('Location: ' . $destino, true, 302);
+            exit;
+        }
     }
 }
 
@@ -75,19 +108,15 @@ require RASTRO_VIEWS . '/layout/head.php';
                     <span class="mensaje__marca" aria-hidden="true">!</span>
                     <?= e($error) ?>
                 </p>
-            <?php elseif ($usuario !== null): ?>
-                <p class="mensaje mensaje--ok t-mono-texto" role="status">
-                    <span class="mensaje__marca" aria-hidden="true">✓</span>
-                    Los datos son correctos, <?= e($usuario['nombre']) ?>. Falta que el
-                    backend abra la sesión: por eso todavía no entrás a tu cuenta.
-                </p>
             <?php endif; ?>
 
             <form class="formulario formulario--auth" method="post" action="<?= e(url('/ingresar')) ?>">
+                <?= csrf_campo() ?>
+
                 <p class="formulario__campo">
                     <label class="formulario__etiqueta t-mono-label-sm" for="email">Correo electrónico</label>
                     <input class="campo t-mono-texto" type="email" id="email" name="email"
-                           autocomplete="email" value="<?= e($email) ?>" required>
+                           autocomplete="email" value="<?= e($email) ?>" required autofocus>
                 </p>
 
                 <p class="formulario__campo">
@@ -96,8 +125,8 @@ require RASTRO_VIEWS . '/layout/head.php';
                            autocomplete="current-password" required>
                 </p>
 
-                <?php /* TODO(backend): esta ruta todavía no existe. Se agrega al
-                         router junto con el envío del mail de recuperación. */ ?>
+                <?php /* TODO(backend): la recuperación por mail todavía no
+                         existe. Se agrega junto con el envío de correo. */ ?>
                 <p class="auth__olvide">
                     <span class="t-mono-label-sm">Olvidé mi contraseña</span>
                 </p>
@@ -112,14 +141,6 @@ require RASTRO_VIEWS . '/layout/head.php';
                 ¿No tenés cuenta?
                 <a class="auth__enlace t-mono-label" href="<?= e(url('/registro')) ?>">Crear una</a>
             </p>
-
-            <?php
-            $nota_maqueta = 'El backend conecta la sesión, el token CSRF y el límite de '
-                          . 'intentos. La verificación de la contraseña ya funciona contra '
-                          . 'data/users.json. Los estados de error del campo están resueltos '
-                          . 'en el componente Input de Figma.';
-            require RASTRO_VIEWS . '/partials/nota-maqueta.php';
-            ?>
         </div>
     </div>
 </main>

@@ -578,3 +578,27 @@
   opacity: 0.08;
   transform: translateY(-0.19em);
 }
+
+/* Acceso al panel. Sólo se dibuja para quien tiene rol admin, así que no
+   compite por espacio con nadie más: en la barra de un cliente no existe. */
+.cabecera__admin {
+  display: none;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: var(--espaciado-12);
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.cabecera__admin:hover,
+.cabecera__admin.es-activo {
+  border-color: var(--color-accent-text);
+  color: var(--color-accent-text);
+}
+
+@media (min-width: 1280px) {
+  .cabecera__admin {
+    display: inline-flex;
+  }
+}
