@@ -1,7 +1,12 @@
 # Pendientes — Rastro Fitness
 
-Todo lo que está bloqueado esperando una definición del cliente o del backend dev.
-Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
+Todo lo que está bloqueado esperando una definición del cliente, o pendiente de
+nuestro lado. Cada ítem tiene un **placeholder** funcionando, así el desarrollo
+no se frena.
+
+> Desde el 27/08/2026 no hay un backend dev externo: el proyecto es entero
+> nuestro. Los ítems que decían "lo hace él" quedaron resueltos o cambiaron de
+> dueño.
 
 ---
 
@@ -29,13 +34,16 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 | 14 | **Cotizador por proyecto con PDF por mail** (pedido "a futuro" en Notion) | Fuera de alcance de esta etapa. Anotado para fase 2 del producto. |
 | 15 | **Banners editables** desde el panel | `repo_banners()` los expone; el ABM lo hace el backend dev. |
 
-## Para el backend dev
+## ~~Para el backend dev~~ → resueltos el 2026-08-27
 
-| # | Tema |
-|---|---|
-| ~~16~~ | Credenciales de MySQL: se cargan **solo** en `app/config.php` del servidor y se pasan por canal seguro. Nunca al repo ni a Notion. |
-| ~~17~~ | Estructura de tablas sugerida a partir de `docs/DATA-CONTRACT.md`. |
-| ~~18~~ | Habilitar MySQL remoto en hPanel para desarrollo local (documentado en `docs/HANDOFF.md`). |
+Esta sección existía para un desarrollador externo que ya no está en el proyecto.
+Los tres ítems se resolvieron al hacer la base nosotros:
+
+| # | Tema | Dónde quedó |
+|---|---|---|
+| ~~16~~ | ~~Credenciales de MySQL~~ | El procedimiento está en `docs/DEPLOY.md`. `app/config.php` sigue fuera del repo y fuera del deploy. |
+| ~~17~~ | ~~Estructura de tablas sugerida~~ | Dejó de ser una sugerencia: son las 13 tablas de `db/esquema.sql`. |
+| ~~18~~ | ~~Habilitar MySQL remoto en hPanel~~ | Documentado en `docs/DEPLOY.md`. |
 
 ## Tareas técnicas nuestras
 
