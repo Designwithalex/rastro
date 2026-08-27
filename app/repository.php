@@ -7,170 +7,223 @@
  * REGLA DE ORO DEL PROYECTO
  *
  *   Ninguna vista lee un JSON. Ninguna vista arma una consulta. Toda lectura
- *   de datos pasa por una de las funciones `repo_*` de este archivo.
+ *   y toda escritura de datos pasa por una de las funciones `repo_*` de este
+ *   archivo.
  *
- * Hoy cada función lee un mock de `data/*.json`. Cuando entre el backend real,
- * lo único que cambia es el CUERPO de estas funciones: donde dice
- * `_repo_json('products')` va a decir `SELECT ... FROM productos`. La firma,
- * el nombre de las claves y la forma del array que devuelven NO se tocan,
- * porque eso es lo que consumen las vistas.
+ * Desde el 27/08/2026 este archivo habla con MySQL. Antes leía los mocks de
+ * `data/*.json`. **Las firmas y la forma de las respuestas no cambiaron**, así
+ * que ninguna de las once vistas del sitio se tocó al migrar: esa era
+ * exactamente la apuesta del contrato, y funcionó.
+ *
+ * Los JSON de `data/` quedan como semilla histórica. Los carga una sola vez
+ * `bin/migrar.php` y después no los edita nadie.
  *
  *   → Si una vista necesita un dato que acá no está, se agrega una función
- *     nueva a este archivo. Nunca un file_get_contents en la vista.
- *   → El contrato completo está documentado en docs/DATA-CONTRACT.md.
+ *     nueva a este archivo. Nunca un `file_get_contents` ni un `SELECT` en
+ *     la vista.
+ *   → El contrato completo está en `docs/DATA-CONTRACT.md`.
  *
- * CONVENCIONES QUE EL BACKEND TIENE QUE SOSTENER
+ * CONVENCIONES QUE SOSTIENE ESTE ARCHIVO
  *
- *   · Las rutas de imagen son relativas a `assets/` y se resuelven en la vista
- *     con `asset()`. Ejemplo: "img/productos/foo.jpg".
- *   · Un producto con `activo: false` no existe para el catálogo: no aparece
- *     en listados, ni en la ficha, ni en relacionados. Sí se resuelve por id
- *     en `repo_cart_items()` y sigue figurando en pedidos viejos.
+ *   · Las rutas de imagen son relativas a `assets/` y se resuelven en la
+ *     vista con `asset()`. Ejemplo: "img/productos/foo.jpg".
+ *   · Un producto con `activo = 0` no existe para el catálogo: no aparece en
+ *     listados, ni en la ficha, ni en relacionados. Sí se resuelve por id en
+ *     `repo_cart_items()` y sigue figurando en pedidos viejos.
  *   · Los precios son enteros en pesos. El descuento por transferencia NO se
  *     calcula acá: lo calcula `precio_con_descuento()` en helpers.php.
- *   · El copy editable —hoy `banners.titulo`— no lleva números escritos a
- *     mano. Lleva marcadores: `{descuento}`, `{envio_gratis}`, `{whatsapp}`,
- *     que la vista resuelve con `interpolar()`. Un banner que dice "15%" es
- *     una segunda fuente de verdad del dato más importante del sitio y queda
- *     desactualizado el día que el cliente cambie el porcentaje.
+ *   · El copy editable no lleva números escritos a mano: lleva marcadores
+ *     `{descuento}`, `{envio_gratis}`, `{whatsapp}` que la vista resuelve con
+ *     `interpolar()`.
  *   · Un pedido guarda su propio `precio_unitario` y su propio
- *     `descuento_aplicado_pct`. Nunca se recalculan contra el producto:
- *     el precio de hoy no es el precio al que se vendió en abril.
+ *     `descuento_aplicado_pct`. Nunca se recalculan contra el producto: el
+ *     precio de hoy no es el precio al que se vendió en abril.
  *   · Las funciones nunca devuelven el `password_hash` de un usuario.
  *
- * AMPLIACIÓN DEL CONTRATO — 2026-08-25, `repo_nosotros()`
+ * POR QUÉ TANTO CUIDADO CON LAS CONSULTAS
  *
- *   El contrato original de CLAUDE.md §4.2 cubría catálogo, prueba social,
- *   configuración, cuenta y carrito. La página /nosotros necesita contenido
- *   que no entra en ninguno de esos grupos —fundadores, hitos, obras y
- *   cuatro cifras— y se agrega UNA sola función que devuelve todo el
- *   contenido de esa sección de una vez.
- *
- *   Una y no tres a propósito: `repo_fundadores()`, `repo_hitos()` y
- *   `repo_obras()` serían tres consultas y tres pantallas de ABM para lo que
- *   el cliente piensa como una sola cosa, "la página de Nosotros". Del lado
- *   del panel es una sección con varios bloques, no tres secciones.
- *
- *   TODO(backend): esto es la NOVENA sección del panel de administración.
- *   Las ocho diseñadas son Dashboard, Productos, Pedidos, Marcas oficiales,
- *   Logos de clientes, Banners, Categorías y Configuración; falta dibujar
- *   "Nosotros" (PENDIENTES #49). Mientras tanto el contenido vive en
- *   data/nosotros.json y todo lo que está en null es un hueco declarado.
- *
- * MARCA PROPIA vs. MARCA DE TERCEROS  (`brands.es_propia`)
- *
- *   Rastro vende dos cosas distintas y la UI no las puede mezclar:
- *
- *     · Marcas de terceros — Greencore y compañía. Rastro es su vendedor
- *       oficial, y esa es la prueba social de la home: la franja dice
- *       "somos vendedores oficiales de estas marcas".
- *     · Línea propia — productos que Rastro fabrica o marca. Ponerlos en
- *       esa franja le saca el sentido a la frase: uno no es vendedor
- *       oficial de sí mismo.
- *
- *   Por eso una marca con `es_propia: true` existe en la tabla —un producto
- *   siempre tiene que poder resolver el nombre de su marca— pero
- *   `repo_brands()` NO la devuelve: esa función alimenta la franja de la
- *   home y solo lista terceros.
- *
- *   El nombre de la marca de un producto no se resuelve llamando a
- *   `repo_brands()`: viene ya en el propio producto, en `marca_nombre`,
- *   que el repository resuelve contra la tabla completa (propias incluidas).
- *   TODO(backend): eso es un LEFT JOIN marcas ON marcas.slug = productos.marca,
- *   sin el WHERE que filtra las propias.
+ *   Todo valor que venga de afuera viaja como parámetro de una sentencia
+ *   preparada. No hay una sola concatenación de datos en este archivo. Los
+ *   únicos fragmentos que se arman con strings son nombres de columna para
+ *   el ORDER BY, y salen de una lista blanca cerrada acá adentro.
  */
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/db.php';
+
 /* ==========================================================================
-   Privado. Nada de esto es parte del contrato: son los andamios del mock.
+   Privado. Nada de esto es parte del contrato.
    ========================================================================== */
 
 /**
- * Lee un JSON de data/ y lo cachea en memoria: dentro del mismo request el
- * archivo se abre una sola vez por más veces que se lo pida.
+ * Las columnas del producto que salen a la vista, con los joins que
+ * resuelven el slug de la categoría y el nombre de la marca.
  *
- * TODO(backend): reemplazar por la conexión PDO que sale de app/config.php.
+ * `marca_nombre` sale de la tabla COMPLETA de marcas, la línea propia
+ * incluida: un producto siempre tiene que poder decir de qué marca es,
+ * aunque esa marca no aparezca en la franja de vendedores oficiales.
  */
-function _repo_json(string $archivo): array
+function _repo_select_producto(): string
 {
-    static $cache = [];
+    return 'SELECT p.*, c.slug AS categoria, m.slug AS marca, m.nombre AS marca_nombre
+            FROM productos p
+            LEFT JOIN categorias c ON c.id = p.categoria_id
+            LEFT JOIN marcas     m ON m.id = p.marca_id';
+}
 
-    if (isset($cache[$archivo])) {
-        return $cache[$archivo];
+/**
+ * Convierte una fila de la base en el producto que esperan las vistas.
+ *
+ * MySQL devuelve los TINYINT como 0/1 y los DECIMAL como string. Las vistas
+ * fueron escritas contra JSON, donde `destacado` era `true` y `peso_kg` era
+ * un número. Ese casteo se hace acá, una sola vez, y no repartido por las
+ * vistas con `== 1` y `(float)`.
+ */
+function _repo_fila_a_producto(array $f): array
+{
+    return [
+        'id'                => (int) $f['id'],
+        'slug'              => (string) $f['slug'],
+        'sku'               => (string) $f['sku'],
+        'nombre'            => (string) $f['nombre'],
+        'categoria'         => $f['categoria'] !== null ? (string) $f['categoria'] : '',
+        'marca'             => $f['marca'] !== null ? (string) $f['marca'] : '',
+        'marca_nombre'      => $f['marca_nombre'] !== null ? (string) $f['marca_nombre'] : null,
+        'descripcion_corta' => (string) ($f['descripcion_corta'] ?? ''),
+        'descripcion'       => (string) ($f['descripcion'] ?? ''),
+        'precio_lista'      => (int) $f['precio_lista'],
+        'precio_mayorista'  => $f['precio_mayorista'] !== null ? (int) $f['precio_mayorista'] : null,
+        'descuento_pct'     => $f['descuento_pct'] !== null ? (float) $f['descuento_pct'] : null,
+        'stock'             => (int) $f['stock'],
+        'destacado'         => (bool) $f['destacado'],
+        'nuevo'             => (bool) $f['nuevo'],
+        'imagen'            => (string) ($f['imagen'] ?? ''),
+        'peso_kg'           => $f['peso_kg'] !== null ? (float) $f['peso_kg'] : null,
+        'activo'            => (bool) $f['activo'],
+        'ancho_px'          => $f['ancho_px'] !== null ? (int) $f['ancho_px'] : null,
+        'alto_px'           => $f['alto_px'] !== null ? (int) $f['alto_px'] : null,
+        'imagenes'          => [],
+        'especificaciones'  => [],
+    ];
+}
+
+/**
+ * Le agrega a un lote de productos sus imágenes y sus especificaciones.
+ *
+ * DOS consultas para todo el lote, no dos por producto. Con doce productos
+ * en la grilla del catálogo la diferencia es 2 consultas contra 24, y esa
+ * es justamente la clase de detalle que no se nota con 30 productos de mock
+ * y sí con el catálogo real.
+ *
+ * @param array<int,array> $productos indexados por id
+ */
+function _repo_completar_productos(array $productos): array
+{
+    if ($productos === []) {
+        return $productos;
     }
 
-    $ruta = dirname(__DIR__) . '/data/' . $archivo . '.json';
+    $ids   = array_keys($productos);
+    $marks = implode(',', array_fill(0, count($ids), '?'));
 
-    if (!is_file($ruta)) {
-        return $cache[$archivo] = [];
+    $imagenes = db_q(
+        "SELECT producto_id, ruta FROM producto_imagenes
+         WHERE producto_id IN ($marks) ORDER BY producto_id, orden, id",
+        $ids
+    );
+
+    foreach ($imagenes as $fila) {
+        $productos[(int) $fila['producto_id']]['imagenes'][] = (string) $fila['ruta'];
     }
 
-    $datos = json_decode((string) file_get_contents($ruta), true);
+    $especs = db_q(
+        "SELECT producto_id, etiqueta, valor FROM producto_especificaciones
+         WHERE producto_id IN ($marks) ORDER BY producto_id, orden, id",
+        $ids
+    );
 
-    return $cache[$archivo] = is_array($datos) ? $datos : [];
-}
-
-/**
- * Normaliza un texto para comparar: minúsculas y sin acentos.
- * Es el equivalente pobre de un COLLATE utf8mb4_unicode_ci.
- */
-function _repo_normalizar(string $texto): string
-{
-    $texto = mb_strtolower(trim($texto), 'UTF-8');
-
-    return strtr($texto, [
-        'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a',
-        'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e',
-        'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i',
-        'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o',
-        'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u',
-        'ñ' => 'n', 'ç' => 'c',
-    ]);
-}
-
-/**
- * Todas las marcas indexadas por slug, la línea propia incluida.
- * Es el lado "uno" del join: sirve para resolver el nombre de la marca de
- * un producto, no para listar marcas en pantalla. Para eso está repo_brands().
- */
-function _repo_marcas_por_slug(): array
-{
-    static $indice = null;
-
-    if ($indice === null) {
-        $indice = [];
-        foreach (_repo_json('brands') as $marca) {
-            $indice[(string) ($marca['slug'] ?? '')] = $marca;
-        }
+    foreach ($especs as $fila) {
+        // La clave sigue siendo `label` y no `etiqueta`: así la escribieron
+        // los mocks y así la leen la ficha y el panel. Cambiarla ahora sería
+        // romper el contrato por una cuestión de gusto.
+        $productos[(int) $fila['producto_id']]['especificaciones'][] = [
+            'label' => (string) $fila['etiqueta'],
+            'valor' => (string) $fila['valor'],
+        ];
     }
 
-    return $indice;
+    return $productos;
 }
 
 /**
- * Deja un producto listo para salir del repository: le agrega el nombre de
- * su marca, que es lo que la vista muestra. Ningún producto sale de acá sin
- * pasar por esta función.
+ * Hidrata las filas de una consulta de productos, en orden.
+ *
+ * @param array<int,array> $filas
  */
-function _repo_producto_publico(array $producto): array
+function _repo_productos_desde_filas(array $filas): array
 {
-    $marcas = _repo_marcas_por_slug();
-    $slug   = (string) ($producto['marca'] ?? '');
+    $porId = [];
+    $orden = [];
 
-    $producto['marca_nombre'] = $marcas[$slug]['nombre'] ?? null;
+    foreach ($filas as $fila) {
+        $id = (int) $fila['id'];
+        $porId[$id] = _repo_fila_a_producto($fila);
+        $orden[] = $id;
+    }
 
-    return $producto;
+    $porId = _repo_completar_productos($porId);
+
+    // El orden lo decide la consulta, no el array asociativo.
+    return array_map(static fn (int $id): array => $porId[$id], $orden);
 }
 
 /**
- * Saca el hash de contraseña de un usuario antes de que salga de acá.
+ * Saca el hash de contraseña de un usuario antes de que salga de acá, y le
+ * arma la dirección con la forma que esperan las vistas.
  */
-function _repo_usuario_publico(array $usuario): array
+function _repo_fila_a_usuario(array $f): array
 {
-    unset($usuario['password_hash']);
+    $usuario = [
+        'id'        => (int) $f['id'],
+        'nombre'    => (string) $f['nombre'],
+        'apellido'  => (string) $f['apellido'],
+        'email'     => (string) $f['email'],
+        'telefono'  => $f['telefono'] !== null ? (string) $f['telefono'] : null,
+        'rol'       => (string) $f['rol'],
+        'empresa'   => $f['empresa'] !== null ? (string) $f['empresa'] : null,
+        'cuit'      => $f['cuit'] !== null ? (string) $f['cuit'] : null,
+        'direccion' => null,
+        'creado'    => (string) $f['creado'],
+        'activo'    => (bool) $f['activo'],
+    ];
+
+    $dir = db_q(
+        'SELECT calle, ciudad, provincia, codigo_postal FROM direcciones
+         WHERE usuario_id = ? ORDER BY principal DESC, id LIMIT 1',
+        [$usuario['id']]
+    )->fetch();
+
+    if ($dir !== false) {
+        $usuario['direccion'] = [
+            'calle'         => (string) $dir['calle'],
+            'ciudad'        => (string) ($dir['ciudad'] ?? ''),
+            'provincia'     => (string) ($dir['provincia'] ?? ''),
+            'codigo_postal' => (string) ($dir['codigo_postal'] ?? ''),
+        ];
+    }
 
     return $usuario;
+}
+
+/**
+ * Normaliza un correo para comparar y para guardar.
+ * La columna es utf8mb4_unicode_ci, así que la base ya no distingue
+ * mayúsculas; esto deja además la forma canónica en la tabla.
+ */
+function _repo_normalizar_email(string $email): string
+{
+    return mb_strtolower(trim($email), 'UTF-8');
 }
 
 /* ==========================================================================
@@ -194,81 +247,98 @@ function _repo_usuario_publico(array $usuario): array
  */
 function repo_products(array $filters = [], int $page = 1, int $perPage = 12): array
 {
-    $productos = array_filter(
-        _repo_json('products'),
-        static fn (array $p): bool => ($p['activo'] ?? false) === true
-    );
+    $where  = ['p.activo = 1'];
+    $params = [];
 
     if (!empty($filters['categoria'])) {
-        $categoria = (string) $filters['categoria'];
-        $productos = array_filter($productos, static fn ($p) => ($p['categoria'] ?? '') === $categoria);
+        $where[]  = 'c.slug = ?';
+        $params[] = (string) $filters['categoria'];
     }
 
     if (!empty($filters['marca'])) {
-        $marca = (string) $filters['marca'];
-        $productos = array_filter($productos, static fn ($p) => ($p['marca'] ?? '') === $marca);
+        $where[]  = 'm.slug = ?';
+        $params[] = (string) $filters['marca'];
     }
 
     if (isset($filters['q']) && trim((string) $filters['q']) !== '') {
-        $q = _repo_normalizar((string) $filters['q']);
-        $productos = array_filter($productos, static function (array $p) use ($q): bool {
-            $heno = _repo_normalizar(implode(' ', [
-                $p['nombre'] ?? '',
-                $p['sku'] ?? '',
-                $p['descripcion_corta'] ?? '',
-                $p['descripcion'] ?? '',
-                $p['categoria'] ?? '',
-                $p['marca'] ?? '',
-            ]));
+        /* LIKE y no FULLTEXT a propósito. La búsqueda del sitio tiene que
+           encontrar "disco" adentro de "discos" y "bumper" adentro de
+           "RS-DB-010"; FULLTEXT trabaja por palabras completas y tiene un
+           largo mínimo de token. Con la colación utf8mb4_unicode_ci esto
+           además ignora acentos y mayúsculas, que es lo que hacía
+           _repo_normalizar() en los mocks.
 
-            return str_contains($heno, $q);
-        });
+           TODO(backend): si el catálogo pasa de unos miles de productos,
+           esto es un escaneo de tabla y conviene un índice FULLTEXT con
+           ngram, o Meilisearch. Con 30 productos no tiene sentido. */
+        $q = '%' . str_replace(['%', '_'], ['\%', '\_'], trim((string) $filters['q'])) . '%';
+
+        $where[] = '(p.nombre LIKE ? OR p.sku LIKE ? OR p.descripcion_corta LIKE ?
+                     OR p.descripcion LIKE ? OR c.nombre LIKE ? OR m.nombre LIKE ?)';
+        array_push($params, $q, $q, $q, $q, $q, $q);
     }
 
-    if (isset($filters['precio_min']) && $filters['precio_min'] !== '') {
-        $min = (int) $filters['precio_min'];
-        $productos = array_filter($productos, static fn ($p) => (int) ($p['precio_lista'] ?? 0) >= $min);
+    if (isset($filters['precio_min']) && $filters['precio_min'] !== '' && $filters['precio_min'] !== null) {
+        $where[]  = 'p.precio_lista >= ?';
+        $params[] = (int) $filters['precio_min'];
     }
 
-    if (isset($filters['precio_max']) && $filters['precio_max'] !== '') {
-        $max = (int) $filters['precio_max'];
-        $productos = array_filter($productos, static fn ($p) => (int) ($p['precio_lista'] ?? 0) <= $max);
+    if (isset($filters['precio_max']) && $filters['precio_max'] !== '' && $filters['precio_max'] !== null) {
+        $where[]  = 'p.precio_lista <= ?';
+        $params[] = (int) $filters['precio_max'];
     }
 
     if (!empty($filters['en_stock'])) {
-        $productos = array_filter($productos, static fn ($p) => (int) ($p['stock'] ?? 0) > 0);
+        $where[] = 'p.stock > 0';
     }
 
     if (!empty($filters['destacado'])) {
-        $productos = array_filter($productos, static fn ($p) => ($p['destacado'] ?? false) === true);
+        $where[] = 'p.destacado = 1';
     }
 
-    $productos = array_values($productos);
+    $sql_where = 'WHERE ' . implode(' AND ', $where);
 
-    // Orden. "relevancia" es el orden comercial: primero lo destacado,
-    // después lo nuevo, y dentro de cada grupo lo que no tiene stock va al final.
-    $orden = (string) ($filters['orden'] ?? 'relevancia');
+    /* Lista blanca cerrada. `orden` viene de la URL y es el único pedazo de
+       la consulta que se arma con un string, así que no puede salir de
+       ningún lado que no sea este array.
 
-    usort($productos, static function (array $a, array $b) use ($orden): int {
-        return match ($orden) {
-            'precio_asc'  => ((int) ($a['precio_lista'] ?? 0)) <=> ((int) ($b['precio_lista'] ?? 0)),
-            'precio_desc' => ((int) ($b['precio_lista'] ?? 0)) <=> ((int) ($a['precio_lista'] ?? 0)),
-            'nombre'      => strcmp(
-                _repo_normalizar((string) ($a['nombre'] ?? '')),
-                _repo_normalizar((string) ($b['nombre'] ?? ''))
-            ),
-            default       => [(int) ($b['stock'] ?? 0) > 0, $b['destacado'] ?? false, $b['nuevo'] ?? false, (int) ($a['id'] ?? 0)]
-                             <=> [(int) ($a['stock'] ?? 0) > 0, $a['destacado'] ?? false, $a['nuevo'] ?? false, (int) ($b['id'] ?? 0)],
-        };
-    });
+       "relevancia" es el orden comercial: primero lo que tiene stock,
+       después lo destacado, después lo nuevo. */
+    $ordenes = [
+        'relevancia'  => '(p.stock > 0) DESC, p.destacado DESC, p.nuevo DESC, p.id ASC',
+        'precio_asc'  => 'p.precio_lista ASC, p.id ASC',
+        'precio_desc' => 'p.precio_lista DESC, p.id ASC',
+        'nombre'      => 'p.nombre ASC, p.id ASC',
+    ];
 
-    $total   = count($productos);
+    $sql_orden = $ordenes[(string) ($filters['orden'] ?? 'relevancia')] ?? $ordenes['relevancia'];
+
+    $total = (int) db_q(
+        'SELECT COUNT(*) FROM productos p
+         LEFT JOIN categorias c ON c.id = p.categoria_id
+         LEFT JOIN marcas     m ON m.id = p.marca_id
+         ' . $sql_where,
+        $params
+    )->fetchColumn();
+
     $perPage = max(1, $perPage);
     $paginas = max(1, (int) ceil($total / $perPage));
     $page    = min(max(1, $page), $paginas);
 
+    /* LIMIT y OFFSET van interpolados y no como parámetros: con
+       ATTR_EMULATE_PREPARES en false, MySQL los recibe como string y
+       rechaza la sentencia. Son enteros que ya pasaron por (int) y por el
+       recorte de arriba, así que no hay valor de afuera acá. */
+    $limit  = (int) $perPage;
+    $offset = (int) (($page - 1) * $perPage);
+
+    $filas = db_q(
+        _repo_select_producto() . ' ' . $sql_where . " ORDER BY $sql_orden LIMIT $limit OFFSET $offset",
+        $params
+    )->fetchAll();
+
     return [
-        'items'   => array_map('_repo_producto_publico', array_slice($productos, ($page - 1) * $perPage, $perPage)),
+        'items'   => _repo_productos_desde_filas($filas),
         'total'   => $total,
         'pagina'  => $page,
         'paginas' => $paginas,
@@ -280,13 +350,16 @@ function repo_products(array $filters = [], int $page = 1, int $perPage = 12): a
  */
 function repo_product(string $slug): ?array
 {
-    foreach (_repo_json('products') as $producto) {
-        if (($producto['slug'] ?? '') === $slug && ($producto['activo'] ?? false) === true) {
-            return _repo_producto_publico($producto);
-        }
+    $fila = db_q(
+        _repo_select_producto() . ' WHERE p.slug = ? AND p.activo = 1 LIMIT 1',
+        [$slug]
+    )->fetch();
+
+    if ($fila === false) {
+        return null;
     }
 
-    return null;
+    return _repo_productos_desde_filas([$fila])[0];
 }
 
 /**
@@ -295,61 +368,55 @@ function repo_product(string $slug): ?array
  */
 function repo_related_products(string $slug, int $limit = 4): array
 {
-    $actual = repo_product($slug);
+    $actual = db_q(
+        'SELECT id, categoria_id, marca_id FROM productos WHERE slug = ? AND activo = 1 LIMIT 1',
+        [$slug]
+    )->fetch();
 
-    if ($actual === null) {
+    if ($actual === false || $limit <= 0) {
         return [];
     }
 
-    $candidatos = array_values(array_filter(
-        _repo_json('products'),
-        static fn (array $p): bool => ($p['activo'] ?? false) === true
-            && ($p['categoria'] ?? '') === ($actual['categoria'] ?? '')
-            && ($p['slug'] ?? '') !== $slug
-    ));
+    $limit = (int) $limit;
 
-    usort($candidatos, static function (array $a, array $b) use ($actual): int {
-        return [
-            ($b['marca'] ?? '') === ($actual['marca'] ?? ''),
-            (int) ($b['stock'] ?? 0) > 0,
-            $b['destacado'] ?? false,
-        ] <=> [
-            ($a['marca'] ?? '') === ($actual['marca'] ?? ''),
-            (int) ($a['stock'] ?? 0) > 0,
-            $a['destacado'] ?? false,
-        ];
-    });
+    $filas = db_q(
+        _repo_select_producto() . '
+         WHERE p.activo = 1 AND p.categoria_id <=> ? AND p.id <> ?
+         ORDER BY (p.marca_id <=> ?) DESC, (p.stock > 0) DESC, p.destacado DESC, p.id ASC
+         LIMIT ' . $limit,
+        [$actual['categoria_id'], (int) $actual['id'], $actual['marca_id']]
+    )->fetchAll();
 
-    return array_map('_repo_producto_publico', array_slice($candidatos, 0, max(0, $limit)));
+    return _repo_productos_desde_filas($filas);
 }
 
 /**
  * Categorías del catálogo, ordenadas.
  *
- * `productos_count` se recalcula sobre los productos activos en vez de leerse
- * del mock: un número que miente en la grilla de la home es peor que no tenerlo.
- * TODO(backend): resolverlo con un COUNT agrupado, no con un bucle por categoría.
+ * `productos_count` se resuelve con un LEFT JOIN agrupado y no con un bucle
+ * por categoría: un número que miente en la grilla de la home es peor que no
+ * tenerlo, y contar 30 veces para dibujar 6 celdas no tiene sentido.
  */
 function repo_categories(): array
 {
-    $categorias = _repo_json('categories');
+    $filas = db_q(
+        'SELECT c.id, c.slug, c.nombre, c.descripcion, c.pictograma, c.orden,
+                COUNT(p.id) AS productos_count
+         FROM categorias c
+         LEFT JOIN productos p ON p.categoria_id = c.id AND p.activo = 1
+         GROUP BY c.id
+         ORDER BY c.orden ASC, c.id ASC'
+    )->fetchAll();
 
-    $conteo = [];
-    foreach (_repo_json('products') as $producto) {
-        if (($producto['activo'] ?? false) === true) {
-            $slug = (string) ($producto['categoria'] ?? '');
-            $conteo[$slug] = ($conteo[$slug] ?? 0) + 1;
-        }
-    }
-
-    foreach ($categorias as &$categoria) {
-        $categoria['productos_count'] = $conteo[$categoria['slug'] ?? ''] ?? 0;
-    }
-    unset($categoria);
-
-    usort($categorias, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
-
-    return $categorias;
+    return array_map(static fn (array $f): array => [
+        'id'              => (int) $f['id'],
+        'slug'            => (string) $f['slug'],
+        'nombre'          => (string) $f['nombre'],
+        'descripcion'     => (string) ($f['descripcion'] ?? ''),
+        'pictograma'      => (string) ($f['pictograma'] ?? ''),
+        'orden'           => (int) $f['orden'],
+        'productos_count' => (int) $f['productos_count'],
+    ], $filas);
 }
 
 /**
@@ -358,7 +425,7 @@ function repo_categories(): array
 function repo_category(string $slug): ?array
 {
     foreach (repo_categories() as $categoria) {
-        if (($categoria['slug'] ?? '') === $slug) {
+        if ($categoria['slug'] === $slug) {
             return $categoria;
         }
     }
@@ -371,36 +438,34 @@ function repo_category(string $slug): ?array
    ========================================================================== */
 
 /**
- * Marcas de TERCEROS de las que Rastro es vendedor oficial, ordenadas.
+ * Marcas ordenadas.
  *
- * Deja afuera la línea propia (`es_propia: true`): esta función alimenta la
- * franja de prueba social de la home, y ahí Rastro no va. Ver el bloque
- * "marca propia vs. marca de terceros" arriba de todo.
+ * Por defecto deja afuera la línea propia (`es_propia = 1`): esta función
+ * alimenta la franja de prueba social de la home, y ahí Rastro no va, porque
+ * uno no es vendedor oficial de sí mismo.
  *
- * AMPLIACIÓN — 2026-08-26, `$incluir_propias`
- *
- * El filtro de marca del catálogo necesita lo contrario: ahí la pregunta no
- * es "¿de quién somos vendedores oficiales?" sino "¿de qué marca es este
- * producto?", y la línea propia es la respuesta de 19 de los 30 productos
- * del catálogo. Sin la propia, ese filtro esconde dos tercios del catálogo.
- *
- * Son dos preguntas distintas sobre la misma tabla, así que es un
- * parámetro y no una función nueva. El valor por defecto es el
- * comportamiento viejo: ninguna llamada existente cambia de resultado.
- *
- * TODO(backend): con MySQL es el mismo SELECT con o sin
- * `WHERE es_propia = 0`.
+ * Con `$incluir_propias = true` devuelve todas. La usa el filtro de marca
+ * del catálogo, que hace la pregunta contraria —"¿de qué marca es este
+ * producto?"— y sin la propia esconde dos tercios del catálogo.
  */
 function repo_brands(bool $incluir_propias = false): array
 {
-    $marcas = array_values(array_filter(
-        _repo_json('brands'),
-        static fn (array $m): bool => $incluir_propias || empty($m['es_propia'])
-    ));
+    $sql = 'SELECT id, slug, nombre, logo, orden, es_propia FROM marcas';
 
-    usort($marcas, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
+    if (!$incluir_propias) {
+        $sql .= ' WHERE es_propia = 0';
+    }
 
-    return $marcas;
+    $filas = db_q($sql . ' ORDER BY orden ASC, id ASC')->fetchAll();
+
+    return array_map(static fn (array $f): array => [
+        'id'        => (int) $f['id'],
+        'slug'      => (string) $f['slug'],
+        'nombre'    => (string) $f['nombre'],
+        'logo'      => (string) ($f['logo'] ?? ''),
+        'orden'     => (int) $f['orden'],
+        'es_propia' => (bool) $f['es_propia'],
+    ], $filas);
 }
 
 /**
@@ -408,10 +473,14 @@ function repo_brands(bool $incluir_propias = false): array
  */
 function repo_clients(): array
 {
-    $clientes = _repo_json('clients');
-    usort($clientes, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
+    $filas = db_q('SELECT id, nombre, logo, orden FROM clientes ORDER BY orden ASC, id ASC')->fetchAll();
 
-    return $clientes;
+    return array_map(static fn (array $f): array => [
+        'id'     => (int) $f['id'],
+        'nombre' => (string) $f['nombre'],
+        'logo'   => (string) ($f['logo'] ?? ''),
+        'orden'  => (int) $f['orden'],
+    ], $filas);
 }
 
 /**
@@ -420,15 +489,20 @@ function repo_clients(): array
  */
 function repo_banners(): array
 {
-    $banners = array_values(array_filter(
-        _repo_json('banners'),
-        static fn (array $b): bool => ($b['activo'] ?? false) === true
-    ));
+    $filas = db_q(
+        'SELECT id, titulo, imagen, enlace, posicion, activo, orden
+         FROM banners WHERE activo = 1 ORDER BY posicion ASC, orden ASC, id ASC'
+    )->fetchAll();
 
-    usort($banners, static fn ($a, $b) => [(string) ($a['posicion'] ?? ''), (int) ($a['orden'] ?? 0)]
-                                      <=> [(string) ($b['posicion'] ?? ''), (int) ($b['orden'] ?? 0)]);
-
-    return $banners;
+    return array_map(static fn (array $f): array => [
+        'id'       => (int) $f['id'],
+        'titulo'   => (string) ($f['titulo'] ?? ''),
+        'imagen'   => (string) ($f['imagen'] ?? ''),
+        'enlace'   => (string) ($f['enlace'] ?? ''),
+        'posicion' => (string) $f['posicion'],
+        'activo'   => (bool) $f['activo'],
+        'orden'    => (int) $f['orden'],
+    ], $filas);
 }
 
 /* ==========================================================================
@@ -438,65 +512,40 @@ function repo_banners(): array
 /**
  * Todo el contenido de la sección "Nosotros", de una sola vez.
  *
- * Alimenta las dos piezas que usan ese contenido con roles distintos: la
- * página /nosotros completa y la franja de la home. Por eso devuelve el
- * paquete entero y no un pedazo por llamada.
- *
- * @return array{
- *     provisorio:bool,
- *     encabezado:array{kicker:string,titulo:string,declaracion:string},
- *     cifras:array<int,array{clave:string,rotulo:string,valor:?int}>,
- *     fundadores:array{titulo:string,texto:string,foto:?string,foto_alt:?string,personas:array},
- *     historia:array{titulo:string,texto:string,hitos:array},
- *     como_trabajamos:array{titulo:string,texto:string,pasos:array},
- *     obras:array{titulo:string,texto:string,items:array},
- *     garantia:array{titulo:string,items:array},
- *     donde_estamos:array{titulo:string,texto:string,direccion:?string,foto:?string,foto_alt:?string},
- *     cierre:array{titulo:string,texto:string,acciones:array},
- *     franja:array{titulo:string,texto:string,enlace_texto:string}
- * }
+ * Se guarda como un documento en una única fila y no repartido en seis
+ * tablas: el cliente lo piensa como una sola cosa y lo edita una sola
+ * pantalla del panel. Ver docs/DATA-CONTRACT.md §4.
  *
  * Reglas que la vista puede dar por sentadas:
  *
  *   · Un valor en null es un hueco DECLARADO, no un error: la vista lo
- *     dibuja como marcador visible en vez de esconder la fila. Hoy son las
- *     tres cifras que el cliente no pasó, los años de los hitos y la
- *     dirección del depósito.
+ *     dibuja como marcador visible en vez de esconder la fila.
  *   · `obras.items` puede venir vacío y eso NO es un estado de error: la
- *     página esconde la sección entera. Una sección de obras vacía es peor
- *     que no tenerla.
+ *     página esconde la sección entera.
  *   · `fundadores.foto` puede ser null y la página colapsa ese bloque a un
- *     párrafo firmado con los dos nombres. No se reemplaza por un retrato
- *     de archivo: una página sin foto es honesta.
- *   · La cifra `productos_en_catalogo` NO se carga a mano. Se resuelve acá
- *     contra el catálogo, porque un número escrito en un JSON al lado de la
- *     tabla que lo contradice queda desactualizado el mismo día.
- *
- * TODO(backend): pasa a ser la novena sección del panel. Cada bloque de
- * este array es un grupo de campos de esa pantalla; `productos_en_catalogo`
- * no lleva campo, es un COUNT.
+ *     párrafo firmado con los dos nombres.
+ *   · La cifra `productos_en_catalogo` NO se carga a mano: se resuelve acá
+ *     contra el catálogo.
  */
 function repo_nosotros(): array
 {
-    $contenido = _repo_json('nosotros');
+    $crudo = db_q('SELECT contenido FROM nosotros WHERE id = 1')->fetchColumn();
 
-    // El comentario del mock no es parte del contrato.
+    $contenido = is_string($crudo) ? json_decode($crudo, true) : null;
+    $contenido = is_array($contenido) ? $contenido : [];
+
     unset($contenido['_comentario']);
 
     $contenido['provisorio'] = (bool) ($contenido['provisorio'] ?? false);
 
     // Forma garantizada: la vista no tiene que preguntar si existe la clave,
     // solo si está vacía. Es la diferencia entre un estado vacío y un error.
-    $contenido['encabezado']      = (array) ($contenido['encabezado'] ?? []);
-    $contenido['cifras']          = array_values((array) ($contenido['cifras'] ?? []));
-    $contenido['fundadores']      = (array) ($contenido['fundadores'] ?? []);
-    $contenido['historia']        = (array) ($contenido['historia'] ?? []);
-    $contenido['como_trabajamos'] = (array) ($contenido['como_trabajamos'] ?? []);
-    $contenido['obras']           = (array) ($contenido['obras'] ?? []);
-    $contenido['garantia']        = (array) ($contenido['garantia'] ?? []);
-    $contenido['donde_estamos']   = (array) ($contenido['donde_estamos'] ?? []);
-    $contenido['cierre']          = (array) ($contenido['cierre'] ?? []);
-    $contenido['franja']          = (array) ($contenido['franja'] ?? []);
+    foreach (['encabezado', 'fundadores', 'historia', 'como_trabajamos',
+              'obras', 'garantia', 'donde_estamos', 'cierre', 'franja'] as $bloque) {
+        $contenido[$bloque] = (array) ($contenido[$bloque] ?? []);
+    }
+
+    $contenido['cifras'] = array_values((array) ($contenido['cifras'] ?? []));
 
     $contenido['fundadores']['personas']   = array_values((array) ($contenido['fundadores']['personas'] ?? []));
     $contenido['historia']['hitos']        = array_values((array) ($contenido['historia']['hitos'] ?? []));
@@ -506,8 +555,7 @@ function repo_nosotros(): array
     $contenido['cierre']['acciones']       = array_values((array) ($contenido['cierre']['acciones'] ?? []));
 
     // La única cifra que no se carga: sale del catálogo.
-    // TODO(backend): SELECT COUNT(*) FROM productos WHERE activo = 1.
-    $total_catalogo = repo_products([], 1, 1)['total'];
+    $total_catalogo = (int) db_q('SELECT COUNT(*) FROM productos WHERE activo = 1')->fetchColumn();
 
     foreach ($contenido['cifras'] as $i => $cifra) {
         if (($cifra['clave'] ?? '') === 'productos_en_catalogo') {
@@ -524,59 +572,91 @@ function repo_nosotros(): array
 
 /**
  * Configuración del sitio: % de descuento, WhatsApp, envíos, redes, legales.
- * TODO(backend): pasa a ser la tabla que edita el panel de administración.
+ *
+ * La tabla es clave-valor y guarda todo como texto. Las claves numéricas se
+ * devuelven casteadas para que la vista reciba lo mismo que recibía del
+ * JSON: `envio_gratis_desde` tiene que ser un int y no la cadena "150000".
  */
 function repo_settings(): array
 {
-    return _repo_json('settings');
+    static $cache = null;
+
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $settings = [];
+
+    foreach (db_q('SELECT clave, valor FROM settings') as $fila) {
+        $settings[(string) $fila['clave']] = (string) ($fila['valor'] ?? '');
+    }
+
+    foreach (['envio_gratis_desde'] as $entero) {
+        if (isset($settings[$entero])) {
+            $settings[$entero] = (int) $settings[$entero];
+        }
+    }
+
+    // El porcentaje puede ser decimal: 12,5 es un descuento válido.
+    if (isset($settings['descuento_transferencia_pct'])) {
+        $settings['descuento_transferencia_pct'] = (float) str_replace(',', '.', $settings['descuento_transferencia_pct']);
+    }
+
+    return $cache = $settings;
 }
 
 /* ==========================================================================
-   Cuenta — mock. Todo este bloque lo conecta el backend dev.
+   Cuenta
    ========================================================================== */
 
 /**
  * Verifica credenciales y devuelve el usuario sin su hash, o null.
  *
- * TODO(backend): además de validar, tiene que abrir la sesión, regenerar el
- * id de sesión y aplicar límite de intentos. La maqueta no persiste nada.
- * Usuarios de prueba: demo@rastrofitness.com.ar y mayorista@rastrofitness.com.ar,
- * los dos con la contraseña "rastro2026".
+ * NO abre sesión: eso es tarea de `app/sesion.php`. Acá solo se responde
+ * "¿este par de credenciales es válido?".
+ *
+ * Nunca se dice cuál de los dos datos estuvo mal, y se gasta el mismo
+ * tiempo aunque el correo no exista, para no filtrar por diferencia de
+ * tiempos qué direcciones están registradas.
  */
 function repo_login(string $email, string $password): ?array
 {
-    $email = _repo_normalizar($email);
+    $fila = db_q(
+        'SELECT * FROM usuarios WHERE email = ? LIMIT 1',
+        [_repo_normalizar_email($email)]
+    )->fetch();
 
-    foreach (_repo_json('users') as $usuario) {
-        if (_repo_normalizar((string) ($usuario['email'] ?? '')) !== $email) {
-            continue;
-        }
-
-        if (($usuario['activo'] ?? false) !== true) {
-            return null;
-        }
-
-        if (password_verify($password, (string) ($usuario['password_hash'] ?? ''))) {
-            return _repo_usuario_publico($usuario);
-        }
+    if ($fila === false) {
+        password_verify($password, '$2y$12$usuarioinexistenteusuarioinexistenteusuarioinexiste');
 
         return null;
     }
 
-    // Se gasta el mismo tiempo aunque el mail no exista, para no filtrar
-    // por diferencia de tiempos qué direcciones están registradas.
-    password_verify($password, '$2y$12$usuarioinexistenteusuarioinexistenteusuarioinexiste');
+    if (!(bool) $fila['activo']) {
+        return null;
+    }
 
-    return null;
+    if (!password_verify($password, (string) $fila['password_hash'])) {
+        return null;
+    }
+
+    /* Si el hash quedó viejo —porque cambió el algoritmo o el costo—, se
+       regraba ahora que tenemos la contraseña en claro. Es el único momento
+       en el que se puede hacer. */
+    if (password_needs_rehash((string) $fila['password_hash'], PASSWORD_DEFAULT)) {
+        db_q(
+            'UPDATE usuarios SET password_hash = ? WHERE id = ?',
+            [password_hash($password, PASSWORD_DEFAULT), (int) $fila['id']]
+        );
+    }
+
+    return _repo_fila_a_usuario($fila);
 }
 
 /**
- * Alta de usuario. Valida y devuelve el resultado; NO persiste.
+ * Alta de usuario. Valida, guarda y devuelve el resultado.
  *
  * @return array{ok:bool, errores:array<string,string>, usuario:?array}
- *
- * TODO(backend): guardar el usuario con password_hash(), verificar que el mail
- * no esté tomado, mandar el mail de bienvenida y abrir la sesión.
  */
 function repo_register(array $data): array
 {
@@ -598,11 +678,13 @@ function repo_register(array $data): array
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errores['email'] = 'Revisá el correo: no parece una dirección válida.';
     } else {
-        foreach (_repo_json('users') as $usuario) {
-            if (_repo_normalizar((string) $usuario['email']) === _repo_normalizar($email)) {
-                $errores['email'] = 'Ya hay una cuenta con este correo.';
-                break;
-            }
+        $tomado = db_q(
+            'SELECT 1 FROM usuarios WHERE email = ? LIMIT 1',
+            [_repo_normalizar_email($email)]
+        )->fetchColumn();
+
+        if ($tomado !== false) {
+            $errores['email'] = 'Ya hay una cuenta con este correo.';
         }
     }
 
@@ -614,23 +696,32 @@ function repo_register(array $data): array
         return ['ok' => false, 'errores' => $errores, 'usuario' => null];
     }
 
-    return [
-        'ok'      => true,
-        'errores' => [],
-        'usuario' => [
-            'id'        => 0,
-            'nombre'    => $nombre,
-            'apellido'  => $apellido,
-            'email'     => $email,
-            'telefono'  => trim((string) ($data['telefono'] ?? '')),
-            'rol'       => ($data['es_empresa'] ?? false) ? 'mayorista' : 'cliente',
-            'empresa'   => trim((string) ($data['empresa'] ?? '')) ?: null,
-            'cuit'      => trim((string) ($data['cuit'] ?? '')) ?: null,
-            'direccion' => null,
-            'creado'    => date('Y-m-d'),
-            'activo'    => true,
-        ],
-    ];
+    /* El rol lo decide el servidor, nunca el formulario. `es_empresa` es
+       una casilla del navegador: si de ella saliera el rol, cualquiera se
+       daría de alta como admin agregando un campo al POST. */
+    $rol = !empty($data['es_empresa']) ? 'mayorista' : 'cliente';
+
+    $id = db_transaccion(static function () use ($nombre, $apellido, $email, $password, $rol, $data): int {
+        db_q(
+            'INSERT INTO usuarios (nombre, apellido, email, password_hash, telefono, rol, empresa, cuit, creado, activo)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)',
+            [
+                $nombre,
+                $apellido,
+                _repo_normalizar_email($email),
+                password_hash($password, PASSWORD_DEFAULT),
+                trim((string) ($data['telefono'] ?? '')) ?: null,
+                $rol,
+                trim((string) ($data['empresa'] ?? '')) ?: null,
+                trim((string) ($data['cuit'] ?? '')) ?: null,
+                date('Y-m-d'),
+            ]
+        );
+
+        return (int) db()->lastInsertId();
+    });
+
+    return ['ok' => true, 'errores' => [], 'usuario' => repo_user($id)];
 }
 
 /**
@@ -638,13 +729,9 @@ function repo_register(array $data): array
  */
 function repo_user(int $id): ?array
 {
-    foreach (_repo_json('users') as $usuario) {
-        if ((int) ($usuario['id'] ?? 0) === $id) {
-            return _repo_usuario_publico($usuario);
-        }
-    }
+    $fila = db_q('SELECT * FROM usuarios WHERE id = ? LIMIT 1', [$id])->fetch();
 
-    return null;
+    return $fila === false ? null : _repo_fila_a_usuario($fila);
 }
 
 /**
@@ -655,36 +742,93 @@ function repo_user(int $id): ?array
  */
 function repo_orders(int $userId): array
 {
-    $pedidos = array_values(array_filter(
-        _repo_json('orders'),
-        static fn (array $o): bool => (int) ($o['usuario_id'] ?? 0) === $userId
-    ));
+    $filas = db_q(
+        'SELECT * FROM pedidos WHERE usuario_id = ? ORDER BY fecha DESC, id DESC',
+        [$userId]
+    )->fetchAll();
 
-    usort($pedidos, static fn ($a, $b) => strcmp((string) ($b['fecha'] ?? ''), (string) ($a['fecha'] ?? '')));
-
-    return $pedidos;
+    return _repo_pedidos_con_items($filas);
 }
 
 /**
  * Un pedido por su código (RF-2026-0418).
  *
- * TODO(backend): esta función NO valida quién pide el pedido. Hoy da igual
- * porque no hay sesión y la vista no está escrita, pero el código es
- * adivinable (RF-año-ddmm) y devuelve nombre, dirección y total de una
- * compra. Antes de exponerla en /cuenta hay que exigir sesión y comparar
- * usuario_id contra el usuario logueado, o recibir el id del dueño como
- * segundo argumento y filtrar acá. Si no, cualquiera lee los pedidos de
- * cualquiera probando códigos.
+ * $usuarioId acota el pedido a su dueño. Es opcional para no romper las
+ * llamadas viejas, pero el panel y la cuenta lo pasan SIEMPRE.
+ *
+ * El código es adivinable —RF-año-ddmm— y el pedido trae nombre, dirección
+ * y total de una compra. Sin ese segundo argumento, cualquiera lee los
+ * pedidos de cualquiera probando códigos. Por eso la ficha de pedido de
+ * /cuenta no se dibujó hasta que existió este parámetro.
  */
-function repo_order(string $code): ?array
+function repo_order(string $code, ?int $usuarioId = null): ?array
 {
-    foreach (_repo_json('orders') as $pedido) {
-        if (($pedido['codigo'] ?? '') === $code) {
-            return $pedido;
-        }
+    $sql    = 'SELECT * FROM pedidos WHERE codigo = ?';
+    $params = [$code];
+
+    if ($usuarioId !== null) {
+        $sql .= ' AND usuario_id = ?';
+        $params[] = $usuarioId;
     }
 
-    return null;
+    $fila = db_q($sql . ' LIMIT 1', $params)->fetch();
+
+    if ($fila === false) {
+        return null;
+    }
+
+    return _repo_pedidos_con_items([$fila])[0];
+}
+
+/**
+ * Le pega los items a un lote de pedidos. Una consulta para todo el lote.
+ *
+ * @param array<int,array> $filas
+ */
+function _repo_pedidos_con_items(array $filas): array
+{
+    if ($filas === []) {
+        return [];
+    }
+
+    $pedidos = [];
+
+    foreach ($filas as $f) {
+        $pedidos[(int) $f['id']] = [
+            'id'                     => (int) $f['id'],
+            'codigo'                 => (string) $f['codigo'],
+            'usuario_id'             => $f['usuario_id'] !== null ? (int) $f['usuario_id'] : null,
+            'fecha'                  => (string) $f['fecha'],
+            'estado'                 => (string) $f['estado'],
+            'medio_pago'             => (string) ($f['medio_pago'] ?? ''),
+            'subtotal'               => (int) $f['subtotal'],
+            'envio'                  => (int) $f['envio'],
+            'descuento_aplicado_pct' => (float) $f['descuento_aplicado_pct'],
+            'total'                  => (int) $f['total'],
+            'items'                  => [],
+        ];
+    }
+
+    $ids   = array_keys($pedidos);
+    $marks = implode(',', array_fill(0, count($ids), '?'));
+
+    $items = db_q(
+        "SELECT pedido_id, producto_id, nombre, sku, cantidad, precio_unitario
+         FROM pedido_items WHERE pedido_id IN ($marks) ORDER BY pedido_id, id",
+        $ids
+    );
+
+    foreach ($items as $item) {
+        $pedidos[(int) $item['pedido_id']]['items'][] = [
+            'producto_id'     => $item['producto_id'] !== null ? (int) $item['producto_id'] : null,
+            'nombre'          => (string) $item['nombre'],
+            'sku'             => (string) ($item['sku'] ?? ''),
+            'cantidad'        => (int) $item['cantidad'],
+            'precio_unitario' => (int) $item['precio_unitario'],
+        ];
+    }
+
+    return array_values($pedidos);
 }
 
 /* ==========================================================================
@@ -695,22 +839,35 @@ function repo_order(string $code): ?array
  * Resuelve los ids que el carrito guarda en localStorage.
  *
  * Devuelve los productos en el mismo orden en que llegaron los ids, con su
- * `activo` y su `stock` puestos, para que el carrito pueda avisar que algo se
- * dio de baja o se quedó sin stock en vez de hacerlo desaparecer sin explicación.
- * Las cantidades no viven acá: las pone el JS.
+ * `activo` y su `stock` puestos, para que el carrito pueda avisar que algo
+ * se dio de baja o se quedó sin stock en vez de hacerlo desaparecer sin
+ * explicación. Las cantidades no viven acá: las pone el JS.
  */
 function repo_cart_items(array $ids): array
 {
-    $porId = [];
-    foreach (_repo_json('products') as $producto) {
-        $porId[(int) ($producto['id'] ?? 0)] = $producto;
+    $ids = array_values(array_filter(array_map('intval', $ids), static fn (int $i): bool => $i > 0));
+
+    if ($ids === []) {
+        return [];
     }
 
+    $marks = implode(',', array_fill(0, count($ids), '?'));
+
+    $filas = db_q(
+        _repo_select_producto() . " WHERE p.id IN ($marks)",
+        $ids
+    )->fetchAll();
+
+    $porId = [];
+    foreach (_repo_productos_desde_filas($filas) as $producto) {
+        $porId[$producto['id']] = $producto;
+    }
+
+    // El orden lo pide quien llama, no la base.
     $items = [];
     foreach ($ids as $id) {
-        $id = (int) $id;
         if (isset($porId[$id])) {
-            $items[] = _repo_producto_publico($porId[$id]);
+            $items[] = $porId[$id];
         }
     }
 

@@ -32,7 +32,14 @@ jobs:
           protocol: ftps
           server-dir: /public_html/
           # Sube solo lo que el sitio necesita para correr.
-          # app/config.php NO se sincroniza: vive únicamente en el servidor.
+          #
+          # app/config.php NO se sincroniza: lleva las credenciales de MySQL
+          # y vive únicamente en el servidor.
+          #
+          # data/ tampoco, desde que el catálogo vive en la base. Esos JSON
+          # son la semilla que cargó bin/migrar.php una sola vez: subirlos
+          # sería dejar en el servidor una copia vieja del catálogo y, peor,
+          # users.json con los hashes de contraseña de los usuarios de prueba.
           exclude: |
             **/.git*
             **/.git*/**
@@ -41,6 +48,8 @@ jobs:
             **/docs/**
             **/design/**
             **/bin/**
+            **/db/**
+            **/data/**
             **/*.md
             **/app/config.php
             **/node_modules/**
