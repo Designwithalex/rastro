@@ -20,7 +20,7 @@ $admin_titulo  = 'Productos';
 $admin_seccion = 'productos';
 $admin_accion  = ['texto' => 'Nuevo producto', 'href' => url('/admin/productos/nuevo')];
 
-require RASTRO_VIEWS . '/admin/_cabecera.php';
+require RASTRO_VIEWS . '/admin/_guard.php';
 
 /* --- Acciones ------------------------------------------------------- */
 
@@ -63,6 +63,10 @@ $categorias = repo_categories();
 
 // Lo que hay que conservar al volver de un POST.
 $volver = http_build_query(array_filter($filtros + ['pagina' => $pagina > 1 ? $pagina : null]));
+
+/* La cabecera va recién acá, no arriba: el bloque de POST necesita poder
+   redirigir, y un header() después del primer byte de HTML no sale. */
+require RASTRO_VIEWS . '/admin/_cabecera.php';
 ?>
 
 <form class="filtros-admin" method="get" action="<?= e(url('/admin/productos')) ?>">

@@ -713,3 +713,52 @@
     gap: var(--espaciado-32);
   }
 }
+
+/* La fila de una obra tiene cuatro campos y no dos: club, ciudad, qué se
+   entregó y foto. */
+.repetible__fila--obra {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) minmax(0, 1.4fr) minmax(0, 1fr) auto;
+}
+
+@media (max-width: 1200px) {
+  .repetible__fila--obra {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .repetible--obras .campo {
+    grid-column: 1;
+  }
+}
+
+/* Un campo deshabilitado tiene que verse deshabilitado: la cifra que sale
+   del catálogo no se carga a mano y nadie tiene que buscarla. */
+.pagina-admin .campo:disabled {
+  background-color: var(--color-bg-surface-alt);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* La fila que se está editando queda marcada en la lista, si no se pierde
+   de vista cuál de las diez abrió el formulario de arriba. */
+.tabla-admin tbody tr.es-editando {
+  background-color: var(--color-accent-soft);
+}
+
+.form-admin--abm {
+  margin-bottom: var(--espaciado-24);
+}
+
+/* La leyenda de un fieldset se dibuja encima del borde por defecto y lo
+   parte al medio. Con float sale de ese hueco y se comporta como un
+   título normal, sin perder la semántica de <legend>. */
+.form-admin__bloque > legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+}
+
+.form-admin__bloque::after {
+  content: "";
+  display: table;
+  clear: both;
+}

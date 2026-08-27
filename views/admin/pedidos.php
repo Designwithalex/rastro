@@ -15,7 +15,7 @@ declare(strict_types=1);
 $admin_titulo  = 'Pedidos';
 $admin_seccion = 'pedidos';
 
-require RASTRO_VIEWS . '/admin/_cabecera.php';
+require RASTRO_VIEWS . '/admin/_guard.php';
 
 $estados = repo_estados_pedido();
 
@@ -48,6 +48,10 @@ $filtros = [
 $pagina  = param_int('pagina', 1, 1) ?? 1;
 $listado = repo_admin_pedidos($filtros, $pagina, 25);
 $volver  = http_build_query(array_filter($filtros + ['pagina' => $pagina > 1 ? $pagina : null]));
+
+/* La cabecera va recién acá, no arriba: el bloque de POST necesita poder
+   redirigir, y un header() después del primer byte de HTML no sale. */
+require RASTRO_VIEWS . '/admin/_cabecera.php';
 ?>
 
 <form class="filtros-admin" method="get" action="<?= e(url('/admin/pedidos')) ?>">
