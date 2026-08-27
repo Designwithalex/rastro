@@ -32,7 +32,28 @@ jobs:
           protocol: ftps
           server-dir: /public_html/
           # Sube solo lo que el sitio necesita para correr.
-          # app/config.php NO se sincroniza: vive únicamente en el servidor.
+          #
+          # DOS COSAS NO SE SINCRONIZAN, Y POR RAZONES DISTINTAS:
+          #
+          # app/config.php  — son credenciales. Vive únicamente en el
+          #   servidor y nunca sale del repo (CLAUDE.md §7.1).
+          #
+          # data/**  — desde que existe el panel de administración, los JSON
+          #   de data/ los ESCRIBE EL CLIENTE en el servidor. Si el deploy
+          #   los sincronizara, cada push que tocara un mock borraría de un
+          #   saque los productos, los precios y los banners que cargaron,
+          #   sin aviso y sin forma de recuperarlos: no hay base de datos
+          #   con backup atrás. Los del repo son la semilla, no la verdad.
+          #   Se suben UNA vez, a mano, cuando se monta el servidor, y de
+          #   ahí en adelante mandan los del servidor. Está explicado en
+          #   docs/DEPLOY.md, "Los datos viven en el servidor".
+          #
+          #   Ojo al agregar un data/*.json nuevo: no llega solo, hay que
+          #   subirlo a mano igual que la primera vez.
+          #
+          # assets/img/subidas/ SÍ se sincroniza, pero sólo su .htaccess:
+          # las imágenes que sube el cliente no están en el repo y la acción
+          # no borra lo que nunca subió.
           exclude: |
             **/.git*
             **/.git*/**
@@ -43,4 +64,5 @@ jobs:
             **/bin/**
             **/*.md
             **/app/config.php
+            **/data/**
             **/node_modules/**

@@ -27,17 +27,28 @@ oficial.
 
 ## 2. Alcance de Chichalabs (nosotros) vs. el backend dev
 
+> **CAMBIO DE ALCANCE — 27/08/2026.** El panel de administración pasó a ser
+> nuestro: lo diseñamos **y lo desarrollamos**. Estaba del lado del otro dev.
+> Lo que sigue del lado de él es el backend real: MySQL, Mercado Pago y la
+> auth de los clientes.
+
 | Nosotros | El otro dev |
 |---|---|
 | Diseño en Figma (sitio + panel admin) | Backend real, MySQL |
-| Frontend completo con datos mock | Panel admin funcionando |
-| `repository.php` (contrato de datos) | Reemplazar mocks por queries |
-| Repo + GitHub Action de deploy FTP | Integración Mercado Pago |
-| `docs/HANDOFF.md` | Auth real (login/registro/cuenta) |
+| Frontend completo con datos mock | Reemplazar mocks por queries |
+| **Panel admin, las 9 secciones, andando** | Integración Mercado Pago |
+| `repository.php` — lectura **y escritura** | Auth real de clientes (login/registro/cuenta) |
+| Repo + GitHub Action de deploy FTP | |
+| `docs/HANDOFF.md` | |
 
-El panel admin **lo diseñamos nosotros** (Figma, solo desktop) pero **lo
-desarrolla él**. Por eso los frames tienen que quedar autoexplicativos:
-componentes estándar y anotaciones de qué hace cada acción.
+El panel es **sólo escritorio** y escribe sobre los JSON de `data/`. El día que
+entre MySQL se cambia el cuerpo de las funciones de `repository-escritura.php` y
+ninguna pantalla del panel se toca — el mismo contrato que ya vale para la lectura.
+
+**Consecuencia operativa que no se puede olvidar:** desde que el panel escribe,
+`data/` está **excluido del deploy por FTP**. Los JSON del repo son la semilla; la
+verdad vive en el servidor. Un deploy que los sincronizara borraría la carga del
+cliente sin aviso (`docs/DEPLOY.md`, "Los datos viven en el servidor").
 
 ---
 
@@ -61,12 +72,21 @@ protegen con su propio `.htaccess` (`Require all denied`).
 index.php          front controller: resuelve ruta -> vista
 .htaccess          rewrite de todo a index.php + headers
 app/               config, router, repository, helpers   [privada]
+  repository.php             lectura  — todo el sitio
+  repository-escritura.php   escritura — sólo el panel
+  panel.php                  sesión, CSRF, subidas       [sólo /admin]
 views/             layout, partials y páginas            [privada]
-data/              mocks JSON                            [privada]
+  admin/                     las 9 pantallas del panel
+data/              datos JSON — los escribe el panel     [privada]
 assets/            css, js, img, fonts                   [pública]
+  img/subidas/               lo que sube el cliente, + .htaccess propio
 docs/              HANDOFF, DATA-CONTRACT, DEPLOY
 design/            links y exports de Figma
 ```
+
+`app/panel.php` y `app/repository-escritura.php` se cargan **sólo** cuando la ruta
+empieza con `/admin`. El sitio público no escribe nada y no tiene por qué abrir una
+sesión de PHP en cada visita a la home.
 
 ### 4.1 Regla de oro del proyecto
 
@@ -79,6 +99,11 @@ vista se toca**. Ese contrato es el corazón del handoff y está documentado en
 
 Si una vista necesita un dato que `repository.php` no expone, se agrega una función
 al repository — nunca un `file_get_contents` en la vista.
+
+Desde el panel, la regla vale igual para el otro sentido: **ninguna pantalla escribe
+un JSON**. Toda escritura pasa por `app/repository-escritura.php`, que es la misma
+frontera para el lado de la escritura y sigue las mismas reglas. Nadie llama a
+`file_put_contents` fuera de ese archivo.
 
 ### 4.2 Contrato de `repository.php`
 

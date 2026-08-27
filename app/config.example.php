@@ -36,4 +36,38 @@ return [
 
     // URL base del sitio, sin barra final.
     'base_url' => 'https://darkorange-buffalo-311255.hostingersite.com',
+
+    /* ------------------------------------------------------------------
+       PANEL DE ADMINISTRACIÓN  (/admin)
+
+       El administrador de arranque vive acá y no en data/users.json a
+       propósito: el panel escribe archivos en el servidor, y un hash de
+       administrador versionado en el repo es un hash que ya está en las
+       máquinas de todo el equipo y en el historial de git para siempre.
+
+       Sin estos tres valores el panel no deja entrar a nadie y muestra
+       cómo configurarlo. Es deliberado: un panel que escribe archivos y
+       arranca con una clave por defecto es un panel abierto.
+
+       El hash se genera en la máquina donde va a correr:
+
+           php -r 'echo password_hash("la-clave-real", PASSWORD_DEFAULT), PHP_EOL;'
+
+       Copiar la salida entera, incluido el $2y$12$ del principio. Ojo con
+       las comillas: en un .php el string va entre comillas SIMPLES, si no
+       PHP se come los $ y el hash deja de coincidir con la clave.
+
+       Cuando el backend tenga usuarios de verdad, cualquier fila de
+       data/users.json con rol "admin" también entra por acá, y este
+       bloque se puede vaciar.
+       ------------------------------------------------------------------ */
+
+    // Mail con el que se entra al panel.
+    'panel_email' => '',
+
+    // Salida de password_hash(), entre comillas simples.
+    'panel_password_hash' => '',
+
+    // Cómo se lo saluda en el panel. Cosmético.
+    'panel_nombre' => 'Administración',
 ];

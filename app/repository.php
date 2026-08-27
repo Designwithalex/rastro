@@ -90,13 +90,20 @@ declare(strict_types=1);
  * Lee un JSON de data/ y lo cachea en memoria: dentro del mismo request el
  * archivo se abre una sola vez por más veces que se lo pida.
  *
+ * `$recargar` está para el panel de administración, que en un mismo request
+ * lee, escribe y vuelve a leer. Sin él la segunda lectura devolvería lo que
+ * había ANTES de guardar y la pantalla mostraría el dato viejo justo después
+ * de tocar "Guardar" —el bug más desconcertante que puede tener un panel—.
+ * Lo usa `_repo_escribir_json()` y nadie más: una vista nunca tiene motivo
+ * para pedir una recarga.
+ *
  * TODO(backend): reemplazar por la conexión PDO que sale de app/config.php.
  */
-function _repo_json(string $archivo): array
+function _repo_json(string $archivo, bool $recargar = false): array
 {
     static $cache = [];
 
-    if (isset($cache[$archivo])) {
+    if (!$recargar && isset($cache[$archivo])) {
         return $cache[$archivo];
     }
 
@@ -429,6 +436,56 @@ function repo_banners(): array
                                       <=> [(string) ($b['posicion'] ?? ''), (int) ($b['orden'] ?? 0)]);
 
     return $banners;
+}
+
+/**
+ * TODOS los banners, activos y apagados, para el panel.
+ *
+ * `repo_banners()` filtra por `activo` porque alimenta el sitio público, y
+ * ahí un banner apagado no existe. El panel necesita justo lo contrario: si
+ * no ve los apagados, apagar un banner es lo mismo que borrarlo y no hay
+ * forma de volver a prenderlo. Son dos preguntas distintas y por eso son
+ * dos funciones, no un parámetro que haya que acordarse de pasar.
+ */
+function repo_all_banners(): array
+{
+    $banners = _repo_json('banners');
+
+    usort($banners, static fn ($a, $b) => [(string) ($a['posicion'] ?? ''), (int) ($a['orden'] ?? 0)]
+                                      <=> [(string) ($b['posicion'] ?? ''), (int) ($b['orden'] ?? 0)]);
+
+    return $banners;
+}
+
+/**
+ * El catálogo entero, sin paginar y sin filtrar, para el panel.
+ *
+ * `repo_products()` pagina de a 12 y ordena por relevancia, que es lo que
+ * necesita quien compra. Quien administra necesita la lista completa para
+ * buscar un SKU o ver de un vistazo qué se quedó sin stock.
+ */
+function repo_all_products(): array
+{
+    $productos = _repo_json('products');
+
+    usort($productos, static fn ($a, $b) => strcmp((string) ($a['nombre'] ?? ''), (string) ($b['nombre'] ?? '')));
+
+    return $productos;
+}
+
+/**
+ * Todos los pedidos, del más nuevo al más viejo, para el panel.
+ *
+ * `repo_orders()` pide un `usuario_id` porque en /cuenta cada quien ve los
+ * suyos. Acá el filtro sería un estorbo: el panel administra los de todos.
+ */
+function repo_all_orders(): array
+{
+    $pedidos = _repo_json('orders');
+
+    usort($pedidos, static fn ($a, $b) => strcmp((string) ($b['fecha'] ?? ''), (string) ($a['fecha'] ?? '')));
+
+    return $pedidos;
 }
 
 /* ==========================================================================

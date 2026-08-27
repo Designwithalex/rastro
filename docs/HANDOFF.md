@@ -3,10 +3,16 @@
 Para el desarrollador que toma el backend.
 
 **Lo que recibís:** el sitio completo maquetado y funcionando con datos mock,
-un contrato de datos cerrado y un panel de administración diseñado en Figma.
+un contrato de datos cerrado —lectura y escritura— y **el panel de
+administración andando**, con sus nueve secciones.
 
 **Lo que tenés que hacer:** reemplazar los mocks por MySQL sin tocar ni una
-vista, programar el panel, integrar Mercado Pago y conectar la autenticación.
+vista, integrar Mercado Pago y conectar la autenticación de los clientes.
+
+> **CAMBIO DE ALCANCE — 27/08/2026.** El panel de administración salió de esta
+> lista: lo hicimos nosotros. Ya no hay que programarlo; hay que cambiarle la
+> fuente de datos, igual que al resto del sitio. Lo que sigue explicado abajo
+> es qué toca y qué no.
 
 ---
 
@@ -47,20 +53,30 @@ El detalle completo (autenticaciones, tipografías, assets originales) está en
 index.php          front controller: resuelve la ruta y cede a una vista
 .htaccess          rewrite de todo a index.php + cabeceras + CSP
 app/               config, router, repository, helpers   [privada]
+  repository.php             lectura  — todo el sitio
+  repository-escritura.php   escritura — sólo el panel
+  panel.php                  sesión, CSRF, subidas — sólo /admin
 views/             layout, partials y las 12 páginas     [privada]
-data/              mocks JSON                            [privada]
+  admin/                     las 9 pantallas del panel
+data/              datos JSON — los escribe el panel     [privada]
 assets/            css, js, img, fonts                   [pública]
+  img/subidas/               lo que sube el cliente, + .htaccess propio
 ```
+
+`panel.php` y `repository-escritura.php` se cargan **sólo** cuando la ruta
+empieza con `/admin`: el sitio público no escribe nada y no abre sesión.
 
 Todo se despliega dentro de `public_html`. `app/`, `views/` y `data/` tienen su
 propio `.htaccess` con `Require all denied`, y además el `.htaccess` de la raíz
 niega cualquier `.json` y cualquier `.md` pase lo que pase con el rewrite.
 
-**El punto donde vas a trabajar es uno solo: `app/repository.php`.**
+**Los puntos donde vas a trabajar son dos: `app/repository.php` y
+`app/repository-escritura.php`.**
 
-Todas las vistas leen datos por ahí. Cambiás el cuerpo de esas funciones
-—donde dice `_repo_json('products')` va a decir `SELECT`— y ninguna vista se
-entera. **El contrato completo está en [`DATA-CONTRACT.md`](DATA-CONTRACT.md)
+Todas las vistas leen datos por el primero y el panel escribe por el segundo.
+Cambiás el cuerpo de esas funciones —donde dice `_repo_json('products')` va a
+decir `SELECT`, y donde dice `_repo_escribir_json()` va a decir `INSERT`— y ni
+una vista ni una pantalla del panel se entera. **El contrato completo está en [`DATA-CONTRACT.md`](DATA-CONTRACT.md)
 y es lo primero que conviene leer.**
 
 `app/helpers.php` es presentación: escape, moneda, rutas y el cálculo del
@@ -68,7 +84,9 @@ precio con descuento. No lo toques para conectar la base.
 
 ---
 
-## 3. Las once cosas que faltan, en orden
+## 3. Las diez cosas que faltan, en orden
+
+(Eran once. La #3.10, el panel, salió de la lista: ya está hecho.)
 
 Están ordenadas por lo que desbloquea a lo demás. Cada una tiene un
 `TODO(backend)` en el código, en el lugar exacto.
@@ -80,8 +98,14 @@ Reemplazalo por la conexión que sale de `app/config.php`.
 
 ### 3.2 Sesión
 
-**No existe `session_start()` en ningún lado del proyecto.** Es lo que bloquea
-login, registro, Mi cuenta y el checkout.
+**No existe `session_start()` en el sitio público.** Es lo que bloquea login,
+registro, Mi cuenta y el checkout.
+
+> El panel **sí** tiene sesión, en `app/panel.php`, y es un buen molde para
+> esta: cookie `HttpOnly` + `SameSite=Strict` + `Secure` según el esquema,
+> `session_regenerate_id(true)` al identificarse, caducidad por inactividad y
+> un token CSRF por sesión. Lo que no comparte es de dónde salen los usuarios,
+> y por eso son dos puertas distintas.
 
 - `views/auth/ingresar.php` — el POST ya llega a `repo_login()` y verifica el
   hash. Falta abrir la sesión, regenerar el id, sumar token CSRF y límite de
@@ -162,26 +186,41 @@ categoría, o cacheando el bloque. **No cambia el marcado.**
   `assets/img/productos/miniaturas/`, además del WebP grande. Hoy la genera
   `bin/optimizar-imagenes.sh`. Si falta, el sitio no se rompe: cae al original.
 
-### 3.10 El panel de administración
+### 3.10 El panel de administración — **ya está hecho**
 
-**Nueve pantallas, sólo escritorio, ya diseñadas en Figma** con un panel de
-anotaciones al lado de cada una que dice qué se valida, qué es obligatorio y
-qué pasa al guardar.
+Nueve secciones, sólo escritorio, en `/admin`: Tablero · Productos · Pedidos ·
+Categorías · Marcas · Clientes · Banners · Nosotros · Configuración.
 
-[Abrir el panel](https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=80-43)
+**Lo que tenés que hacer acá es cambiarle la fuente de datos, no programarlo.**
+Toda la escritura pasa por `app/repository-escritura.php`, que es la misma
+frontera que `repository.php` pero para el otro sentido. Cambiás el cuerpo de
+esas catorce funciones —JSON por `INSERT`/`UPDATE`/`DELETE`— y ninguna de las
+pantallas se toca. El contrato completo, con lo que devuelve cada una y las
+cinco reglas que hay que sostener, está en `docs/DATA-CONTRACT.md` §9.
 
-Dashboard · Productos (listado y alta) · Pedidos (listado y detalle) · Marcas ·
-Clientes · Banners · Configuración · **Nosotros**.
+Tres cosas que conviene saber antes de tocarlo:
 
-Usa el modo `Admin` de la colección Color de Figma: los mismos 24 tokens en
-claro. En CSS se activa con `<html data-tema="admin">`, y ya está escrito en
-`assets/css/tokens.css`. **No hay un segundo sistema que mantener.**
+- **`app/panel.php` es la puerta**: sesión, CSRF, subida de imágenes y lectura
+  de formularios. Tiene su propio login, aparte del de clientes (§3.2), porque
+  protege otra cosa: el panel escribe archivos en el servidor y no podía
+  esperar a que la auth de clientes existiera. El administrador sale de
+  `app/config.php`; sin eso configurado el panel no deja entrar a nadie.
+- **`data/` está excluido del deploy.** Desde que el panel escribe, los JSON
+  del repo son la semilla y la verdad vive en el servidor. Un deploy que los
+  sincronizara borraría la carga del cliente (`docs/DEPLOY.md`). Cuando entre
+  MySQL esto deja de aplicar y se puede volver a incluir `data/`.
+- **`assets/img/subidas/`** es la única carpeta donde escribe el servidor.
+  Tiene un `.htaccess` propio que apaga la ejecución de PHP ahí adentro, y
+  `panel_subir_imagen()` sólo guarda lo que pasa `getimagesize()`, con la
+  extensión que él mismo le pone. No aflojes ninguna de las dos.
 
-> "Categorías" no tiene pantalla propia: es el mismo patrón que Marcas y está
-> explicado en la anotación de al lado.
->
-> "Nosotros" es la novena y **todavía no está dibujada** (#49). Avisá cuando
-> llegues ahí.
+**Lo que el panel todavía no hace y te toca:** optimizar las imágenes al
+subirlas (`PENDIENTES.md` #69) — hoy entran tal cual, hasta 6 MB, y no se
+genera el WebP ni la miniatura de 96 px de §3.9.
+
+Los frames de Figma quedaron desactualizados: el panel se diseñó en código y
+se rehacen a partir de capturas (`PENDIENTES.md` #70). **La referencia es el
+panel andando, no el archivo de Figma.**
 
 ### 3.11 Borrar `data/users.json`
 
@@ -198,6 +237,9 @@ como hash bcrypt. **Borralo el día que conectes la base real.**
 | **`assets/css/tokens.css`** | Se genera desde las variables de Figma. Si cambia un token, cambia allá y se copia acá. |
 | **El cálculo del descuento** | Vive en `precio_con_descuento()` y en ningún otro lado. |
 | **`assets/js/carrito.js`** | Guarda id y cantidad, nada más. No agregues cálculos de precio ahí. |
+| **Las pantallas de `views/admin/`** | Están escritas contra `repository-escritura.php`. Si necesitás cambiar una, probablemente falte una función en el repository. |
+| **`estados_pedido()` en `helpers.php`** | Es la lista de estados que comparten `/cuenta` y el panel. Duplicarla hace que el panel ofrezca estados que la página del cliente no sabe dibujar. |
+| **El `.htaccess` de `assets/img/subidas/`** | Apaga la ejecución de PHP en la única carpeta donde escribe el servidor. |
 
 ---
 

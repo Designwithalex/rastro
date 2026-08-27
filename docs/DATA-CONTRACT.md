@@ -362,7 +362,111 @@ hacerlo desaparecer sin explicación.
 
 ---
 
-## 9. Estructura de tablas sugerida
+## 9. Escritura — `app/repository-escritura.php`
+
+Hasta agosto de 2026 el contrato era de sólo lectura: el sitio mostraba mocks y el
+panel lo desarrollaba el backend dev. **Con el cambio de alcance del 27/08/2026 el
+panel lo desarrollamos nosotros**, así que el contrato tiene ahora una segunda mitad.
+
+Vive en un archivo aparte porque el sitio público no escribe nada: `index.php` sólo
+carga `repository-escritura.php` cuando la ruta empieza con `/admin`.
+
+### Las funciones
+
+```php
+// Catálogo
+repo_save_product(array $datos): ?array      // alta o edición; devuelve lo guardado
+repo_delete_product(int $id): bool
+repo_recount_categories(): bool              // recalcula productos_count
+
+// Colecciones cortas
+repo_save_category(array $datos): ?array
+repo_delete_category(int $id): array         // ['ok'=>bool, 'motivo'=>string]
+repo_save_brand(array $datos): ?array
+repo_delete_brand(int $id): array            // ['ok'=>bool, 'motivo'=>string]
+repo_save_client(array $datos): ?array
+repo_delete_client(int $id): bool
+repo_save_banner(array $datos): ?array
+repo_delete_banner(int $id): bool
+
+// Pedidos — sólo el estado
+repo_save_order_status(string $codigo, string $estado): bool
+
+// Configuración y contenido
+repo_save_settings(array $datos): ?array     // merge, no reemplazo
+repo_save_nosotros(array $datos): ?array     // merge recursivo
+```
+
+### Lecturas que sólo usa el panel
+
+`repo_banners()`, `repo_products()` y `repo_orders()` están armadas para el sitio
+público: filtran lo inactivo, paginan y acotan por usuario. El panel necesita
+exactamente lo contrario, y por eso tiene sus propias funciones en vez de un
+parámetro que haya que acordarse de pasar:
+
+```php
+repo_all_products(): array   // sin paginar, ordenado por nombre
+repo_all_banners(): array    // incluye los apagados
+repo_all_orders(): array     // de todos los usuarios
+```
+
+Un banner apagado que el panel no ve es un banner que no se puede volver a prender.
+
+### Cinco reglas que el backend tiene que sostener
+
+1. **Devuelven lo guardado, no un booleano.** La vista necesita el id recién asignado
+   para redirigir, y el registro completo para mostrar lo que quedó y no lo que se
+   mandó. `null` significa "no se pudo escribir", y la pantalla lo dice: un cartel de
+   éxito sobre un archivo que no cambió es peor que un error.
+
+2. **Los borrados con dependencias devuelven el motivo.** Borrar una categoría que
+   tiene productos los dejaría fuera del catálogo y de la búsqueda sin que nada lo
+   avise. `repo_delete_category()` y `repo_delete_brand()` devuelven
+   `['ok' => false, 'motivo' => 'No se puede borrar: 6 productos…']` para que la
+   pantalla pueda explicarlo. **TODO(backend):** con MySQL esto es una FK con
+   `ON DELETE RESTRICT`, pero el mensaje lo sigue armando esta función.
+
+3. **`productos_count` es derivado.** Lo recalcula `repo_recount_categories()` en cada
+   alta y cada baja. No se escribe desde un formulario. **TODO(backend):** pasa a ser
+   un `COUNT(*)` con `GROUP BY`, y esta función desaparece.
+
+4. **Settings y Nosotros se guardan por merge.** El formulario muestra diez campos y
+   el archivo puede tener más —los que agregue Mercado Pago, por ejemplo—. Un
+   reemplazo completo los borraría en silencio la primera vez que alguien toque
+   "Guardar" en una pantalla que no los conoce.
+
+5. **De un pedido sólo cambia el estado.** Los importes son los del día de la compra
+   y no se recalculan nunca contra el catálogo actual (regla 1.4). Un pedido editable
+   después de cobrado no sirve como comprobante.
+
+### `orden` es por grupo, no por tabla
+
+En `banners`, `orden` sólo tiene sentido dentro de su `posicion`: la segunda placa
+del carrusel es la segunda del carrusel, no la segunda de la tabla. `repo_save_banner()`
+renumera por posición. En categorías, marcas y clientes —que son un solo grupo— la
+renumeración es sobre la colección entera.
+
+Después de cada guardado los `orden` quedan **renumerados de 1 en adelante**. Si el
+cliente pone tres elementos en la posición 2, el orden queda indefinido y depende de
+cómo el motor resuelva el empate; después de esto siempre hay un primero y un segundo.
+
+### Escritura atómica
+
+`_repo_escribir_json()` escribe en un temporal de la **misma carpeta** y renombra.
+Un `rename()` dentro del mismo sistema de archivos es atómico: o está el archivo
+viejo entero o el nuevo entero, nunca medio JSON. Sin eso, un timeout de PHP a mitad
+de un `fwrite` deja el catálogo roto y sin recuperación, porque no hay base de datos
+atrás. **TODO(backend):** con MySQL esto es una transacción y la función desaparece.
+
+### Validar no es tarea del repository
+
+Estas funciones asumen datos ya limpios. Quién valida es la vista del panel, que es
+la que sabe qué formulario los mandó y puede devolver el error al lado del campo.
+El repository normaliza la **forma** (tipos, claves, orden), no el **contenido**.
+
+---
+
+## 10. Estructura de tablas sugerida
 
 No es obligatoria: es la traducción directa de los mocks.
 
@@ -407,7 +511,7 @@ Dos columnas que no están en los mocks y conviene sumar:
 
 ---
 
-## 10. Lo que el contrato todavía no resuelve
+## 11. Lo que el contrato todavía no resuelve
 
 | # | Tema | Dónde está anotado |
 |---|---|---|

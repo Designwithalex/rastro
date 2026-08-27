@@ -49,14 +49,10 @@ $secciones = [
     'datos'   => 'Mis datos',
 ];
 
-/* Los estados son los que hay en el mock. Confirmar cuáles maneja el
-   negocio de verdad: si aparecen más, se suma una variante del chip y la
-   tabla no se toca (PENDIENTES #36). */
-$estados = [
-    'en_camino' => ['texto' => 'En camino', 'clase' => 'chip-estado--camino'],
-    'entregado' => ['texto' => 'Entregado', 'clase' => 'chip-estado--entregado'],
-    'cancelado' => ['texto' => 'Cancelado', 'clase' => 'chip-estado--cancelado'],
-];
+/* La lista vive en helpers.php porque el panel también la necesita, para
+   ofrecer los estados que se pueden elegir. Duplicada, el panel termina
+   ofreciendo estados que esta página no sabe dibujar (PENDIENTES #36). */
+$estados = estados_pedido();
 ?>
 
 <main id="contenido" tabindex="-1">

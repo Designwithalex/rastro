@@ -53,11 +53,64 @@ public_html/
 Verificar después del primer deploy que `…/data/products.json` y `…/app/config.php`
 devuelvan **403**, no el contenido.
 
+## Los datos viven en el servidor
+
+**Desde que existe el panel de administración, `data/` está EXCLUIDO del deploy.**
+
+Los JSON de `data/` dejaron de ser mocks que viajan con el código: son los datos
+del negocio, y los escribe el cliente desde `/admin`. Si el deploy los sincronizara,
+cualquier push que tocara uno de esos archivos —o un `git revert`, o una rama vieja
+que se mergea— reemplazaría de un saque los productos, los precios y los banners que
+cargaron. Sin aviso, y sin forma de recuperarlos: atrás no hay una base de datos con
+backup, hay un archivo.
+
+Los del repo son **la semilla**, no la verdad.
+
+### Montaje inicial, una sola vez
+
+1. Subir el contenido de `data/` por FTP o por el Administrador de archivos de hPanel.
+2. Verificar que la carpeta y los archivos queden **escribibles por PHP**
+   (en Hostinger, `755` la carpeta y `644` los archivos suele alcanzar; si el panel
+   avisa "no se pudo guardar", es esto).
+3. Verificar que `…/data/products.json` devuelva **403** por HTTP.
+
+### Cuando se agrega un `data/*.json` nuevo
+
+No llega solo: hay que subirlo a mano, igual que la primera vez. Es el precio de que
+los deploys no pisen la carga del cliente.
+
+### Imágenes que sube el cliente
+
+Van a `assets/img/subidas/`. Esa carpeta también tiene que ser escribible por PHP.
+Su `.htaccess` —que sí se despliega— apaga la ejecución de PHP ahí adentro: es la
+única carpeta del sitio donde escribe el servidor y por lo tanto la única donde un
+archivo podría no ser lo que dice ser.
+
+La acción de FTP no borra lo que nunca subió, así que las imágenes del cliente
+sobreviven a los deploys. **No sobreviven a un borrado manual de la carpeta.**
+
+### Copias de respaldo
+
+No hay ninguna automática. Antes de un deploy grande, bajar `data/` por FTP y
+guardarlo con fecha. Son 60 KB.
+
 ## `app/config.php` en el servidor
 
 No lo crea el deploy: hay que subirlo **una sola vez** por FTP o por el Administrador
 de archivos de hPanel, copiando `app/config.example.php` y completando los valores.
 Como está excluido de la sincronización, los deploys posteriores no lo pisan.
+
+Desde el panel, ese archivo además lleva **el usuario de administración**:
+`panel_email` y `panel_password_hash`. Sin esos dos valores el panel no deja entrar a
+nadie y muestra en pantalla cómo configurarlo. El hash se genera en la máquina donde
+va a correr:
+
+```bash
+php -r 'echo password_hash("la-clave-real", PASSWORD_DEFAULT), PHP_EOL;'
+```
+
+La salida va entre **comillas simples** en el `.php`: entre comillas dobles, PHP se
+come los `$` del hash y la clave deja de coincidir.
 
 ## Desarrollo local
 

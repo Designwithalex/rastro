@@ -21,6 +21,10 @@ $config = is_file(__DIR__ . '/app/config.php')
     ? (array) require __DIR__ . '/app/config.php'
     : [];
 
+/* Como constante para que la lean las funciones, que no ven $config.
+   El acceso es config('clave') y está en helpers.php. */
+define('RASTRO_CONFIG', $config);
+
 $entorno = (string) ($config['entorno'] ?? 'produccion');
 
 if ($entorno === 'local') {
@@ -68,6 +72,21 @@ if ($camino !== '/' && str_ends_with($camino, '/')) {
 
 $camino = '/' . trim($camino, '/');
 define('RASTRO_RUTA', $camino);
+
+/* --- El panel -------------------------------------------------------------
+   Sesión, CSRF, subidas y el lado de escritura del repository sólo se cargan
+   cuando la ruta es del panel. El sitio público no escribe nada, y arrancar
+   una sesión en cada visita a la home costaría un archivo de sesión por
+   visitante para no guardar nada adentro. */
+if (RASTRO_RUTA === '/admin' || str_starts_with(RASTRO_RUTA, '/admin/')) {
+    require __DIR__ . '/app/repository-escritura.php';
+    require __DIR__ . '/app/panel.php';
+
+    /* El panel no se indexa ni se cachea. Es lo primero que se manda porque
+       una vista que redirige con panel_ir() termina antes de llegar al head. */
+    header('X-Robots-Tag: noindex, nofollow');
+    header('Cache-Control: no-store, private');
+}
 
 /* --- Despacho ------------------------------------------------------------ */
 $ruta   = router_resolver(RASTRO_RUTA);

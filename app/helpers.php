@@ -307,6 +307,50 @@ function asset(string $ruta): string
 }
 
 /**
+ * Un valor de app/config.php, o el defecto si no está.
+ *
+ * `config.php` no se versiona y puede no existir: en esa máquina el sitio
+ * público igual levanta con mocks. Lo que NO levanta sin configuración es
+ * el panel, que necesita de acá el mail y el hash del administrador
+ * (`app/panel.php`).
+ */
+function config(string $clave, mixed $defecto = null): mixed
+{
+    $config = defined('RASTRO_CONFIG') ? RASTRO_CONFIG : [];
+
+    return is_array($config) ? ($config[$clave] ?? $defecto) : $defecto;
+}
+
+/**
+ * Los estados que puede tener un pedido, con su rótulo y su chip.
+ *
+ * UNA SOLA LISTA PARA LAS DOS PUNTAS. La usa `/cuenta`, donde el cliente lee
+ * en qué anda su compra, y la usa el panel, donde se cambia. Estuvieron
+ * separadas el tiempo que tardó en aparecer el panel, y alcanzó para que el
+ * panel ofreciera estados —"pagado", "en preparación"— que la página del
+ * cliente no sabía dibujar: los mostraba con la clave cruda, `en_camino`.
+ * Un estado que se puede elegir de un lado y no se entiende del otro es una
+ * lista que hay que acordarse de actualizar dos veces.
+ *
+ * Sumar un estado es sumar una fila acá y una variante de `.chip-estado` en
+ * `cuenta.css`. La tabla de pedidos no se toca.
+ *
+ * TODO(backend): confirmar cuáles maneja el negocio de verdad. Estos son los
+ * que hay en el mock; con el checkout de Mercado Pago van a hacer falta al
+ * menos "pendiente de pago" y "pagado" (`PENDIENTES.md` #36).
+ *
+ * @return array<string,array{texto:string,clase:string}>
+ */
+function estados_pedido(): array
+{
+    return [
+        'en_camino' => ['texto' => 'En camino', 'clase' => 'chip-estado--camino'],
+        'entregado' => ['texto' => 'Entregado', 'clase' => 'chip-estado--entregado'],
+        'cancelado' => ['texto' => 'Cancelado', 'clase' => 'chip-estado--cancelado'],
+    ];
+}
+
+/**
  * Ruta que se está mostrando, normalizada y sin barra final.
  * "/" se mantiene como "/".
  */
