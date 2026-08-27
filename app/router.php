@@ -26,6 +26,24 @@ function router_tabla(): array
         '#^/carrito$#'                 => ['carrito',                []],
         '#^/mayoristas$#'              => ['mayoristas',             []],
 
+        /* Checkout y pago.
+
+           /checkout recibe el formulario y se lo manda a sí misma, igual que
+           /ingresar: así los errores de validación se pintan al lado de cada
+           campo sin perder lo que la persona ya escribió.
+
+           /webhooks/mercadopago no es una página: es el endpoint que llama
+           Mercado Pago para avisar que un pago cambió de estado. Contesta
+           texto plano y no imprime una sola etiqueta HTML. El router no mira
+           el método, así que esa vista verifica que sea POST.
+
+           Las rutas de pago existen aunque no haya credenciales cargadas: sin
+           ellas el checkout muestra solamente el camino por transferencia.
+           Ver app/mercadopago.php y docs/MERCADOPAGO.md. */
+        '#^/checkout$#'                => ['checkout/index',          []],
+        '#^/checkout/retorno$#'        => ['checkout/retorno',        []],
+        '#^/webhooks/mercadopago$#'    => ['webhooks/mercadopago',    []],
+
         // /nosotros se lleva también el contacto: el menú apunta a
         // /nosotros#contacto y no hay una página de contacto aparte.
         '#^/nosotros$#'                => ['nosotros',               []],

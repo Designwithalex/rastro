@@ -3,6 +3,14 @@ app/config.php
 .env
 *.local.php
 
+# Datos que escribe el sitio, no la persona.
+# data/pedidos.json lo crea el checkout con cada compra de prueba y
+# data/mp-eventos.log guarda la conversación con Mercado Pago. Los dos
+# tienen datos de compradores (nombre, correo, dirección) y no van al repo.
+# Los mocks escritos a mano —orders.json, products.json— sí se versionan.
+data/pedidos.json
+data/mp-eventos.log
+
 # Sistema
 .DS_Store
 Thumbs.db

@@ -36,8 +36,9 @@ oficial.
 |---|---|
 | Diseño en Figma (sitio + panel admin) | Backend real, MySQL |
 | Frontend completo con datos mock | Reemplazar mocks por queries |
-| **Panel admin, las 9 secciones, andando** | Integración Mercado Pago |
-| `repository.php` — lectura **y escritura** | Auth real de clientes (login/registro/cuenta) |
+| **Panel admin, las 9 secciones, andando** | Auth real de clientes (login/registro/cuenta) |
+| **Checkout con Mercado Pago** (Checkout Pro) | Stock, mails y conciliación de pagos |
+| `repository.php` — lectura **y escritura** | |
 | Repo + GitHub Action de deploy FTP | |
 | `docs/HANDOFF.md` | |
 
@@ -49,6 +50,15 @@ ninguna pantalla del panel se toca — el mismo contrato que ya vale para la lec
 `data/` está **excluido del deploy por FTP**. Los JSON del repo son la semilla; la
 verdad vive en el servidor. Un deploy que los sincronizara borraría la carga del
 cliente sin aviso (`docs/DEPLOY.md`, "Los datos viven en el servidor").
+
+**La integración con Mercado Pago cambió de lado el 27/08/2026.** Estaba
+asignada al backend dev y la hicimos nosotros: es la pieza que decide qué se
+cobra, y eso depende de la regla de precio de §1, que es diseño de producto
+antes que backend. Está andando de punta a punta en ambiente de prueba —
+Checkout Pro, preferencia, retorno y webhook con firma validada. Lo que queda
+del otro lado es lo que necesita base de datos y sesión: reservar stock,
+mandar los mails y conciliar los pagos que no notifican. Todo en
+`docs/MERCADOPAGO.md`.
 
 ---
 
@@ -75,6 +85,8 @@ app/               config, router, repository, helpers   [privada]
   repository.php             lectura  — todo el sitio
   repository-escritura.php   escritura — sólo el panel
   panel.php                  sesión, CSRF, subidas       [sólo /admin]
+  mercadopago.php            la API de Mercado Pago
+  checkout.php               armado y validación del pedido
 views/             layout, partials y páginas            [privada]
   admin/                     las 9 pantallas del panel
 data/              datos JSON — los escribe el panel     [privada]
@@ -132,6 +144,14 @@ repo_order(string $code): ?array
 
 // Carrito (hoy vive en localStorage; esto resuelve los ids)
 repo_cart_items(array $ids): array
+
+// Pedidos del checkout — ampliación del 27/08/2026
+repo_order_create(array $pedido): array
+repo_order_update(string $codigo, array $cambios): ?array
+repo_order_by_reference(string $referencia): ?array   // external_reference
+repo_order_local(string $codigo): ?array
+repo_order_next_code(): string
+repo_log_pago(string $que, array $contexto = []): void
 ```
 
 `$filters` acepta: `q`, `categoria`, `marca`, `precio_min`, `precio_max`,
@@ -144,6 +164,28 @@ repo_cart_items(array $ids): array
 El cálculo del precio con descuento vive en **un solo helper**
 (`app/helpers.php: precio_con_descuento()`), que lee el `%` de `repo_settings()`
 y respeta un override por producto (`descuento_pct`). Ninguna vista hace la cuenta.
+
+Desde que existe el checkout, esa regla tiene una segunda mitad: **cuál de los
+dos precios se cobra lo decide el medio de pago**, y eso vive también en un solo
+lugar, `checkout_medios()` de `app/checkout.php`.
+
+- **Mercado Pago** → precio **publicado**. Es la definición de §1: el número
+  grande del sitio es lo que se paga con Mercado Pago.
+- **Transferencia o efectivo** → precio **con descuento**, y no pasa por
+  ninguna pasarela: se coordina por WhatsApp.
+
+`checkout.php` **elige** cuál de los dos números usar; no multiplica ningún
+porcentaje. Si aparece un `* (100 - $pct)` fuera de `precio_con_descuento()`,
+hay dos fuentes de verdad y una de las dos está mal.
+
+### 4.4 El precio nunca viene del navegador
+
+El carrito vive en `localStorage` y de ahí salen **`id` y `cantidad`, y nada
+más**. `checkout_lineas()` vuelve a resolver los precios contra el repository
+antes de cobrar. Un `precio_unitario` que llegue en el POST se ignora.
+
+Es el agujero clásico de un checkout casero y por eso está acá arriba: sin esto,
+cualquiera con la consola abierta compra una barra olímpica a un peso.
 
 ---
 
