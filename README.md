@@ -9,6 +9,25 @@ gimnasio. PHP 8 como capa de vistas, HTML/CSS/JS vanilla, datos mock en JSON.
 - **Deploy:** [`docs/DEPLOY.md`](docs/DEPLOY.md)
 - **Pendientes abiertos:** [`PENDIENTES.md`](PENDIENTES.md)
 
+## Estado
+
+**Fase 2 cerrada** (26/08/2026). Las doce rutas del router tienen su vista:
+
+| | |
+|---|---|
+| `/` | Home |
+| `/catalogo` · `/catalogo/{categoria}` | Listado con filtros, orden y paginación |
+| `/producto/{slug}` | Ficha con galería, especificaciones y relacionados |
+| `/carrito` | Carrito (vive en `localStorage`) |
+| `/mayoristas` | Landing del canal mayorista |
+| `/nosotros` | Página de credibilidad |
+| `/ingresar` · `/registro` · `/cuenta` | Cuenta |
+| `/terminos` · `/arrepentimiento` | Legales |
+| 404 | Página de error |
+
+Lo que sigue es backend: MySQL, sesión, Mercado Pago y el panel de
+administración. Todo eso está ordenado en [`docs/HANDOFF.md`](docs/HANDOFF.md).
+
 ## Correr local
 
 ```bash

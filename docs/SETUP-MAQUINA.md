@@ -46,15 +46,14 @@ Está en `.gitignore` y excluido del deploy: vive solo en tu máquina y en el se
 
 ## 4. La tipografía del hero
 
-El titular "QUE AGUANTA" usa **Urban Thunder Demo**, que está instalada localmente y
-**no existe en Figma**. Si abrís el archivo sin tenerla instalada, esa línea se ve con
-una fuente sustituta.
+**Ya no hay nada que instalar.** El titular del hero usaba `Urban Thunder Demo`, que
+vivía sólo en una máquina y cuyo sufijo "Demo" no permitía ni uso comercial ni
+webfont. El hero v3 del 26/08/2026 la reemplazó por **Saira Condensed Black**, que es
+OFL, está self-hosteada en `assets/fonts/saira-condensed-900.woff2` y no queda ni un
+nodo con la fuente vieja en las 17 páginas del archivo de Figma.
 
-Instalala en la máquina nueva, o asumí que vas a ver un reemplazo.
-
-> Recordá que el sufijo "Demo" casi siempre significa licencia de uso personal, sin
-> derecho comercial ni de webfont. **Esto sigue bloqueando el maquetado del hero**
-> hasta que se consiga la licencia completa. Ver `design/README.md`.
+Las cuatro familias del sitio se sirven desde el propio servidor y viajan en el repo.
+Abrir el Figma o levantar el sitio en una máquina nueva no requiere instalar nada.
 
 ## 5. Assets originales del cliente — opcional
 

@@ -165,11 +165,21 @@ Dos cosas que salieron de acá:
 ## Qué falta
 
 **La fase de diseño está cerrada.** Nueve pantallas de sitio en escritorio y celular,
-más ocho de panel de administración.
+más ocho de panel de administración. **Y desde el 26/08/2026 están las once páginas
+maquetadas**, así que los frames ya tienen su contraparte en código.
 
 Lo que queda abierto no es diseño:
 - Íconos de interfaz: hoy son placeholders geométricos (`PENDIENTES.md` #24).
 - Logos de clientes y de marcas oficiales (`PENDIENTES.md` #25).
+
+Y tres cosas que salieron de maquetar y hay que corregir **en los frames**:
+- La numeración de secciones de la home no cierra: la franja de Nosotros dice
+  `[ 07 ]`, número que ya usa Medios de pago, y Mayoristas dice `[ 10 ]`. El front
+  va correlativo hasta `[ 11 ]` (`PENDIENTES.md` #59).
+- `display/hero` quedó duplicado en la lista de estilos de texto, y los seis nodos
+  del titular del hero están desvinculados de sus estilos (#64).
+- El gris del titular (`#d9d9d9`) es una capa suelta, sin variable. Cae entre
+  `plata/1` y `plata/2` (#62).
 
 Se reabrió una sola cosa, y es de panel: **la sección "Nosotros" es la novena
 pantalla del admin** y todavía no está dibujada. Salió de la dirección UX v3, que

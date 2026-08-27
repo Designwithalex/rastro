@@ -43,8 +43,8 @@ Cada ítem tiene un **placeholder** funcionando, así el desarrollo no se frena.
 |---|---|
 | ~~19~~ | ~~Optimizar imágenes~~ → resuelto el 2026-08-25, ver abajo. |
 | ~~20~~ | ~~Recomprimir los PNG transparentes~~ → resuelto el 2026-08-25, ver abajo. |
-| 46 | `docs/DATA-CONTRACT.md` y `docs/HANDOFF.md` todavía no existen. `repository.php` ya los referencia. Se escriben al cerrar la Fase 2. |
-| 47 | No hay `views/errors/404.php`: hoy el 404 cae en el andamio `views/partials/en-construccion.php` con el código correcto. Entra con el bloque de páginas. |
+| ~~46~~ | ~~`docs/DATA-CONTRACT.md` y `docs/HANDOFF.md`~~ → escritos el 2026-08-26, ver abajo. |
+| ~~47~~ | ~~No hay `views/errors/404.php`~~ → entró el 2026-08-26 con el bloque de páginas, ver abajo. |
 
 ---
 
@@ -112,6 +112,23 @@ Surgidos al armar la capa de datos y el layout compartido.
 
 ---
 
+## Abiertos por el cierre de la Fase 2
+
+Salieron de maquetar las once páginas contra los frames. Ninguno frena nada:
+el sitio funciona con la decisión provisoria que está en la última columna.
+
+| # | Tema | Por qué importa | Decisión provisoria |
+|---|---|---|---|
+| 59 | **La numeración de secciones de la home no cierra en Figma.** La franja de Nosotros dice `[ 07 ]`, número que ya usa Medios de pago, y Mayoristas dice `[ 10 ]`. | Los índices son una de las ocho reglas del lenguaje visual. Repetido o salteado, el recurso deja de leerse como sistema y pasa a leerse como error. | **El front va correlativo**: 05 Categorías, 06 Destacados, 07 Medios de pago, 08 Confían, 09 Vendedores, 10 Quiénes somos, 11 Mayoristas. Falta pasarle la corrección a los dos frames de Figma. |
+| 60 | **La sexta categoría no entra en el bento de la home.** El frame tiene seis celdas: cinco categorías más "Ver todo". Hoy hay seis categorías cargadas. | Accesorios es la categoría con más productos del catálogo y en la home no aparece. Se llega igual por el mega-menú y por el catálogo, pero no desde el bloque que existe para eso. | Se dibujan las cinco primeras, como el frame. Las dos salidas son: sumar una fila al bento (rompe la asimetría, que es lo que le da carácter) o aceptar que el bento es una selección y no un índice. **Lo decide el cliente**, es su catálogo. |
+| 61 | **Las tres placas de promoción del hero no existen en el repo.** El frame las muestra superpuestas a la derecha del titular: son piezas de diseño del cliente, del estilo de las que publica en Instagram. | Es media pantalla del hero. | La vista dibuja el collage **a partir del segundo banner de posición `hero`**. Con uno solo no lo dibuja, porque ese banner ya es la foto de fondo y repetirlo pone la misma imagen dos veces en la misma pantalla. Cuando el cliente cargue las placas desde el panel, aparecen solas. Hay que pedírselas en 422 × 531 y 303 × 381. |
+| 62 | **El gris del titular del hero (`#d9d9d9`) no es un token.** Es una capa de color suelta de Figma, sin variable asociada. | Es el color del elemento más grande de la home y hoy vive como valor crudo en `home.css`. Si mañana se ajusta, se ajusta en dos lados. | Declarado una sola vez, como `--hero-titular` en `.pagina-home`. Cae entre `plata/1` (`#f2f2f2`) y `plata/2` (`#c4c4c4`): o se lo suma a la colección como `plata/0`, o se usa uno de los dos que ya existen. |
+| 63 | **Los filtros del catálogo son de selección única, y el frame dibuja casillas.** Una casilla promete poder marcar tres categorías a la vez; `repo_products()` acepta una. | Es la diferencia entre un control que hace lo que dice y uno que no. | Van como **enlaces** que arman la URL con el filtro puesto o sacado: se ven igual que el frame, andan sin JavaScript y la URL queda compartible. Pasar a múltiple es un cambio de contrato —`categoria` y `marca` aceptando arrays— y hay que hacerlo antes de que el catálogo crezca. |
+| 64 | **En Figma quedó `display/hero` duplicado** y los nodos del titular están desvinculados de sus estilos. | El archivo se vende como "31 estilos de texto y Dev Mode devuelve el nombre real de la variable". Un estilo repetido y seis nodos sueltos rompen justamente eso. | El CSS ya está escrito con los valores que están **en el canvas**, que es lo que se ve. Falta un pase de limpieza en Figma: borrar el duplicado y volver a aplicar los estilos a los seis nodos del titular. |
+| 65 | **"A pedido" no es lo mismo que "sin stock"**, y el catálogo sólo sabe lo segundo. El frame de filtros ofrece las dos opciones. | Un producto que no está en depósito pero se consigue en dos semanas es vendible; uno discontinuado, no. Hoy los dos se ven igual. | El filtro ofrece nada más que "En stock". Sumar "A pedido" es un campo nuevo en el producto, no un filtro nuevo: hay que definir primero si el negocio lo distingue. |
+
+---
+
 ## Abiertos por el hero v3
 
 El cliente mandó una referencia el 26/08/2026 y pidió cambiar sólo el bloque de texto
@@ -119,7 +136,7 @@ del hero. Se hizo en Figma, escritorio y celular. Lo que quedó colgando:
 
 | # | Tema | Por qué importa | Decisión provisoria |
 |---|---|---|---|
-| 55 | **Saira Condensed Black no está self-hosteada.** Figma la toma de Google Fonts. En `assets/fonts/` hoy están Michroma, Saira y JetBrains Mono, pero no el corte Condensed. | **Bloquea el maquetado del hero**, igual que antes lo bloqueaba `Urban Thunder Demo` — con la diferencia de que esto se resuelve solo, sin depender del cliente: Saira es OFL. | Bajar el WOFF2 subconjunto latin de Saira Condensed Black y sumarlo a `assets/fonts/` y a `LICENCIAS.txt`. Son ~30 KB. |
+| ~~55~~ | ~~Saira Condensed Black no está self-hosteada~~ → resuelto el 2026-08-26, ver abajo. |
 | 56 | **`MARCA EL CAMINO.` va en bordeaux `#780606` sobre negro: contraste ≈ 2:1.** | Es el claim de marca del hero. La referencia del cliente lo tiene así, y el titular anterior (`QUE AGUANTA`) también, pero ahí lo salvaba un contorno blanco que ahora no está. | **Se mantiene el rojo de la referencia.** Es texto decorativo y el mensaje no depende de él. Si el cliente lo quiere más legible, la salida es `bordeaux/700` (`#8f0808`) o sumarle el contorno. Confirmar viéndolo en pantalla, no en captura. |
 | 57 | **Se perdió el ojal "Vendedores oficiales · Argentina".** La referencia pone `EQUIPAMIENTO` en ese lugar. | Era una línea de credibilidad arriba de todo. | El dato sigue en el marquee de la barra superior y en la sección `[ 09 ] Vendedores oficiales`. Si el cliente lo reclama en el hero, entra como tercera línea de la barra de datos, no arriba del titular. |
 | 58 | **El botón secundario del hero quedó con el relleno del sistema** (blanco 10%), no con el contorno de 1 px de la referencia. | Cambiarlo acá desincroniza el hero del componente `Botón`, que usa el mismo estilo en todo el sitio. | Se deja el del sistema. Si se quiere el contorno, se cambia en el componente y baja a las nueve pantallas de una. |
@@ -130,6 +147,13 @@ del hero. Se hizo en Figma, escritorio y celular. Lo que quedó colgando:
 
 | Fecha | Tema | Decisión |
 |---|---|---|
+| 2026-08-26 | #55 Saira Condensed Black self-hosteada | **Resuelto, y sin depender del cliente.** WOFF2 subconjunto latin de Fontsource, 18 KB, OFL. Desbloquea el maquetado del hero. Se precarga **sólo en la home**, con `$precargar_titular` en `layout/head.php`: es la única página con titular, y bajarla en el catálogo sería pagar por una fuente que esa página no dibuja. `.t-display-hero` estaba declarada en `tokens.css` y sin usar, así que se reutilizó en vez de inventar un nombre nuevo. |
+| 2026-08-26 | **Fase 2 cerrada.** Las doce rutas del router tienen su vista | **Resuelto.** Home, catálogo, ficha, carrito, mayoristas, nosotros, ingresar, registro, mi cuenta, términos, arrepentimiento y 404. Todo el contenido sale de `repository.php`. Se borró el andamio `views/partials/en-construccion.php` y su bloque en `layout.css`: ya no hay ruta que caiga ahí. Cuando falta un archivo de vista, `index.php` devuelve 500 con log —es un despliegue a medias, no una página que no existe— en vez de un 404 bonito que esconde el problema. |
+| 2026-08-26 | #46 `docs/DATA-CONTRACT.md` y `docs/HANDOFF.md` | **Escritos.** El contrato documenta las 17 funciones del repository, la forma de cada respuesta, las convenciones que el backend tiene que sostener y una estructura de tablas sugerida. El handoff ordena lo que falta por lo que desbloquea a lo demás, y arranca por la sesión, que es lo que traba login, cuenta y checkout. |
+| 2026-08-26 | #47 `views/errors/404.php` | **Entró.** `router_404()` ya no necesita el andamio como respaldo. La página muestra además el código y la ruta, que es lo primero que mira alguien que llegó desde un enlace roto y quiere avisar cuál era. |
+| 2026-08-26 | Selección múltiple en los filtros del catálogo | **Se difiere y se documenta (#63).** El frame dibuja casillas; `repo_products()` acepta una categoría y una marca. Se implementaron como enlaces en vez de poner una casilla que promete lo que no puede cumplir. |
+| 2026-08-26 | El filtro de marca escondía dos tercios del catálogo | **Resuelto con un parámetro, no con una función nueva.** `repo_brands()` filtraba la línea propia porque alimenta la franja "vendedores oficiales" de la home, donde Rastro no va. Pero 19 de los 30 productos son de línea propia, así que el filtro del catálogo no los encontraba. Ahora acepta `$incluir_propias`, `false` por defecto: ninguna llamada existente cambia de resultado. |
+| 2026-08-26 | Dónde vivían las clases de formulario | **Resuelto.** `.formulario*` estaba en `mayoristas.css` y `.campo` en `catalogo.css`; las páginas de cuenta y de legales no cargan esas hojas y salían con la etiqueta y el campo en la misma línea. Pasaron a `componentes.css`, junto con `.nota` y `.marcador`. Las usan cinco páginas. |
 | 2026-08-26 | Licencia de `Urban Thunder Demo`, que bloqueaba el maquetado del hero | **Resuelto por el camino largo: la fuente ya no se usa.** El hero v3 que pidió el cliente cambia el titular por Saira Condensed Black. Se verificaron las 17 páginas del archivo de Figma y no queda un solo nodo de texto con esa familia. La anotación vieja del titular quedó reescrita con las decisiones nuevas. Sigue abierta la licencia de Eurostile (#4), que es otra cosa. |
 | 2026-08-26 | Cómo se resuelve la textura de metal del titular | **Relleno de imagen, no degradé.** El cliente mandó una referencia con chapa fotográfica. Se generó `assets/img/texturas/acero-cepillado.jpg` (1200 × 147, 30 KB) y se aplica como relleno `IMAGE` en modo Recortar con matriz identidad, así el archivo se estira al alto de cada línea. El degradé plata sigue reservado a precios y cifras (`CLAUDE.md` §5.6). |
 | 2026-08-25 | Observación 3 del QA: el orden de foco no coincidía con el orden visual de la cabecera abajo de 1280 | **Resuelto con la cabecera nueva.** Quedó abierta a propósito porque la cabecera se rehacía. Ahora los elementos están en el marcado en el mismo orden en el que se ven y lo que no corresponde a un ancho se apaga con `display:none`, que además lo saca del árbol de accesibilidad. Ninguna regla de CSS reordena la barra. El buscador de celular tampoco empuja una segunda fila: se despliega y se queda con la barra entera. |
