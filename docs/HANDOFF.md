@@ -218,9 +218,10 @@ Tres cosas que conviene saber antes de tocarlo:
 subirlas (`PENDIENTES.md` #69) — hoy entran tal cual, hasta 6 MB, y no se
 genera el WebP ni la miniatura de 96 px de §3.9.
 
-Los frames de Figma quedaron desactualizados: el panel se diseñó en código y
-se rehacen a partir de capturas (`PENDIENTES.md` #70). **La referencia es el
-panel andando, no el archivo de Figma.**
+**La referencia del panel es el panel andando, no el archivo de Figma.** Los
+ocho frames viejos describen un panel que no se construyó así y no se van a
+actualizar: es una decisión tomada, no un pendiente (`PENDIENTES.md` #70).
+Quedan en Figma como archivo histórico.
 
 ### 3.11 Borrar `data/users.json`
 
