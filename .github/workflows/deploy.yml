@@ -33,6 +33,12 @@ jobs:
           server-dir: /public_html/
           # Sube solo lo que el sitio necesita para correr.
           # app/config.php NO se sincroniza: vive únicamente en el servidor.
+          #
+          # Los dos últimos los escribe el sitio en el servidor, no una
+          # persona en el repo: los pedidos del checkout y la bitácora de
+          # Mercado Pago. Están en .gitignore, así que hoy no llegarían acá
+          # de todos modos; la exclusión es para que un `git add -f` de
+          # apuro no borre los pedidos de producción en el próximo deploy.
           exclude: |
             **/.git*
             **/.git*/**
@@ -44,3 +50,5 @@ jobs:
             **/*.md
             **/app/config.php
             **/node_modules/**
+            **/data/pedidos.json
+            **/data/mp-eventos.log
