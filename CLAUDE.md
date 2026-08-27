@@ -25,19 +25,24 @@ oficial.
 
 ---
 
-## 2. Alcance de Chichalabs (nosotros) vs. el backend dev
+## 2. Alcance de Chichalabs
 
-| Nosotros | El otro dev |
+**Cambió el 27/08/2026: el proyecto es entero nuestro.** Ya no hay un backend
+dev externo. El panel de administración y la integración de pagos, que estaban
+del otro lado, pasaron a este.
+
+| Hecho | Falta |
 |---|---|
-| Diseño en Figma (sitio + panel admin) | Backend real, MySQL |
-| Frontend completo con datos mock | Panel admin funcionando |
-| `repository.php` (contrato de datos) | Reemplazar mocks por queries |
-| Repo + GitHub Action de deploy FTP | Integración Mercado Pago |
-| `docs/HANDOFF.md` | Auth real (login/registro/cuenta) |
+| Diseño en Figma (sitio + panel admin) | Integración de Mercado Pago |
+| Sitio público completo, doce rutas | Detalle de pedido en /cuenta |
+| MySQL y el contrato de datos | Envío de correo (recuperar contraseña, formularios) |
+| Sesión, login, registro y cuenta | |
+| Panel de administración, nueve secciones | |
+| Repo + GitHub Action de deploy FTP | |
 
-El panel admin **lo diseñamos nosotros** (Figma, solo desktop) pero **lo
-desarrolla él**. Por eso los frames tienen que quedar autoexplicativos:
-componentes estándar y anotaciones de qué hace cada acción.
+Los frames del panel igual quedaron autoexplicativos —componentes estándar y
+anotaciones de qué hace cada acción— y eso siguió sirviendo: son la referencia
+contra la que se programó.
 
 ---
 

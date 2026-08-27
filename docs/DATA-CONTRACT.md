@@ -1,20 +1,27 @@
 # Contrato de datos — Rastro Fitness
 
-Este documento es el acuerdo entre el frontend y el backend. Describe **qué
-devuelve cada función de `app/repository.php`** y qué puede dar por sentado
-la vista que la llama.
+Describe **qué devuelve cada función del repository** y qué puede dar por
+sentado la vista que la llama.
 
 > **La regla de oro del proyecto:** ninguna vista lee un JSON y ninguna vista
-> arma una consulta. Toda lectura de datos pasa por una función `repo_*`.
->
-> Hoy cada función lee un mock de `data/*.json`. Cuando entre MySQL, cambia el
-> **cuerpo** de estas funciones. La firma, los nombres de las claves y la forma
-> del array que devuelven **no se tocan**, porque eso es lo que consumen las
-> once vistas del sitio.
+> arma una consulta. Toda lectura y toda escritura pasa por una función `repo_*`.
+
+**El 27/08/2026 el repository pasó de los mocks a MySQL y ninguna de las once
+vistas del sitio se tocó.** Esa era la apuesta del contrato y funcionó: cambió
+el cuerpo de las funciones, no su firma ni la forma de lo que devuelven. Los
+JSON de `data/` quedan como semilla histórica; los carga una sola vez
+`bin/migrar.php` y después no los edita nadie.
+
+El repository son dos archivos:
+
+| | |
+|---|---|
+| `app/repository.php` | **Lectura, lo que consume el sitio público.** Lo carga `index.php` en todos los requests. |
+| `app/repository-admin.php` | **Escritura y las lecturas que sólo ve el panel** —productos dados de baja, todos los pedidos—. Lo carga sólo `views/admin/_guard.php`, después de comprobar el rol. |
 
 Si una vista necesita un dato que acá no está, se agrega una función nueva —o
 un parámetro nuevo, como pasó con `repo_brands($incluir_propias)`— y se
-documenta acá. Nunca un `file_get_contents` en la vista.
+documenta acá. Nunca un `file_get_contents` ni un `SELECT` en la vista.
 
 ---
 
@@ -274,15 +281,18 @@ del día de la compra. **No se enriquecen contra el catálogo actual y no se
 recalculan.** El precio de hoy no es el precio al que se vendió en abril. Cada
 pedido guarda además su propio `descuento_aplicado_pct`.
 
-### `repo_order(string $code): ?array`
+### `repo_order(string $code, ?int $usuarioId = null): ?array`
 
 Un pedido por su código (`RF-2026-0418`).
 
-> ⚠️ **Esta función no valida quién pide el pedido, y el código es adivinable**
-> (`RF-año-ddmm`). Devuelve nombre, dirección y total de una compra. **Por eso
-> la pantalla de detalle de pedido no está construida.** Antes de exponerla
-> hay que exigir sesión y comparar `usuario_id` contra el usuario logueado, o
-> recibir el id del dueño como segundo argumento y filtrar acá.
+El segundo argumento acota el pedido a su dueño, y la cuenta del cliente lo
+pasa siempre. Sin él, el código es adivinable —`RF-año-ddmm`— y la función
+devuelve nombre, dirección y total de una compra: cualquiera leería los pedidos
+de cualquiera probando códigos. Era la razón por la que la ficha de pedido del
+cliente no se había construido.
+
+El panel usa `repo_admin_pedido()`, que no filtra por dueño: ahí el dueño es
+Rastro.
 
 ### Estados de pedido
 
@@ -346,9 +356,56 @@ hacerlo desaparecer sin explicación.
 
 ---
 
-## 9. Estructura de tablas sugerida
+## 8 bis. El lado de escritura — `app/repository-admin.php`
 
-No es obligatoria: es la traducción directa de los mocks.
+Lo carga sólo el panel. Tres reglas que valen para todas estas funciones:
+
+1. **Toda operación que toque más de una tabla va en una transacción.** Guardar
+   un producto son tres escrituras —el producto, sus imágenes y sus
+   especificaciones— y a medias no sirve.
+2. **Validan y devuelven los errores por campo.** La vista dibuja; no decide
+   qué es válido. La forma es siempre
+   `['ok' => bool, 'errores' => array<string,string>, 'id' => ?int]`.
+3. **Nada se borra si tiene historia.** Un producto se da de baja (`activo = 0`),
+   no se borra: borrarlo deja los pedidos viejos sin referencia y el carrito de
+   quien lo tenía cargado sin explicación.
+
+| Función | Qué hace |
+|---|---|
+| `repo_admin_metricas()` | Las cuatro cifras del dashboard. "Ventas del mes" no cuenta cancelados. |
+| `repo_admin_products($filtros, $page, $perPage)` | Como `repo_products()` pero **ve también lo dado de baja**. |
+| `repo_admin_product($id)` | Un producto por id, activo o no, con imágenes y especificaciones. |
+| `repo_producto_guardar($datos, ?$id)` | Alta y edición. El slug **no se recalcula** al editar: cambiarlo rompe los enlaces ya compartidos. |
+| `repo_producto_activo($id, $activo)` | Baja y alta lógica. |
+| `repo_estados_pedido()` | Los cuatro estados. Sumar uno es tocar sólo esta función (#36). |
+| `repo_admin_pedidos($filtros, $page, $perPage)` | Todos los pedidos, con el nombre de quien compró. |
+| `repo_admin_pedido($codigo)` | Un pedido con items y cliente. **No filtra por dueño**: acá el dueño es Rastro. |
+| `repo_pedido_estado($codigo, $estado)` | Cambia el estado. Rechaza estados que no existen. |
+| `repo_categoria_guardar` · `repo_categoria_borrar` | ABM de categorías. El borrado avisa cuántos productos quedan sueltos. |
+| `repo_marca_guardar` · `repo_marca_borrar` | Ídem marcas. |
+| `repo_cliente_guardar` · `repo_cliente_borrar` | Ídem logos de clientes. |
+| `repo_banner_guardar` · `repo_banner_borrar` | Ídem banners. |
+| `repo_admin_marcas()` | `repo_brands(true)`: todas, la línea propia incluida. |
+| `repo_nosotros_guardar($contenido)` | Guarda el documento entero. La cifra del catálogo se descarta: se calcula sola. |
+| `repo_settings_editables()` | **Qué ajustes deja editar el panel**, con su tipo y su explicación. Agregar un ajuste es agregarlo acá. |
+| `repo_settings_guardar($valores)` | Sólo escribe claves de esa lista: un POST con una clave inventada no crea un ajuste. |
+| `admin_avisar($texto, $tipo)` | Deja un mensaje para la pantalla siguiente, después del redirect. |
+
+### Subidas de imagen — `app/subidas.php`
+
+`subir_imagen($archivo, $carpeta, $base)` devuelve
+`['ok' => bool, 'ruta' => ?string, 'error' => ?string, 'ancho' => ?int, 'alto' => ?int]`.
+
+El tipo se decide con `getimagesize()`, que lee los bytes: el nombre del archivo
+y `$_FILES['type']` los manda quien sube. El nombre final lo inventa el servidor
+a partir del SKU. Y la defensa que de verdad importa: la función escribe un
+`.htaccess` en la carpeta de imágenes que apaga la ejecución de PHP y CGI, así
+que aunque alguna vez se cuele un archivo con código adentro, ahí no corre.
+
+## 9. Estructura de tablas
+
+Es lo que crea `db/esquema.sql`. Cada decisión que no se lee sola está comentada
+en ese archivo.
 
 ```sql
 productos      id, slug UNIQUE, sku, nombre, categoria_id, marca_id,
