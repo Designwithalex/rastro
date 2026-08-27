@@ -40,6 +40,10 @@ $descripcion = 'Discos, barras, mancuernas, kettlebells y racks para gimnasios, 
 $clase_body  = 'pagina-home';
 $estilos     = ['componentes', 'home', 'nosotros'];
 
+/* El carrusel del hero. Sin él la pista sigue siendo un scroller con snap:
+   el script sólo agrega los controles, el autoplay y el foco. */
+$scripts     = ['carrusel'];
+
 /* Saira Condensed la dibuja solamente el titular del hero, que existe nada
    más que en esta página. Se precarga acá y en ningún otro lado. */
 $precargar_titular = true;
@@ -54,8 +58,24 @@ $catalogo    = repo_products([], 1, 1);
 $clientes    = repo_clients();
 $marcas      = repo_brands();
 
+/* El fondo del hero y las placas que rotan arriba son dos cosas distintas,
+   y por eso son dos posiciones distintas. Hasta el hero v3 la vista tomaba
+   el PRIMER banner de `hero` como foto de fondo y del segundo en adelante
+   armaba el collage: una regla implicita que el panel no tenia como
+   explicarle al cliente (#61). Ahora `hero_fondo` es la foto de atras y
+   `hero` son las placas de promocion. Una posicion, una intencion. */
+$banners = repo_banners();
+
+$hero_fondo = null;
+foreach ($banners as $banner) {
+    if (($banner['posicion'] ?? '') === 'hero_fondo') {
+        $hero_fondo = $banner;
+        break;
+    }
+}
+
 $banners_hero = array_values(array_filter(
-    repo_banners(),
+    $banners,
     static fn (array $b): bool => ($b['posicion'] ?? '') === 'hero'
 ));
 
@@ -92,23 +112,21 @@ $mayorista_publicos = [
              ============================================================ */ ?>
     <section class="hero" aria-labelledby="hero-titulo">
 
-        <?php if ($banners_hero !== []): ?>
-            <?php
-            $hero_foto   = (string) ($banners_hero[0]['imagen'] ?? '');
-            $hero_webp   = $hero_foto !== '' ? imagen_webp($hero_foto) : null;
-            ?>
-            <?php if ($hero_foto !== ''): ?>
-                <?php /* Decorativa: el alt vacío es correcto. Lo que la foto
-                         aporta es clima, y el titular ya dice todo lo demás.
-                         fetchpriority alto porque es la imagen más grande de
-                         la primera pantalla. */ ?>
-                <picture class="hero__fondo">
-                    <?php if ($hero_webp !== null): ?>
-                        <source srcset="<?= e($hero_webp) ?>" type="image/webp">
-                    <?php endif; ?>
-                    <img src="<?= e(asset($hero_foto)) ?>" alt="" fetchpriority="high" decoding="async">
-                </picture>
-            <?php endif; ?>
+        <?php
+        $hero_foto = (string) ($hero_fondo['imagen'] ?? '');
+        $hero_webp = $hero_foto !== '' ? imagen_webp($hero_foto) : null;
+        ?>
+        <?php if ($hero_foto !== ''): ?>
+            <?php /* Decorativa: el alt vacío es correcto. Lo que la foto
+                     aporta es clima, y el titular ya dice todo lo demás.
+                     fetchpriority alto porque es la imagen más grande de
+                     la primera pantalla. */ ?>
+            <picture class="hero__fondo">
+                <?php if ($hero_webp !== null): ?>
+                    <source srcset="<?= e($hero_webp) ?>" type="image/webp">
+                <?php endif; ?>
+                <img src="<?= e(asset($hero_foto)) ?>" alt="" fetchpriority="high" decoding="async">
+            </picture>
         <?php endif; ?>
 
         <span class="hero__velo" aria-hidden="true"></span>
@@ -146,33 +164,118 @@ $mayorista_publicos = [
                 </div>
             </div>
 
-            <?php /* El collage de piezas de la derecha. En el frame son tres
-                     placas de promoción de la marca, que hoy no existen en el
-                     repo: son piezas de diseño del cliente (PENDIENTES #61).
+            <?php /* ------------------------------------------------------
+                     El carrusel de placas.
 
-                     Se dibuja recién a partir del SEGUNDO banner de hero. Con
-                     uno solo, ese banner ya es el fondo y repetirlo acá pone
-                     la misma foto dos veces en la misma pantalla — que es
-                     exactamente lo que pasaba antes de esta condición. Sin
-                     collage el hero se lee entero igual: foto, texto y las
-                     dos puertas. El día que el cliente cargue las placas
-                     desde el panel, aparecen solas. */ ?>
-            <?php if (count($banners_hero) >= 2): ?>
-                <div class="hero__piezas" aria-hidden="true">
-                    <?php foreach (array_slice($banners_hero, 1, 3) as $i => $pieza): ?>
-                        <?php
-                        $pieza_img  = (string) ($pieza['imagen'] ?? '');
-                        $pieza_webp = $pieza_img !== '' ? imagen_webp($pieza_img) : null;
-                        ?>
-                        <?php if ($pieza_img !== ''): ?>
-                            <picture class="hero__pieza hero__pieza--<?= e((string) ($i + 1)) ?>">
-                                <?php if ($pieza_webp !== null): ?>
-                                    <source srcset="<?= e($pieza_webp) ?>" type="image/webp">
-                                <?php endif; ?>
-                                <img src="<?= e(asset($pieza_img)) ?>" alt="" loading="lazy" decoding="async">
-                            </picture>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
+                     En el frame son piezas de promoción de la marca —las
+                     mismas que el cliente publica en Instagram— apiladas a
+                     la derecha del titular: la del medio entera y las dos
+                     vecinas asomando por los costados. Eso es lo que dibuja
+                     este bloque, con las placas que tengan `posicion: hero`.
+
+                     SIN JAVASCRIPT SIGUE ANDANDO. La pista es un contenedor
+                     con scroll horizontal y scroll-snap: se arrastra con el
+                     dedo y se recorre con el teclado sin que corra una línea
+                     de JS. Los controles arrancan en `hidden` y los muestra
+                     carrusel.js, porque son botones que sin JS no hacen nada
+                     —el mismo criterio que la hamburguesa en sin-js.css.
+
+                     Con una sola placa no hay nada que rotar: no se dibujan
+                     controles y la pista queda quieta.
+                     ------------------------------------------------------ */ ?>
+            <?php if ($banners_hero !== []): ?>
+                <?php $hero_placas = count($banners_hero); ?>
+                <?php /* Con una sola placa no hay carrusel, y decirle
+                         "carrusel" a un lector de pantalla es prometer
+                         un recorrido que no existe. Los roles entran
+                         recién cuando hay algo que recorrer. */ ?>
+                <div class="hero__carrusel carrusel"
+                     <?php if ($hero_placas > 1): ?>
+                         data-carrusel
+                         role="group"
+                         aria-roledescription="carrusel"
+                         aria-label="Promociones de Rastro Fitness"
+                     <?php endif; ?>>
+
+                    <ul class="carrusel__pista" data-carrusel-pista>
+                        <?php foreach ($banners_hero as $i => $placa): ?>
+                            <?php
+                            $placa_img  = (string) ($placa['imagen'] ?? '');
+                            $placa_webp = $placa_img !== '' ? imagen_webp($placa_img) : null;
+                            $placa_txt  = (string) ($placa['titulo'] ?? '');
+                            $placa_href = (string) ($placa['enlace'] ?? '');
+                            ?>
+                            <?php if ($placa_img !== ''): ?>
+                                <li class="carrusel__placa"
+                                    <?php if ($hero_placas > 1): ?>
+                                        role="group"
+                                        aria-roledescription="diapositiva"
+                                        aria-label="<?= e(sprintf('%d de %d', $i + 1, $hero_placas)) ?>"
+                                    <?php endif; ?>>
+
+                                    <?php /* La placa YA dice lo que promociona: el texto
+                                             está adentro de la imagen. Por eso el alt es
+                                             el título del banner y no una descripción de
+                                             la foto — es la única forma de que un lector
+                                             de pantalla reciba lo mismo que se ve. */ ?>
+                                    <?php ob_start(); ?>
+                                        <picture class="carrusel__marco">
+                                            <?php if ($placa_webp !== null): ?>
+                                                <source srcset="<?= e($placa_webp) ?>" type="image/webp">
+                                            <?php endif; ?>
+                                            <img src="<?= e(asset($placa_img)) ?>"
+                                                 alt="<?= e($placa_txt) ?>"
+                                                 width="892" height="1115"
+                                                 <?php /* La única imagen con prioridad alta del hero es
+                                                          el fondo: es la más grande y la candidata a LCP.
+                                                          Pedir dos altas es no pedir ninguna. La primera
+                                                          placa va eager —está en la primera pantalla— y
+                                                          las demás, diferidas. */ ?>
+                                                 <?= $i === 0 ? '' : 'loading="lazy"' ?>
+                                                 decoding="async">
+                                        </picture>
+                                    <?php $placa_marco = (string) ob_get_clean(); ?>
+
+                                    <?php if ($placa_href !== ''): ?>
+                                        <a class="carrusel__enlace" href="<?= e(url($placa_href)) ?>">
+                                            <?= $placa_marco ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= $placa_marco ?>
+                                    <?php endif; ?>
+                                </li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </ul>
+
+                    <?php if ($hero_placas > 1): ?>
+                        <div class="carrusel__controles" data-carrusel-controles hidden>
+                            <button class="carrusel__flecha carrusel__flecha--anterior"
+                                    type="button" data-carrusel-anterior>
+                                <span class="visualmente-oculto">Placa anterior</span>
+                                <span aria-hidden="true">←</span>
+                            </button>
+
+                            <ol class="carrusel__puntos" data-carrusel-puntos>
+                                <?php foreach ($banners_hero as $i => $placa): ?>
+                                    <li>
+                                        <button class="carrusel__punto" type="button"
+                                                data-carrusel-ir="<?= e((string) $i) ?>">
+                                            <span class="visualmente-oculto">
+                                                Ir a la placa <?= e((string) ($i + 1)) ?>
+                                            </span>
+                                        </button>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ol>
+
+                            <button class="carrusel__flecha carrusel__flecha--siguiente"
+                                    type="button" data-carrusel-siguiente>
+                                <span class="visualmente-oculto">Placa siguiente</span>
+                                <span aria-hidden="true">→</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 

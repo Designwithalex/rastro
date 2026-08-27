@@ -86,6 +86,18 @@ for f in "$IMG"/ambiente/*.jpg; do
   webp "$f" 78
 done
 
+echo "→ Placas de promoción (lado largo 1200, JPEG + WebP)"
+# Van con más calidad que una foto de ambiente y no por capricho: la placa
+# es una pieza gráfica con tipografía grande adentro de la imagen, y el
+# ringing del JPEG se ve justo en los bordes de las letras. 82 es donde
+# deja de notarse en el titular blanco sobre negro.
+for f in "$IMG"/banners/*.jpg; do
+  [ -e "$f" ] || continue
+  redimensionar "$f" 1200
+  sips -s format jpeg -s formatOptions 82 "$f" --out "$f" >/dev/null
+  webp "$f" 82
+done
+
 echo "→ Marca (lado largo 600, PNG con transparencia + WebP)"
 for f in "$IMG"/marca/*.png; do
   redimensionar "$f" 600

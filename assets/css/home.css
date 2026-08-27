@@ -36,12 +36,21 @@
 /* La foto se apaga con un filtro y no con una capa negra encima: así el
    velo de abajo puede seguir siendo un degradé y no tiene que pelear
    contra el brillo original. Las fotos que mande el cliente van a venir
-   con exposiciones distintas y esto las nivela a todas. */
+   con exposiciones distintas y esto las nivela a todas.
+
+   EL 0.34 DE ANTES NO SIRVE PARA ESTA FOTO. Estaba calculado para las
+   tomas de ambiente del cliente, que tienen un gris medio de ~85 sobre
+   255. El fondo del hero v3 es una pared negra con dos reflectores: su
+   gris medio es 19. Al 0.34 quedaba en 6 —negro liso, sin pared y sin
+   reflectores—, y el hero perdía justo lo que la foto venía a aportar.
+   A 0.8 la pared se lee y los reflectores marcan el borde de arriba.
+   La legibilidad del texto no depende de este número: la resuelve el
+   velo, que es opaco del lado del titular. */
 .hero__fondo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.34) saturate(0.65);
+  filter: brightness(0.8) saturate(0.8);
 }
 
 /* El velo no es una capa opaca: es un degradé que apaga la foto justo
@@ -125,50 +134,189 @@
   margin-top: var(--espaciado-32);
 }
 
-/* --- El collage de piezas -----------------------------------
-   En el frame son tres piezas superpuestas. Hoy hay un solo banner
-   cargado y se dibuja una sola, centrada: el collage no se finge
-   con fotos de producto (PENDIENTES #61). */
+/* --- El carrusel de placas ----------------------------------
+   La pieza que ocupa la mitad derecha del hero: las placas de
+   promoción de la marca, la del medio entera y las vecinas
+   asomando por los costados (frame "Home BOLD · Desktop 1440").
 
-.hero__piezas {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+   EL CARRUSEL ES LA PISTA, NO EL SCRIPT. Todo el recorrido lo
+   hace el navegador con overflow-x + scroll-snap: se arrastra
+   con el dedo, se recorre con el teclado y frena centrado en
+   cada placa aunque el JavaScript no llegue nunca. carrusel.js
+   sólo enciende los controles y el avance automático.
 
-.hero__pieza {
-  display: block;
+   El asomo de las vecinas sale del padding de la pista, no de
+   márgenes negativos en las placas: así la primera y la última
+   también quedan centradas cuando les toca, que es lo que un
+   margen negativo rompe. */
+
+.hero__carrusel {
+  position: relative;
   min-width: 0;
 }
 
-.hero__pieza img {
+.carrusel__pista {
+  display: flex;
+  gap: var(--espaciado-16);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+
+  /* El asomo. La mitad del sobrante a cada lado deja la placa
+     activa en el centro exacto de la pista. */
+  padding-inline: 11%;
+
+  /* La barra se esconde pero el contenedor sigue siendo scrolleable:
+     el gesto y el teclado no dependen de que se vea. */
+  scrollbar-width: none;
+}
+
+.carrusel__pista::-webkit-scrollbar {
+  display: none;
+}
+
+/* Quien pide menos movimiento no quiere que la pista se deslice
+   sola de una placa a la otra: salta y listo. */
+@media (prefers-reduced-motion: reduce) {
+  .carrusel__pista {
+    scroll-behavior: auto;
+  }
+}
+
+.carrusel__placa {
+  flex: 0 0 78%;
+  scroll-snap-align: center;
+  min-width: 0;
+}
+
+/* Con una sola placa no hay nada al costado que asomar: ocupa el
+   ancho entero y la pista deja de tener sobrante. */
+.carrusel__placa:only-child {
+  flex-basis: 100%;
+}
+
+.carrusel__pista:has(> .carrusel__placa:only-child) {
+  padding-inline: 0;
+}
+
+.carrusel__enlace {
+  display: block;
+  text-decoration: none;
+}
+
+.carrusel__marco {
+  display: block;
+  aspect-ratio: 4 / 5;
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.carrusel__marco img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Las laterales sólo existen cuando hay tres: con una o dos, el
-   :nth-child no las alcanza y la pieza queda sola y derecha. */
-.hero__pieza--1:not(:only-child),
-.hero__pieza--3 {
-  flex: 0 1 34%;
-  opacity: 0.75;
-  aspect-ratio: 303 / 381;
+/* Las que asoman por los costados se apagan: el ojo tiene que saber
+   cuál es la placa que se está mostrando, y en el frame las vecinas
+   están más oscuras que la del medio.
+
+   Quién es la activa lo dice el script con una clase, y no un :has()
+   contra el punto encendido: los puntos viven en los controles, que
+   son hermanos de la pista y no descendientes de la placa. El único
+   que sabe qué quedó centrado es quien lee el scroll.
+
+   Sin JavaScript la clase `carrusel--vivo` no existe y no se apaga
+   ninguna: mejor todas enteras que todas al 45%. */
+.carrusel--vivo .carrusel__placa {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
 }
 
-.hero__pieza--2 {
-  flex: 0 1 46%;
-  z-index: 1;
-  aspect-ratio: 422 / 531;
-  margin-inline: -6%;
-}
-
-/* La pieza única no se achica ni se corre: ocupa su lugar entera. */
-.hero__pieza:only-child {
-  flex: 0 1 78%;
+.carrusel--vivo .carrusel__placa--activa,
+.carrusel--vivo .carrusel__placa:hover,
+.carrusel--vivo .carrusel__placa:focus-within {
   opacity: 1;
-  margin-inline: 0;
-  aspect-ratio: 422 / 531;
+}
+
+/* --- Controles ---------------------------------------------
+   Arrancan hidden desde el marcado y los muestra el script. */
+
+.carrusel__controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-16);
+  margin-top: var(--espaciado-20);
+}
+
+.carrusel__flecha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--color-text-primary);
+  background-color: transparent;
+  border: var(--hairline) solid var(--color-border-strong);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.carrusel__flecha:hover:not(:disabled) {
+  background-color: var(--color-bg-elevated);
+  border-color: var(--color-text-primary);
+}
+
+/* Deshabilitada y no escondida: el control tiene que seguir estando
+   donde estaba, si no la fila de puntos se corre sola al llegar a la
+   primera o a la última placa. */
+.carrusel__flecha:disabled {
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-subtle);
+  cursor: default;
+}
+
+.carrusel__puntos {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* El área de toque es de 44 px aunque la marca sea una línea de 24:
+   el objetivo táctil no puede medir lo que mide el dibujo. */
+.carrusel__punto {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 44px;
+  padding: 0;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.carrusel__punto::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-border-strong);
+  transition: background-color 0.2s ease;
+}
+
+.carrusel__punto:hover::after {
+  background-color: var(--color-text-secondary);
+}
+
+.carrusel__punto--activo::after {
+  background-color: var(--color-accent-text);
 }
 
 @media (min-width: 1040px) {
@@ -214,6 +362,22 @@
   .hero__acciones .boton {
     justify-content: flex-start;
     gap: var(--espaciado-16);
+  }
+
+  /* La placa del frame mide 422 px de ancho. Con el 78% de la pista,
+     ese ancho sale de una columna de ~560: se acota acá y no en la
+     placa para que el asomo de las vecinas siga siendo proporcional.
+     Pegada a la derecha, como en el frame. */
+  .hero__carrusel {
+    width: 100%;
+    max-width: 560px;
+    margin-inline-start: auto;
+  }
+
+  .carrusel__controles {
+    justify-content: flex-start;
+    margin-top: var(--espaciado-24);
+    padding-inline: 11%;
   }
 }
 

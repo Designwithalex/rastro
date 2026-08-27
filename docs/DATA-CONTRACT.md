@@ -163,10 +163,26 @@ por `orden`. `logo` puede venir vacío; la vista escribe el nombre en su lugar.
 ### `repo_banners(): array`
 
 Banners activos, ordenados por `posicion` y `orden`. La vista elige por
-`posicion`: `hero` | `mayorista` | `franja`.
+`posicion`: `hero_fondo` | `hero` | `mayorista` | `franja`.
 
-> La home usa el **primer** banner de `hero` como foto de fondo. A partir del
-> **segundo** dibuja el collage de placas de la derecha (#61).
+| `posicion` | Qué es | Cuántos | Formato |
+|---|---|---|---|
+| `hero_fondo` | La foto detrás del hero de la home. Decorativa: va con `alt` vacío y no lleva enlace. | Uno. Si hay varios se usa el primero. | Apaisada, lado largo 1600 |
+| `hero` | Las placas de promoción que rotan en el carrusel del hero. | Las que haya. Con una sola no se dibujan controles. | **4:5**, lado largo 1200 |
+| `mayorista` | La foto de la franja mayorista. | Uno | Apaisada |
+| `franja` | Texto de la barra superior. Sin imagen; admite `{descuento}`. | Uno | — |
+
+> **`titulo` de un banner `hero` es su texto alternativo.** La placa es una
+> pieza gráfica con el mensaje adentro de la imagen, así que el `alt` no
+> describe la foto: repite lo que la placa dice. Es la única forma de que un
+> lector de pantalla reciba lo mismo que se ve. Cargar una placa sin título
+> deja esa promoción invisible para quien no ve la imagen.
+
+> **Hasta el hero v3 no existía `hero_fondo`:** la vista tomaba el primer
+> banner de `hero` como fondo y del segundo en adelante armaba el collage.
+> Era una regla implícita que el panel no tenía cómo explicarle al cliente,
+> y que obligaba a cargar la foto de fondo y las placas en la misma bolsa.
+> Ahora son dos posiciones distintas porque son dos cosas distintas (#61).
 
 ---
 

@@ -236,7 +236,11 @@ Origen: `/Users/ale/Documents/chichalabs-clientes/rastro` (ya copiados al repo).
 - `assets/img/favicon/` — 8 tamaños
 - `assets/img/productos/` — 68 fotos (45 genéricos + 23 sobre blanco)
 - `assets/img/productos/png/` — 23 PNG con fondo transparente (línea Greencore)
-- `assets/img/ambiente/` — 3 fotos lifestyle de gimnasio
+- `assets/img/ambiente/` — 4 fotos lifestyle de gimnasio. Tres verticales y
+  `ambiente-pared-ladrillo-negro.jpg`, apaisada, que es el fondo del hero.
+- `assets/img/banners/` — placas de promoción de la marca, en 4:5. Son las
+  piezas que el cliente publica en Instagram y que rotan en el carrusel del
+  hero. Hoy hay una; el resto se piden (`PENDIENTES.md` #66).
 
 **Greencore** aparece como línea/marca en las fotos: es candidata a "marca de la que
 somos vendedores oficiales". Confirmar el listado definitivo (`PENDIENTES.md`).
