@@ -334,6 +334,11 @@ WebP. No versionar originales pesados sin optimizar.
 
 ## 8. Enlaces
 
+**Para poner a andar los pagos y el panel en el servidor:**
+[`docs/PUESTA-EN-MARCHA.md`](docs/PUESTA-EN-MARCHA.md). Son seis valores en
+`app/config.php`, un webhook y dos permisos. Es lo único que separa al sitio
+de estar cobrando.
+
 - Notion del proyecto: https://app.notion.com/p/3c18437e26f380ec9a3bc3202527f36a
 - Drive del cliente: https://drive.google.com/drive/folders/17A56drHb-n59DK6x9uPZNrufPmcwhxpX
 - Sitio provisorio Hostinger: https://darkorange-buffalo-311255.hostingersite.com/

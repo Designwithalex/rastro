@@ -301,6 +301,7 @@ Los que más pesan:
 |---|---|
 | Contrato de datos | [`docs/DATA-CONTRACT.md`](DATA-CONTRACT.md) |
 | **Mercado Pago y checkout** | [`docs/MERCADOPAGO.md`](MERCADOPAGO.md) |
+| **Poner a andar pagos y panel en el servidor** | [`docs/PUESTA-EN-MARCHA.md`](PUESTA-EN-MARCHA.md) |
 | Despliegue y credenciales | [`docs/DEPLOY.md`](DEPLOY.md) |
 | Levantar el proyecto | [`docs/SETUP-MAQUINA.md`](SETUP-MAQUINA.md) |
 | Contexto del proyecto y marca | [`CLAUDE.md`](../CLAUDE.md) |
