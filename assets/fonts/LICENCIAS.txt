@@ -8,6 +8,7 @@ Google Fonts ni a ningún otro dominio (ver la Content-Security-Policy del
   michroma-400.woff2         Michroma Regular
   saira-400.woff2            Saira Regular
   saira-600.woff2            Saira SemiBold
+  saira-condensed-900.woff2  Saira Condensed Black
   jetbrains-mono-400.woff2   JetBrains Mono Regular
   jetbrains-mono-700.woff2   JetBrains Mono Bold
 
@@ -16,9 +17,17 @@ el alojamiento propio:
 
   Michroma        © Vernon Adams · https://fonts.google.com/specimen/Michroma
   Saira           © Omnibus-Type · https://fonts.google.com/specimen/Saira
+  Saira Condensed © Omnibus-Type · https://fonts.google.com/specimen/Saira+Condensed
   JetBrains Mono  © JetBrains     · https://fonts.google.com/specimen/JetBrains+Mono
 
 Subconjunto latin, una instancia estática por peso.
+
+Saira Condensed entró el 26/08/2026 con el hero v3 y no se usa en ningún otro
+lado: sólo el titular de la home y su claim. Reemplazó a `Urban Thunder Demo`,
+que estaba instalada nada más que en una máquina y cuyo sufijo "Demo" no
+permitía ni uso comercial ni webfont. Por eso el preload de este archivo lo
+declara sólo la home, con $precargar_titular en views/layout/head.php, y no el
+layout entero: son 18 KB que el catálogo y el carrito no dibujan.
 
 Nota de dónde salieron los archivos
 -----------------------------------

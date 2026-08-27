@@ -219,6 +219,59 @@
     pintarContador();
   }
 
+  /* --- Botones "Agregar al carrito" -------------------------
+     Delegado en el documento y no un listener por botón: las cards
+     las dibuja PHP, pero el catálogo va a poder filtrar sin recargar
+     y ahí los botones aparecen después de este archivo. Con
+     delegación, los que aparezcan más tarde ya funcionan.
+
+     El botón confirma en su propia etiqueta, no con un cartel: el
+     contador de la cabecera ya cambió y un aviso flotante taparía
+     la grilla justo cuando la persona sigue mirando productos. */
+
+  var TEXTO_OK = 'Agregado';
+  var ESPERA_OK = 1600;
+
+  function confirmar(boton) {
+    var etiqueta = boton.querySelector('.t-mono-label') || boton;
+
+    if (boton.dataset.textoOriginal === undefined) {
+      boton.dataset.textoOriginal = etiqueta.textContent;
+    }
+
+    etiqueta.textContent = TEXTO_OK;
+    boton.classList.add('es-agregado');
+
+    global.clearTimeout(boton._rastroTimer);
+    boton._rastroTimer = global.setTimeout(function () {
+      etiqueta.textContent = boton.dataset.textoOriginal;
+      boton.classList.remove('es-agregado');
+    }, ESPERA_OK);
+  }
+
+  document.addEventListener('click', function (evento) {
+    var boton = evento.target.closest ? evento.target.closest('[data-agregar]') : null;
+
+    if (!boton) {
+      return;
+    }
+
+    var id = parseInt(boton.getAttribute('data-agregar'), 10);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return;
+    }
+
+    // La card entera es un enlace a la ficha y el botón está encima:
+    // sin esto, agregar al carrito además navega.
+    evento.preventDefault();
+
+    var cantidad = parseInt(boton.getAttribute('data-cantidad'), 10);
+
+    agregar(id, Number.isInteger(cantidad) && cantidad > 0 ? cantidad : 1);
+    confirmar(boton);
+  });
+
   /* --- API pública ------------------------------------------ */
 
   global.Carrito = {

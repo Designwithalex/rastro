@@ -1,0 +1,432 @@
+/* ============================================================
+   componentes.css — Rastro Fitness
+   Las piezas que se repiten entre páginas: botón, badge, bloque
+   de precio, card de producto, encabezado de sección y grilla.
+   Son los mismos componentes de la página Componentes de Figma.
+
+   Lo que es de una sola página no va acá: va en su propia hoja.
+   Móvil primero. Ningún valor de marca literal: todo sale de tokens.
+   ============================================================ */
+
+/* ============================================================
+   Botón — 3 estilos. La tipografía la pone la clase de la escala
+   en el marcado (.t-mono-label), como en el resto del sitio.
+   ============================================================ */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  min-height: 44px;
+  padding: var(--espaciado-16) var(--espaciado-24);
+  border: var(--hairline) solid transparent;
+  color: var(--color-text-primary);
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.boton__flecha {
+  flex: 0 0 auto;
+}
+
+/* --- Acento: la acción principal --------------------------- */
+
+.boton--acento {
+  background-color: var(--color-accent-base);
+  border-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.boton--acento:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.boton--acento:active {
+  background-color: var(--color-accent-pressed);
+  border-color: var(--color-accent-pressed);
+}
+
+/* --- Fantasma: contorno, sin relleno ----------------------- */
+
+.boton--fantasma {
+  background-color: transparent;
+  border-color: var(--color-border-strong);
+}
+
+.boton--fantasma:hover {
+  border-color: var(--color-border-focus);
+  background-color: var(--color-bg-elevated);
+}
+
+/* Sobre una foto el contorno solo no alcanza: el fondo cambia de
+   claro a oscuro debajo del botón y el borde se pierde en el medio.
+   Este relleno lo despega sin agregar un color nuevo a la paleta. */
+.boton--sobre-foto {
+  background-color: var(--color-bg-elevated);
+}
+
+/* --- Texto: sin caja --------------------------------------- */
+
+.boton--texto {
+  min-height: 0;
+  padding: 0;
+  border-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.boton--texto:hover {
+  color: var(--color-text-primary);
+}
+
+.boton:disabled,
+.boton[aria-disabled="true"] {
+  background-color: transparent;
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Badge
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espaciado-4) var(--espaciado-8);
+  white-space: nowrap;
+}
+
+.badge--descuento {
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.badge--nuevo {
+  background-color: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+.badge--agotado {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+}
+
+.badge--oficial {
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   Bloque de precio
+
+   El único componente que aparece en las cuatro pantallas de
+   compra. Si suma una tercera línea por cuotas (PENDIENTES #21),
+   se agrega acá y baja a todas.
+   ============================================================ */
+
+.precio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding-top: var(--espaciado-16);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.precio__publicado,
+.precio__transferencia {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+}
+
+/* El degradé plata del isotipo, sólo en el número. La clase .plata
+   de tokens.css hace el background-clip; acá va lo demás. */
+.precio__monto {
+  font-variant-numeric: tabular-nums;
+}
+
+.precio__medio {
+  color: var(--color-text-secondary);
+}
+
+.precio__transferencia-monto {
+  color: var(--color-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.precio__nota {
+  color: var(--color-text-secondary);
+}
+
+/* En el tamaño chico —fila de carrito— el bloque no lleva la línea
+   de arriba: ya lo separa la retícula de la propia fila. */
+.precio--sm {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* ============================================================
+   Card de producto
+   ============================================================ */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-bg-base);
+}
+
+/* --- La foto -------------------------------------------------
+   El "image well" claro de PENDIENTES #22: las 68 fotos vienen
+   sobre blanco y el sitio es negro, así que el recuadro claro pasa
+   a ser una decisión de diseño y no un defecto. */
+
+.card__foto {
+  position: relative;
+  aspect-ratio: 359 / 300;
+  background-color: var(--color-bg-product-well);
+  overflow: hidden;
+}
+
+.card__imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .card__imagen {
+  transform: scale(1.03);
+}
+
+/* Las cuatro miras de encuadre, dibujadas con ocho degradés de un
+   solo color en vez de ocho <span> vacíos: es adorno, y el adorno no
+   tiene por qué existir en el árbol de accesibilidad. */
+.card__miras {
+  position: absolute;
+  inset: var(--espaciado-12);
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--color-text-disabled) 0 0), linear-gradient(var(--color-text-disabled) 0 0),
+    linear-gradient(var(--color-text-disabled) 0 0), linear-gradient(var(--color-text-disabled) 0 0),
+    linear-gradient(var(--color-text-disabled) 0 0), linear-gradient(var(--color-text-disabled) 0 0),
+    linear-gradient(var(--color-text-disabled) 0 0), linear-gradient(var(--color-text-disabled) 0 0);
+  background-repeat: no-repeat;
+  background-size: 14px 1px, 1px 14px, 14px 1px, 1px 14px, 14px 1px, 1px 14px, 14px 1px, 1px 14px;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+/* Adentro de las miras, no pegado al canto: el código es parte de la
+   ficha técnica de la foto y tiene que leerse como tal. */
+.card__codigo {
+  position: absolute;
+  left: var(--espaciado-12);
+  bottom: var(--espaciado-12);
+  color: var(--color-text-inverse);
+}
+
+/* --- El cuerpo ---------------------------------------------- */
+
+.card__cuerpo {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-20) var(--espaciado-20) var(--espaciado-24);
+}
+
+.card__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaciado-12);
+  color: var(--color-text-secondary);
+}
+
+.card__nombre {
+  color: var(--color-text-primary);
+}
+
+/* Un solo enlace por card, estirado sobre toda la superficie. El
+   botón de agregar se levanta por encima con position: relative. */
+.card__enlace::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.card:hover .card__nombre {
+  color: var(--color-accent-text);
+}
+
+/* El bloque de precio empuja al botón contra el pie de la card, así
+   todas las cards de una fila terminan con el botón a la misma
+   altura aunque el nombre ocupe una línea más. */
+.card .precio {
+  margin-top: auto;
+}
+
+.card__cta {
+  position: relative;
+  z-index: 1;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Confirmación de "Agregado". La pone y la saca carrito.js; dura poco
+   y no mueve nada de lugar porque sólo cambia color y borde. */
+.boton.es-agregado {
+  border-color: var(--color-accent-base);
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.card__sin-stock {
+  color: var(--color-text-disabled);
+  padding-block: var(--espaciado-12);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.card--agotado .card__imagen {
+  opacity: 0.55;
+}
+
+/* ============================================================
+   Grilla de productos
+
+   Una columna en celular, a sangre y separadas por hairline
+   (PENDIENTES #30). Cuatro en escritorio.
+   ============================================================ */
+
+.grilla-productos {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grilla-productos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1040px) {
+  .grilla-productos {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================================
+   Encabezado de sección
+
+     [ 05 ]  CATEGORÍAS  ─────────────  183 productos
+   ============================================================ */
+
+.encabezado-seccion {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: var(--espaciado-16);
+  row-gap: var(--espaciado-8);
+  padding-block: var(--espaciado-48) var(--espaciado-24);
+}
+
+.encabezado-seccion__indice {
+  color: var(--color-accent-text);
+}
+
+.encabezado-seccion__titulo {
+  color: var(--color-text-primary);
+}
+
+.encabezado-seccion__nota,
+.encabezado-seccion__enlace {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+}
+
+.encabezado-seccion__enlace {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  transition: color 0.15s ease;
+}
+
+.encabezado-seccion__enlace:hover {
+  color: var(--color-text-primary);
+}
+
+/* Arriba del corte el encabezado es una sola línea, con la regla
+   ocupando el hueco. La regla es un pseudoelemento y no un <div>
+   vacío: no significa nada, así que no está en el marcado. */
+@media (min-width: 900px) {
+  .encabezado-seccion {
+    grid-template-columns: auto auto 1fr auto;
+    column-gap: var(--espaciado-24);
+    padding-block: var(--espaciado-80) var(--espaciado-40);
+  }
+
+  .encabezado-seccion::after {
+    content: "";
+    grid-column: 3;
+    height: var(--hairline);
+    background-color: var(--color-border-subtle);
+    /* Alinea la regla con la mitad de la mayúscula del titular en vez
+       de con la línea de base, que la dejaría pegada abajo. */
+    transform: translateY(-0.45em);
+  }
+
+  .encabezado-seccion__nota,
+  .encabezado-seccion__enlace {
+    grid-column: 4;
+    justify-self: end;
+    text-align: right;
+  }
+}
+
+/* ============================================================
+   Índice de sección suelto: [ 07 ] · Medios de pago
+   ============================================================ */
+
+.indice-seccion {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  color: var(--color-accent-text);
+}
+
+/* ============================================================
+   Estado vacío — catálogo sin resultados, carrito sin productos
+   ============================================================ */
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-64) var(--espaciado-20);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.vacio__indice {
+  color: var(--color-accent-text);
+}
+
+.vacio__texto {
+  max-width: 46ch;
+  color: var(--color-text-secondary);
+}
+
+.vacio__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-12);
+  margin-top: var(--espaciado-8);
+}

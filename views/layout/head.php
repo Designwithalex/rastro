@@ -36,6 +36,9 @@
  *   $estilos      array   hojas de estilo propias de la página, por nombre
  *                         de archivo sin extensión: ['nosotros'] carga
  *                         assets/css/nosotros.css después de las comunes.
+ *   $precargar_titular
+ *                 bool    precarga Saira Condensed Black. La usa sólo el
+ *                         titular del hero, así que la pone sólo la home.
  *
  * Las define el layout (la vista las puede leer, no pisar):
  *   $settings            array   repo_settings(), ya cacheado
@@ -98,6 +101,14 @@ $estilos_pagina  = array_values(array_filter(
     <?php /* Las dos familias que aparecen arriba de todo: el titular y el texto. */ ?>
     <link rel="preload" href="<?= e(asset('fonts/michroma-400.woff2')) ?>" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="<?= e(asset('fonts/saira-400.woff2')) ?>" as="font" type="font/woff2" crossorigin>
+
+    <?php /* Saira Condensed es 18 KB y sólo la usa el titular del hero, que
+             está en la home y en ningún otro lado. Se precarga únicamente
+             ahí: bajarla en el catálogo o en el carrito sería pagar por una
+             fuente que esas páginas no dibujan. La declara $precargar_titular. */ ?>
+    <?php if (!empty($precargar_titular)): ?>
+        <link rel="preload" href="<?= e(asset('fonts/saira-condensed-900.woff2')) ?>" as="font" type="font/woff2" crossorigin>
+    <?php endif; ?>
 
     <?php foreach (array_merge($estilos_comunes, $estilos_pagina) as $hoja): ?>
         <link rel="stylesheet" href="<?= e(asset('css/' . $hoja . '.css')) ?>">

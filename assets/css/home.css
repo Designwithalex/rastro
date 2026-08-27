@@ -1,0 +1,654 @@
+/* ============================================================
+   home.css — Rastro Fitness
+   Sólo lo que existe en la portada. Lo que se comparte con otras
+   páginas —botón, badge, precio, card, encabezado— está en
+   componentes.css. Móvil primero.
+
+   Referencia: frame "Home BOLD · Desktop 1440" y su par de 390.
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=28-3
+   ============================================================ */
+
+.pagina-home {
+  /* Gris del titular del hero. Es un valor crudo de Figma: la capa de
+     color no tiene variable asociada, así que no está en tokens.css.
+     Vive acá, en un solo lugar, hasta que sea un token de verdad
+     (PENDIENTES #62). Está entre plata/1 y plata/2. */
+  --hero-titular: #d9d9d9;
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-bg-base);
+  overflow: hidden;
+}
+
+.hero__fondo {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+/* La foto se apaga con un filtro y no con una capa negra encima: así el
+   velo de abajo puede seguir siendo un degradé y no tiene que pelear
+   contra el brillo original. Las fotos que mande el cliente van a venir
+   con exposiciones distintas y esto las nivela a todas. */
+.hero__fondo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.34) saturate(0.65);
+}
+
+/* El velo no es una capa opaca: es un degradé que apaga la foto justo
+   donde va el texto y la deja respirar del otro lado. Con un negro
+   plano la foto se pierde entera y el hero queda liso. */
+.hero__velo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(90deg, var(--color-bg-base) 8%, transparent 72%),
+    linear-gradient(0deg, var(--color-bg-base) 0%, transparent 45%);
+}
+
+.hero__interior {
+  position: relative;
+  display: grid;
+  gap: var(--espaciado-40);
+  padding-block: var(--espaciado-48) var(--espaciado-64);
+}
+
+/* --- El bloque de texto -------------------------------------
+   Las tres medidas de abajo no salen de la escala tipográfica a
+   propósito: en Figma tampoco son estilos, son overrides del hero.
+   La escala sí resuelve el titular (.t-display-hero) y el claim
+   (.t-display-hero-sub), que son los dos que sí son estilos. */
+
+.hero__ojal {
+  font-family: var(--fuente-mono);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 17px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--color-accent-text);
+  margin-bottom: var(--espaciado-8);
+}
+
+.hero__titulo {
+  color: var(--hero-titular);
+}
+
+.hero__regla {
+  display: block;
+  width: 64px;
+  height: 2px;
+  margin-block: var(--espaciado-20) var(--espaciado-16);
+  background-color: var(--color-accent-base);
+}
+
+.hero__bajada {
+  font-family: var(--fuente-texto);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 24px;
+  color: var(--color-text-secondary);
+  max-width: 34ch;
+}
+
+.hero__claim {
+  margin-top: var(--espaciado-16);
+}
+
+.hero__claim-marca,
+.hero__claim-frase {
+  display: block;
+}
+
+.hero__claim-marca {
+  color: var(--hero-titular);
+}
+
+.hero__claim-frase {
+  color: var(--color-accent-text);
+}
+
+.hero__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+  margin-top: var(--espaciado-32);
+}
+
+/* --- El collage de piezas -----------------------------------
+   En el frame son tres piezas superpuestas. Hoy hay un solo banner
+   cargado y se dibuja una sola, centrada: el collage no se finge
+   con fotos de producto (PENDIENTES #61). */
+
+.hero__piezas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero__pieza {
+  display: block;
+  min-width: 0;
+}
+
+.hero__pieza img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Las laterales sólo existen cuando hay tres: con una o dos, el
+   :nth-child no las alcanza y la pieza queda sola y derecha. */
+.hero__pieza--1:not(:only-child),
+.hero__pieza--3 {
+  flex: 0 1 34%;
+  opacity: 0.75;
+  aspect-ratio: 303 / 381;
+}
+
+.hero__pieza--2 {
+  flex: 0 1 46%;
+  z-index: 1;
+  aspect-ratio: 422 / 531;
+  margin-inline: -6%;
+}
+
+/* La pieza única no se achica ni se corre: ocupa su lugar entera. */
+.hero__pieza:only-child {
+  flex: 0 1 78%;
+  opacity: 1;
+  margin-inline: 0;
+  aspect-ratio: 422 / 531;
+}
+
+@media (min-width: 1040px) {
+  .hero__interior {
+    grid-template-columns: minmax(0, 700px) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--espaciado-64);
+    min-height: 719px;
+    padding-block: var(--espaciado-64);
+  }
+
+  .hero__ojal {
+    font-size: 48px;
+    line-height: 53px;
+    letter-spacing: 2.2px;
+    margin-bottom: 0;
+  }
+
+  .hero__regla {
+    width: 88px;
+    margin-block: var(--espaciado-32) var(--espaciado-24);
+  }
+
+  .hero__bajada {
+    font-size: 32px;
+    line-height: 30px;
+    /* Ancho de la caja del frame, para que corte donde corta el diseño:
+       "…para acompañar / cada etapa…". Con un max-width en ch el corte
+       se mueve según la fuente que llegue a cargar. */
+    max-width: 667px;
+  }
+
+  .hero__claim {
+    margin-top: var(--espaciado-32);
+  }
+
+  .hero__acciones {
+    flex-direction: row;
+    gap: var(--espaciado-24);
+    margin-top: var(--espaciado-48);
+  }
+
+  .hero__acciones .boton {
+    justify-content: flex-start;
+    gap: var(--espaciado-16);
+  }
+}
+
+/* ============================================================
+   Garantías — las cuatro razones
+   ============================================================ */
+
+.garantias__grilla {
+  grid-template-columns: 1fr;
+}
+
+.garantias__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-32);
+}
+
+.garantias__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-12);
+}
+
+.garantias__indice {
+  color: var(--color-accent-text);
+}
+
+.garantias__pictograma {
+  width: 26px;
+  height: 26px;
+  opacity: 0.85;
+}
+
+.garantias__texto {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 640px) {
+  .garantias__grilla {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1040px) {
+  .garantias__grilla {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================================
+   Categorías — el bento
+
+   Composición asimétrica, no una grilla pareja (CLAUDE.md §5.6).
+   ============================================================ */
+
+.bento {
+  grid-template-columns: 1fr;
+}
+
+.bento__celda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--espaciado-32);
+  min-height: 180px;
+  padding: var(--espaciado-24);
+  overflow: hidden;
+  transition: background-color 0.2s ease;
+}
+
+.bento__celda:hover {
+  background-color: var(--color-bg-surface-alt);
+}
+
+/* --- La celda con foto: duotono bordeaux --------------------- */
+
+.bento__celda--foto {
+  background-color: var(--color-bg-base);
+}
+
+.bento__foto {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Duotono: la foto va a escala de grises y el bordeaux lo pone la
+     capa de arriba. Sin el grayscale, el rojo de la capa se mezcla
+     con el color original y da un marrón sucio. El brillo bajo es lo
+     que evita que el duotono salga rosa: el bordeaux del sistema es
+     oscuro y sobre grises claros levanta demasiado. */
+  filter: grayscale(1) contrast(1.05) brightness(0.42);
+}
+
+.bento__celda--foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: var(--color-accent-base);
+  mix-blend-mode: multiply;
+  opacity: 0.72;
+}
+
+.bento__celda--foto:hover {
+  background-color: var(--color-bg-base);
+}
+
+/* Todo lo que no sea la foto se levanta por encima del duotono. El
+   :not() no es decoración: sin él, esta regla le gana en especificidad
+   a .bento__foto, le saca el position: absolute a la imagen y la manda
+   al flujo, que empuja el texto fuera de la celda. */
+.bento__celda--foto > *:not(.bento__foto) {
+  position: relative;
+  z-index: 2;
+}
+
+/* --- La celda de "Ver todo" ---------------------------------- */
+
+.bento__celda--todo {
+  background-color: var(--color-accent-base);
+}
+
+.bento__celda--todo:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.bento__celda--todo .bento__indice,
+.bento__celda--todo .bento__conteo,
+.bento__celda--todo .bento__flecha {
+  color: var(--color-accent-on);
+}
+
+/* --- Contenido de la celda ----------------------------------- */
+
+.bento__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-12);
+}
+
+.bento__indice {
+  color: var(--color-accent-text);
+}
+
+.bento__pictograma {
+  width: 30px;
+  height: 30px;
+  opacity: 0.85;
+}
+
+.bento__texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+.bento__enlace::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.bento__conteo {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 640px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1040px) {
+  .bento {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .bento__celda {
+    grid-column: span 3;
+    min-height: 210px;
+  }
+
+  /* Discos ocupa dos tercios de la primera fila y Barras el resto:
+     de ahí sale la asimetría del bloque. */
+  .bento__celda--1 {
+    grid-column: span 8;
+    min-height: 300px;
+  }
+
+  .bento__celda--2 {
+    grid-column: span 4;
+    min-height: 300px;
+  }
+}
+
+/* ============================================================
+   Banda de medios de pago
+
+   La cifra grande es decorativa y sale del mismo helper que el
+   resto del sitio: no hay un "15" escrito en ningún lado.
+   ============================================================ */
+
+.banda-pago {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.banda-pago__cifra {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--margen-mobile) * -1);
+  translate: 0 -50%;
+  font-family: var(--fuente-display);
+  font-size: clamp(120px, 26vw, 230px);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--color-accent-on);
+  opacity: 0.12;
+  pointer-events: none;
+  user-select: none;
+}
+
+.banda-pago__interior {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding-block: var(--espaciado-48);
+}
+
+.banda-pago__indice {
+  color: var(--color-accent-on);
+  opacity: 0.75;
+}
+
+.banda-pago__titulo {
+  max-width: 28ch;
+}
+
+.banda-pago__texto {
+  max-width: 60ch;
+  opacity: 0.85;
+}
+
+@media (min-width: 1040px) {
+  .banda-pago__cifra {
+    right: 6%;
+    opacity: 0.16;
+  }
+
+  .banda-pago__interior {
+    padding-block: var(--espaciado-64);
+  }
+}
+
+/* ============================================================
+   Franjas de prueba social — clientes y marcas oficiales
+   ============================================================ */
+
+.logos {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.logos__celda {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: var(--espaciado-20);
+}
+
+/* Monocromo plata al 60%, color al hover: así una franja de logos de
+   ocho marcas distintas no se convierte en ocho colores peleando entre
+   sí sobre negro (PENDIENTES #25). */
+.logos__imagen {
+  max-height: 48px;
+  width: auto;
+  filter: grayscale(1) brightness(1.6);
+  opacity: 0.6;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.logos__celda:hover .logos__imagen {
+  filter: none;
+  opacity: 1;
+}
+
+/* Sin archivo de logo se escribe el nombre. No es un estado de error:
+   es lo que se ve hasta que el cliente mande los SVG. */
+.logos__nombre {
+  color: var(--color-text-disabled);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .logos--3 { grid-template-columns: repeat(3, 1fr); }
+  .logos--4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1040px) {
+  .logos__celda {
+    min-height: 128px;
+  }
+
+  .logos--4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ============================================================
+   Franja mayorista
+   ============================================================ */
+
+.mayoristas-franja {
+  grid-template-columns: 1fr;
+  margin-top: var(--espaciado-64);
+}
+
+.mayoristas-franja__foto {
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+  background-color: var(--color-bg-base);
+}
+
+.mayoristas-franja__foto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05) brightness(0.42);
+}
+
+.mayoristas-franja__foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-accent-base);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+.mayoristas-franja__pie {
+  position: absolute;
+  left: var(--espaciado-24);
+  bottom: var(--espaciado-24);
+  z-index: 1;
+  color: var(--color-text-primary);
+}
+
+.mayoristas-franja__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-24);
+  padding: var(--espaciado-32) var(--espaciado-20);
+}
+
+.mayoristas-franja__publicos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+}
+
+/* Cuatro celdas, cuatro columnas: número, rubro, línea y "Consultar".
+   Con tres columnas declaradas la cuarta se iba a una fila nueva y cada
+   rubro ocupaba el doble de alto. Abajo del corte la línea está en
+   display:none y salen del flujo tres, no cuatro. */
+.mayoristas-franja__publico {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: var(--espaciado-12);
+}
+
+.mayoristas-franja__numero {
+  color: var(--color-accent-text);
+}
+
+.mayoristas-franja__nombre {
+  color: var(--color-text-primary);
+}
+
+/* La línea de puntos entre el rubro y "Consultar" sólo tiene lugar
+   cuando hay ancho; abajo del corte se esconde y quedan las dos
+   puntas, que es lo que se lee. */
+.mayoristas-franja__linea {
+  display: none;
+  height: var(--hairline);
+  background-color: var(--color-border-subtle);
+}
+
+.mayoristas-franja__consultar {
+  color: var(--color-text-secondary);
+}
+
+.mayoristas-franja__cta {
+  align-self: flex-start;
+}
+
+.mayoristas-franja__nota {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .mayoristas-franja__publico {
+    grid-template-columns: auto auto 1fr auto;
+  }
+
+  .mayoristas-franja__linea {
+    display: block;
+  }
+}
+
+@media (min-width: 1040px) {
+  .mayoristas-franja {
+    grid-template-columns: 620fr 819fr;
+  }
+
+  .mayoristas-franja__foto {
+    min-height: 520px;
+  }
+
+  .mayoristas-franja__panel {
+    gap: var(--espaciado-32);
+    padding: var(--espaciado-48);
+  }
+
+  .mayoristas-franja__cta {
+    align-self: stretch;
+  }
+}
