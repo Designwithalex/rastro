@@ -544,3 +544,172 @@
     height: 100svh;
   }
 }
+
+/* ============================================================
+   Barra de filtros de los listados
+   ============================================================ */
+
+.filtros-admin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaciado-16);
+  margin-bottom: var(--espaciado-16);
+  padding: var(--espaciado-20);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.filtros-admin .form-admin__campo {
+  min-width: 180px;
+}
+
+.admin__conteo {
+  margin-bottom: var(--espaciado-16);
+  color: var(--color-text-secondary);
+}
+
+/* El SKU debajo del nombre, en la misma celda: es el segundo dato con el
+   que alguien busca un producto en una lista larga. */
+.tabla-admin__sku {
+  display: block;
+  color: var(--color-text-disabled);
+}
+
+.paginacion-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hairline);
+  margin-top: var(--espaciado-16);
+  background-color: var(--color-border-subtle);
+  border: var(--hairline) solid var(--color-border-subtle);
+  width: max-content;
+}
+
+/* Fila repetible de un solo campo: la galería de fotos, que no tiene
+   etiqueta y valor sino una ruta sola. */
+.repetible__fila--simple {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.form-admin__vista {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  background-color: var(--color-bg-surface-alt);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* En el panel los campos van sobre blanco, no sobre la superficie oscura
+   del sitio, así que el borde tiene que ser más marcado para leerse. */
+.pagina-admin .campo {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-border-subtle);
+}
+
+.pagina-admin .campo:hover {
+  border-color: var(--color-border-strong);
+}
+
+.pagina-admin .campo.es-error {
+  border-color: var(--color-accent-base);
+}
+
+.pagina-admin select.campo {
+  appearance: none;
+  padding-right: var(--espaciado-32);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 16px top 50%, right 11px top 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* ============================================================
+   Ficha de pedido
+   ============================================================ */
+
+.pedido {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaciado-24);
+  align-items: start;
+}
+
+.pedido__principal {
+  min-width: 0;
+}
+
+.pedido__lado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+}
+
+.pedido__totales {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  margin-top: var(--espaciado-16);
+  padding: var(--espaciado-20) var(--espaciado-24);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.pedido__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaciado-24);
+  color: var(--color-text-secondary);
+}
+
+.pedido__total dd {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.pedido__total dt .form-admin__ayuda {
+  display: block;
+}
+
+.pedido__total--final {
+  margin-top: var(--espaciado-8);
+  padding-top: var(--espaciado-12);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.pedido__datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+}
+
+.pedido__datos dt {
+  color: var(--color-text-secondary);
+}
+
+.pedido__datos dd {
+  color: var(--color-text-primary);
+}
+
+/* El cambio de estado desde la fila del listado: select y botón en línea,
+   sin salir de la lista. */
+.estado-form {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+}
+
+.estado-form .campo {
+  min-height: 36px;
+  min-width: 130px;
+}
+
+@media (min-width: 1040px) {
+  .pedido {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--espaciado-32);
+  }
+}

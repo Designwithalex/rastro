@@ -31,12 +31,11 @@
 
 declare(strict_types=1);
 
-$admin_usuario = sesion_exigir_admin();
-
-/* El lado de escritura del contrato. Se carga acá y no en index.php: el
-   sitio público no usa ni una de esas funciones, y para cuando esta línea
-   corre el guard de arriba ya dijo que quien está del otro lado es admin. */
-require_once RASTRO_RAIZ . '/app/repository-admin.php';
+/* El guard vive aparte, en _guard.php, porque una pantalla que puede
+   devolver 404 necesita correrlo ANTES de imprimir nada. Acá se incluye
+   con require_once para que una pantalla que no lo necesita pueda seguir
+   incluyendo sólo esta cabecera. */
+require_once RASTRO_VIEWS . '/admin/_guard.php';
 
 $admin_titulo  = (string) ($admin_titulo ?? 'Panel');
 $admin_seccion = (string) ($admin_seccion ?? '');
