@@ -403,6 +403,112 @@
 }
 
 /* ============================================================
+   Formularios
+
+   Están acá y no en la hoja de una página porque los usan cinco:
+   catálogo (rango de precio), mayoristas, login, registro y el
+   botón de arrepentimiento. Vivían en mayoristas.css y las páginas
+   de cuenta salían con las etiquetas y los campos en la misma
+   línea, porque no cargan esa hoja.
+   ============================================================ */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-40);
+  background-color: var(--color-bg-surface);
+}
+
+.formulario__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.formulario__etiqueta {
+  color: var(--color-text-secondary);
+}
+
+/* text-transform: none porque la etiqueta va en .t-mono-label-sm, que
+   es mayúsculas: "(OPCIONAL)" gritando al lado del nombre del campo
+   compite con el campo. */
+.formulario__opcional {
+  color: var(--color-text-disabled);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.formulario__enviar {
+  justify-content: space-between;
+  margin-top: var(--espaciado-8);
+}
+
+.campo {
+  min-width: 0;
+  min-height: 44px;
+  padding-inline: var(--espaciado-12);
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease;
+}
+
+.campo::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.campo:hover {
+  border-color: var(--color-plata-3);
+}
+
+.campo--area {
+  min-height: 120px;
+  padding-block: var(--espaciado-12);
+  resize: vertical;
+}
+
+/* ============================================================
+   Huecos declarados y notas de maqueta
+
+   Las dos existen para que lo que falta SE VEA. Un dato inventado
+   que no se distingue del real, o un formulario que no dice que no
+   envía, es lo que termina publicado sin que nadie lo reclame.
+   Las dos se borran cuando la pieza deja de ser maqueta.
+   ============================================================ */
+
+.marcador {
+  color: var(--color-accent-text);
+  white-space: nowrap;
+}
+
+.nota {
+  margin-top: var(--espaciado-8);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  border: var(--hairline) dashed var(--color-border-strong);
+  color: var(--color-text-secondary);
+  max-width: 74ch;
+}
+
+.nota--maqueta {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaciado-12);
+  border-color: var(--color-accent-text);
+}
+
+.nota__marca {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: var(--hairline) solid var(--color-accent-text);
+  border-radius: var(--radio-full);
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+
+/* ============================================================
    Estado vacío — catálogo sin resultados, carrito sin productos
    ============================================================ */
 

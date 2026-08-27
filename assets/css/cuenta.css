@@ -1,0 +1,339 @@
+/* ============================================================
+   cuenta.css — Rastro Fitness
+   Login, registro y Mi cuenta. Móvil primero.
+   Referencia: página "Sitio · Cuenta" de Figma.
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-3
+   ============================================================ */
+
+/* ============================================================
+   Login y registro: foto + panel
+   ============================================================ */
+
+.auth {
+  grid-template-columns: 1fr;
+}
+
+/* En celular la foto no se dibuja: ocuparía media pantalla antes del
+   formulario, que es lo que la persona vino a hacer. display:none y no
+   opacity: así tampoco se baja el archivo ni queda en el árbol de
+   accesibilidad. */
+.auth__foto {
+  display: none;
+}
+
+.auth__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-40) var(--margen-mobile) var(--espaciado-64);
+}
+
+.auth__titulo {
+  margin-bottom: var(--espaciado-4);
+}
+
+.auth__bajada {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--espaciado-8);
+}
+
+.formulario--auth {
+  padding: 0;
+  background: none;
+}
+
+.auth__olvide {
+  align-self: flex-end;
+  color: var(--color-text-secondary);
+}
+
+.auth__alterna {
+  color: var(--color-text-secondary);
+}
+
+.auth__enlace {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth__enlace:hover {
+  color: var(--color-accent-text);
+}
+
+/* ============================================================
+   Mensajes de estado
+
+   Ícono + texto, nunca sólo color: en este sistema el bordeaux es
+   a la vez promoción y error (CLAUDE.md §5.4).
+   ============================================================ */
+
+.mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaciado-12);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.mensaje__marca {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: var(--hairline) solid currentColor;
+  border-radius: var(--radio-full);
+  font-weight: 700;
+}
+
+.mensaje--error {
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+
+.mensaje--ok {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   Campos con error
+   ============================================================ */
+
+.campo.es-error {
+  border-color: var(--color-danger-border);
+}
+
+.formulario__error {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  color: var(--color-danger-text);
+}
+
+.formulario__ayuda {
+  color: var(--color-text-secondary);
+}
+
+.formulario__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+  padding: var(--espaciado-16);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* accent-color pinta la casilla nativa con el bordeaux del sistema sin
+   tener que reconstruirla: sigue siendo un checkbox de verdad, con su
+   teclado y su semántica. */
+.opcion input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent-base);
+}
+
+/* ============================================================
+   Mi cuenta
+   ============================================================ */
+
+.cuenta {
+  grid-template-columns: 1fr;
+}
+
+.cuenta__nav {
+  padding-block: var(--espaciado-8);
+}
+
+.cuenta__item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-16);
+  width: 100%;
+  min-height: 52px;
+  padding-inline: var(--margen-mobile);
+  color: var(--color-text-secondary);
+  border-left: 2px solid transparent;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cuenta__item:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface);
+}
+
+.cuenta__item.es-activo {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface);
+  border-left-color: var(--color-accent-base);
+}
+
+.cuenta__numero {
+  color: var(--color-accent-text);
+}
+
+.cuenta__item--salir:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.cuenta__item--salir:disabled .cuenta__numero {
+  color: var(--color-text-disabled);
+}
+
+.cuenta__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-64);
+}
+
+.cuenta__bajada {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--espaciado-8);
+}
+
+.cuenta__datos {
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* ============================================================
+   Tabla de pedidos
+
+   La tabla no se convierte en tarjetas en celular: es una tabla de
+   verdad y se lee mejor desplazándola que rota en fichas. El
+   contenedor se lleva el scroll y es enfocable, para que también se
+   pueda mover con el teclado.
+   ============================================================ */
+
+.tabla-envoltorio {
+  overflow-x: auto;
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.tabla {
+  min-width: 520px;
+}
+
+.tabla th,
+.tabla td {
+  padding: var(--espaciado-16);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabla thead th {
+  color: var(--color-text-secondary);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.tabla tbody tr + tr th,
+.tabla tbody tr + tr td {
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.tabla tbody th {
+  color: var(--color-text-primary);
+  font-weight: inherit;
+}
+
+.tabla td {
+  color: var(--color-text-secondary);
+}
+
+.tabla__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Chip de estado ------------------------------------------
+   Tres variantes hoy. Si el negocio maneja más estados se suma una
+   variante acá y la tabla no se toca (PENDIENTES #36). */
+
+.chip-estado {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espaciado-4) var(--espaciado-8);
+  border: var(--hairline) solid currentColor;
+  white-space: nowrap;
+}
+
+.chip-estado--camino {
+  color: var(--color-accent-text);
+}
+
+.chip-estado--entregado {
+  color: var(--color-text-primary);
+}
+
+.chip-estado--cancelado {
+  color: var(--color-text-disabled);
+}
+
+/* ============================================================
+   Escritorio
+   ============================================================ */
+
+@media (min-width: 900px) {
+  .auth {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .auth__foto {
+    position: relative;
+    display: block;
+    min-height: 560px;
+    overflow: hidden;
+    background-color: var(--color-bg-base);
+  }
+
+  .auth__foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.05) brightness(0.5);
+  }
+
+  .auth__claim {
+    position: absolute;
+    inset: auto var(--espaciado-40) var(--espaciado-40) var(--espaciado-40);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaciado-12);
+  }
+
+  .auth__pie {
+    color: var(--color-text-secondary);
+  }
+
+  .auth__panel {
+    justify-content: center;
+    padding: var(--espaciado-64) var(--margen-desktop);
+  }
+
+  .cuenta {
+    grid-template-columns: 280px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .cuenta__nav {
+    padding-block: var(--espaciado-16);
+  }
+
+  .cuenta__item {
+    padding-inline: var(--margen-desktop);
+  }
+
+  .cuenta__panel {
+    padding: var(--espaciado-40) var(--margen-desktop) var(--espaciado-80);
+  }
+}

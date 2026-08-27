@@ -227,23 +227,6 @@
   gap: var(--espaciado-12);
 }
 
-.campo {
-  min-width: 0;
-  min-height: 40px;
-  padding-inline: var(--espaciado-12);
-  border: var(--hairline) solid var(--color-border-strong);
-  color: var(--color-text-primary);
-  transition: border-color 0.15s ease;
-}
-
-.campo::placeholder {
-  color: var(--color-text-secondary);
-}
-
-.campo:hover {
-  border-color: var(--color-plata-3);
-}
-
 .filtros__aplicar {
   justify-content: center;
 }

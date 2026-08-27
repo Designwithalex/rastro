@@ -1,0 +1,178 @@
+/* ============================================================
+   legales.css — Rastro Fitness
+   Las páginas de servicio: términos, botón de arrepentimiento y
+   el 404. Son páginas de texto y de una sola columna; lo único
+   que importa acá es que se lean. Van juntas en una hoja en vez
+   de tener tres archivos de treinta líneas cada uno.
+   ============================================================ */
+
+/* ============================================================
+   404
+   ============================================================ */
+
+.error404 {
+  display: flex;
+  align-items: center;
+  padding-block: var(--espaciado-64) var(--espaciado-96);
+}
+
+.error404__caja {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaciado-16);
+  max-width: 62ch;
+}
+
+.error404__indice {
+  color: var(--color-accent-text);
+}
+
+/* La cifra es una marca de agua, no un titular: por eso no sale de la
+   escala tipográfica y es fluida. Igual que .pie__marca. */
+.error404__cifra {
+  font-family: var(--fuente-display);
+  font-size: clamp(96px, 20vw, 220px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.error404__texto {
+  color: var(--color-text-secondary);
+}
+
+.error404__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-12);
+  margin-top: var(--espaciado-8);
+}
+
+/* La ruta y el código no son decoración: es lo primero que mira alguien
+   que llegó acá desde un enlace roto y quiere avisar cuál era. */
+.error404__ruta {
+  margin-top: var(--espaciado-24);
+  color: var(--color-text-disabled);
+}
+
+/* ============================================================
+   Términos y arrepentimiento
+   ============================================================ */
+
+.legal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  max-width: 78ch;
+  padding-block: var(--espaciado-32) var(--espaciado-80);
+}
+
+.legal__titulo {
+  margin-top: var(--espaciado-8);
+}
+
+.legal__bajada {
+  color: var(--color-text-secondary);
+}
+
+.legal__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-40);
+  margin-top: var(--espaciado-24);
+}
+
+.legal__bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+  padding-top: var(--espaciado-24);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.legal__seccion {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-16);
+}
+
+.legal__numero {
+  flex: 0 0 auto;
+  color: var(--color-accent-text);
+}
+
+.legal__bloque p {
+  color: var(--color-text-secondary);
+}
+
+/* Un texto legal que falta se ve, no se disimula: si el hueco no se nota
+   nadie lo reclama y el sitio sale publicado sin él. */
+.marcador--bloque {
+  display: inline-block;
+  padding: var(--espaciado-12) var(--espaciado-16);
+  border: var(--hairline) dashed var(--color-accent-text);
+}
+
+.legal__pendiente {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  color: var(--color-text-disabled);
+}
+
+.legal__pasos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+  counter-reset: paso;
+}
+
+.legal__pasos li {
+  display: flex;
+  gap: var(--espaciado-16);
+  color: var(--color-text-secondary);
+  counter-increment: paso;
+}
+
+.legal__pasos li::before {
+  content: counter(paso, decimal-leading-zero);
+  flex: 0 0 auto;
+  font-family: var(--fuente-mono);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 26px;
+  letter-spacing: 1.2px;
+  color: var(--color-accent-text);
+}
+
+.formulario--legal {
+  padding: var(--espaciado-24);
+  background-color: var(--color-bg-surface);
+}
+
+.legal__cta {
+  align-self: flex-start;
+}
+
+.legal__pie {
+  margin-top: var(--espaciado-24);
+  padding-top: var(--espaciado-16);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+}
+
+.legal__enlace {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 900px) {
+  .legal {
+    padding-block: var(--espaciado-48) var(--espaciado-96);
+  }
+
+  .formulario--legal {
+    padding: var(--espaciado-32);
+  }
+}

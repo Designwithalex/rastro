@@ -195,42 +195,6 @@
   text-underline-offset: 3px;
 }
 
-/* --- El formulario ------------------------------------------- */
-
-.formulario {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaciado-16);
-  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-40);
-  background-color: var(--color-bg-surface);
-}
-
-.formulario__campo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaciado-8);
-}
-
-.formulario__etiqueta {
-  color: var(--color-text-secondary);
-}
-
-.formulario__opcional {
-  color: var(--color-text-disabled);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.campo--area {
-  min-height: 120px;
-  padding-block: var(--espaciado-12);
-  resize: vertical;
-}
-
-.formulario__enviar {
-  justify-content: space-between;
-  margin-top: var(--espaciado-8);
-}
 
 /* ============================================================
    Escritorio
@@ -298,7 +262,9 @@
     padding: var(--espaciado-48) var(--espaciado-40) var(--espaciado-48) var(--margen-desktop);
   }
 
-  .formulario {
+  /* Sólo el de esta página: el formulario del login o el del botón de
+     arrepentimiento no viven en una retícula a sangre. */
+  .cotizar__cuerpo .formulario {
     padding: var(--espaciado-48) var(--margen-desktop) var(--espaciado-48) var(--espaciado-40);
   }
 }

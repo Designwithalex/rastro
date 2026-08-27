@@ -81,8 +81,14 @@ $archivo = RASTRO_VIEWS . '/' . $ruta['vista'] . '.php';
 if (is_file($archivo)) {
     require $archivo;
 } else {
-    // Andamio de la Fase 2: la ruta ya existe, la página todavía no.
-    // Se cae solo cuando estén todas las vistas.
-    $vista_pendiente = $ruta['vista'];
-    require RASTRO_VIEWS . '/partials/en-construccion.php';
+    /* Todas las rutas de la tabla tienen su vista desde el cierre de la
+       Fase 2, así que llegar acá significa que falta un archivo: un
+       despliegue a medias o un renombre sin actualizar el router. Es un
+       500, no un 404 — la página existe, el servidor está mal— y por eso
+       no muestra un 404 bonito, que escondería el problema. */
+    error_log('Falta la vista views/' . $ruta['vista'] . '.php para la ruta ' . RASTRO_RUTA);
+
+    http_response_code(500);
+    echo '<!doctype html><meta charset="utf-8"><title>Error 500</title>'
+       . '<p>Error del servidor. Ya estamos mirando qué pasó.</p>';
 }

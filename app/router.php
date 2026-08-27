@@ -74,9 +74,7 @@ function router_404(): never
 {
     http_response_code(404);
 
-    $vista = RASTRO_VIEWS . '/errors/404.php';
-
-    require is_file($vista) ? $vista : RASTRO_VIEWS . '/partials/en-construccion.php';
+    require RASTRO_VIEWS . '/errors/404.php';
 
     exit;
 }
