@@ -1,0 +1,318 @@
+/* ============================================================
+   producto.css — Rastro Fitness
+   La ficha: galería, panel de compra, especificaciones,
+   descripción y relacionados. Móvil primero.
+   Referencia: frame "Producto · Desktop 1440".
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=60-3
+   ============================================================ */
+
+.barra-pagina--ficha {
+  padding-block: var(--espaciado-24) var(--espaciado-16);
+}
+
+/* ============================================================
+   Galería
+   ============================================================ */
+
+.ficha {
+  grid-template-columns: 1fr;
+}
+
+.galeria {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hairline);
+  background-color: var(--color-border-subtle);
+}
+
+.galeria__marco {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background-color: var(--color-bg-product-well);
+  overflow: hidden;
+}
+
+.galeria__foto {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.galeria__pie {
+  position: absolute;
+  left: var(--espaciado-16);
+  bottom: var(--espaciado-12);
+  color: var(--color-text-inverse);
+}
+
+/* Miniaturas de tamaño fijo y no en columnas de 1fr: con tres tomas en
+   cuatro columnas de un contenedor de 920 px cada estampilla medía 230 y
+   competía con la foto grande. El scroll horizontal aparece sólo si hay
+   más tomas de las que entran. */
+.galeria__tira {
+  display: flex;
+  gap: var(--hairline);
+  overflow-x: auto;
+}
+
+.galeria__item {
+  flex: 0 0 auto;
+}
+
+.galeria__mini {
+  display: block;
+  width: 104px;
+  aspect-ratio: 1 / 1;
+  padding: var(--espaciado-8);
+  background-color: var(--color-bg-product-well);
+  transition: opacity 0.15s ease;
+}
+
+.galeria__mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* La activa va a plena opacidad y las otras apagadas: es la única
+   diferencia entre ellas, así que tiene que ser evidente. */
+.galeria__mini {
+  opacity: 0.55;
+}
+
+.galeria__mini:hover,
+.galeria__mini.es-activa {
+  opacity: 1;
+}
+
+.galeria__mini.es-activa {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: -2px;
+}
+
+/* ============================================================
+   Panel de compra
+   ============================================================ */
+
+.panel-compra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-20);
+  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-40);
+  background-color: var(--color-bg-surface);
+}
+
+.panel-compra__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  color: var(--color-text-secondary);
+}
+
+.panel-compra__estado {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  color: var(--color-text-secondary);
+}
+
+.panel-compra__punto {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radio-full);
+  background-color: var(--color-plata-1);
+}
+
+.panel-compra__estado.es-agotado .panel-compra__punto {
+  background-color: var(--color-text-disabled);
+}
+
+.panel-compra__aviso {
+  color: var(--color-text-secondary);
+}
+
+/* --- Comprar ------------------------------------------------- */
+
+.compra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-12);
+}
+
+.stepper {
+  display: flex;
+  align-items: stretch;
+  border: var(--hairline) solid var(--color-border-strong);
+}
+
+.stepper__paso {
+  width: 44px;
+  min-height: 44px;
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease;
+}
+
+.stepper__paso:hover {
+  background-color: var(--color-bg-elevated);
+}
+
+/* Las flechitas nativas del number no entran en el lenguaje del sitio y
+   además duplican lo que hacen los dos botones de al lado. */
+.stepper__campo {
+  width: 56px;
+  text-align: center;
+  color: var(--color-text-primary);
+  appearance: textfield;
+  -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepper__campo::-webkit-outer-spin-button,
+.stepper__campo::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.compra__agregar {
+  flex: 1 1 200px;
+}
+
+.panel-compra__cantidad {
+  justify-content: space-between;
+}
+
+/* --- La ficha chica: envío, retiro, garantía ------------------ */
+
+.ficha-datos {
+  grid-template-columns: 1fr;
+  margin-top: var(--espaciado-8);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.ficha-datos__fila {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  align-items: baseline;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-12) var(--espaciado-16);
+}
+
+.ficha-datos__fila dt {
+  color: var(--color-text-secondary);
+}
+
+.ficha-datos__fila dd {
+  color: var(--color-text-primary);
+}
+
+/* Hueco declarado. Se ve a propósito: un dato inventado que no se
+   distingue del real es peor que un dato faltante. */
+.marcador {
+  color: var(--color-accent-text);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Especificaciones y descripción
+   ============================================================ */
+
+.detalle {
+  grid-template-columns: 1fr;
+  margin-top: var(--hairline);
+}
+
+.detalle__bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-40) var(--margen-mobile);
+}
+
+.detalle__bloque--descripcion {
+  background-color: var(--color-bg-surface);
+}
+
+.detalle__titulo {
+  margin-bottom: var(--espaciado-8);
+}
+
+.especificaciones {
+  display: flex;
+  flex-direction: column;
+}
+
+.especificaciones__fila {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaciado-4);
+  padding-block: var(--espaciado-12);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.especificaciones__fila:last-child {
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.especificaciones__fila dt {
+  color: var(--color-text-secondary);
+}
+
+.descripcion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+}
+
+.nota {
+  margin-top: var(--espaciado-8);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  border: var(--hairline) dashed var(--color-border-strong);
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+}
+
+/* ============================================================
+   Relacionados
+   ============================================================ */
+
+.relacionados {
+  margin-top: var(--espaciado-32);
+}
+
+/* ============================================================
+   Escritorio
+   ============================================================ */
+
+@media (min-width: 640px) {
+  .especificaciones__fila {
+    grid-template-columns: 160px 1fr;
+    gap: var(--espaciado-24);
+    align-items: baseline;
+  }
+}
+
+@media (min-width: 1040px) {
+  .ficha {
+    grid-template-columns: minmax(0, 1fr) 520px;
+    align-items: start;
+  }
+
+  .galeria__marco {
+    aspect-ratio: 4 / 3;
+  }
+
+  .panel-compra {
+    padding: var(--espaciado-40) var(--espaciado-40) var(--espaciado-48);
+  }
+
+  .detalle {
+    grid-template-columns: minmax(0, 1fr) 520px;
+  }
+
+  .detalle__bloque {
+    padding: var(--espaciado-64) var(--espaciado-40);
+  }
+}

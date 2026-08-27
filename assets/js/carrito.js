@@ -249,8 +249,53 @@
     }, ESPERA_OK);
   }
 
+  /* El stepper de la ficha. Sin JavaScript el campo sigue siendo un
+     <input type="number"> editable y el botón agrega 1: los dos pasos
+     son un atajo, no el único camino. */
+
+  function campoCantidad(desde) {
+    var caja = desde.closest ? desde.closest('[data-compra]') : null;
+
+    return caja ? caja.querySelector('input[name="cantidad"]') : null;
+  }
+
+  function mover(campo, paso) {
+    var minimo = parseInt(campo.min, 10);
+    var maximo = parseInt(campo.max, 10);
+    var valor = parseInt(campo.value, 10);
+
+    if (!Number.isInteger(minimo)) { minimo = 1; }
+    if (!Number.isInteger(valor)) { valor = minimo; }
+
+    valor += paso;
+
+    if (valor < minimo) { valor = minimo; }
+    if (Number.isInteger(maximo) && valor > maximo) { valor = maximo; }
+
+    campo.value = String(valor);
+  }
+
   document.addEventListener('click', function (evento) {
-    var boton = evento.target.closest ? evento.target.closest('[data-agregar]') : null;
+    var destino = evento.target.closest ? evento.target : null;
+
+    if (!destino) {
+      return;
+    }
+
+    var paso = destino.closest('[data-paso]');
+
+    if (paso) {
+      var campo = campoCantidad(paso);
+
+      if (campo) {
+        evento.preventDefault();
+        mover(campo, parseInt(paso.getAttribute('data-paso'), 10) || 0);
+      }
+
+      return;
+    }
+
+    var boton = destino.closest('[data-agregar]');
 
     if (!boton) {
       return;
@@ -266,7 +311,12 @@
     // sin esto, agregar al carrito además navega.
     evento.preventDefault();
 
-    var cantidad = parseInt(boton.getAttribute('data-cantidad'), 10);
+    // La cantidad sale del stepper si el botón está adentro de uno; si
+    // no —la card del catálogo—, del atributo, y si no, una unidad.
+    var campoFicha = campoCantidad(boton);
+    var cantidad = campoFicha
+      ? parseInt(campoFicha.value, 10)
+      : parseInt(boton.getAttribute('data-cantidad'), 10);
 
     agregar(id, Number.isInteger(cantidad) && cantidad > 0 ? cantidad : 1);
     confirmar(boton);

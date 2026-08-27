@@ -1,0 +1,379 @@
+/* ============================================================
+   catalogo.css — Rastro Fitness
+   Listado con filtros, orden y paginación. Móvil primero.
+   Referencia: frame "Catálogo · Desktop 1440".
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=58-3
+   ============================================================ */
+
+/* ============================================================
+   Miga de pan
+   ============================================================ */
+
+.miga__lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-8);
+}
+
+.miga__paso {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+}
+
+.miga__enlace {
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.miga__enlace:hover {
+  color: var(--color-text-primary);
+}
+
+.miga__barra {
+  color: var(--color-text-disabled);
+}
+
+.miga__actual {
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   Barra de página
+   ============================================================ */
+
+.barra-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-24);
+  padding-block: var(--espaciado-32) var(--espaciado-24);
+}
+
+.barra-pagina__titulo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+}
+
+.barra-pagina__linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaciado-20);
+}
+
+.barra-pagina__conteo {
+  color: var(--color-text-secondary);
+}
+
+/* --- Select de orden ---------------------------------------- */
+
+.orden {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  min-height: 44px;
+  padding-inline: var(--espaciado-16);
+  border: var(--hairline) solid var(--color-border-strong);
+}
+
+.orden:focus-within {
+  border-color: var(--color-border-focus);
+}
+
+.orden__etiqueta {
+  color: var(--color-text-secondary);
+}
+
+/* El appearance: none saca el estilo del sistema operativo; la flecha la
+   dibuja el fondo. Sin eso, en Windows el select entra blanco sobre un
+   sitio negro y es el único control que se ve de otro sistema. */
+.orden__select {
+  flex: 1 1 auto;
+  min-width: 0;
+  appearance: none;
+  padding-right: var(--espaciado-20);
+  color: var(--color-text-primary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 6px top 50%, right 1px top 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* El desplegable nativo hereda el fondo del sistema, no el del sitio:
+   sin esto las opciones salen negras sobre negro en algunos Windows. */
+.orden__select option {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.orden__aplicar {
+  flex: 0 0 auto;
+  padding: var(--espaciado-8) var(--espaciado-12);
+  border: var(--hairline) solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.orden__aplicar:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+@media (min-width: 900px) {
+  .barra-pagina {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--espaciado-32);
+    padding-block: var(--espaciado-40) var(--espaciado-32);
+  }
+
+  .orden {
+    flex: 0 0 auto;
+    width: 280px;
+  }
+}
+
+/* ============================================================
+   El cuerpo: filtros + resultados
+   ============================================================ */
+
+.catalogo {
+  grid-template-columns: 1fr;
+}
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-32);
+  padding: var(--espaciado-32) var(--margen-mobile);
+}
+
+.filtros__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+}
+
+.filtros__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+/* --- Una fila de filtro -------------------------------------
+   Marca, nombre, línea de puntos y conteo. Es un enlace y no una
+   casilla a propósito: ver el comentario de views/catalogo.php. */
+
+.filtro {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: var(--espaciado-12);
+  min-height: 32px;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.filtro:hover {
+  color: var(--color-text-primary);
+}
+
+.filtro__marca {
+  width: 14px;
+  height: 14px;
+  border: var(--hairline) solid var(--color-border-strong);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.filtro:hover .filtro__marca {
+  border-color: var(--color-text-primary);
+}
+
+.filtro.es-activo {
+  color: var(--color-text-primary);
+}
+
+.filtro.es-activo .filtro__marca {
+  background-color: var(--color-accent-base);
+  border-color: var(--color-accent-base);
+}
+
+.filtro__linea {
+  height: var(--hairline);
+  background-color: var(--color-border-subtle);
+}
+
+.filtro__conteo {
+  color: var(--color-text-disabled);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Rango de precio ----------------------------------------- */
+
+.filtros__precio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+}
+
+.filtros__rango {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaciado-12);
+}
+
+.campo {
+  min-width: 0;
+  min-height: 40px;
+  padding-inline: var(--espaciado-12);
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease;
+}
+
+.campo::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.campo:hover {
+  border-color: var(--color-plata-3);
+}
+
+.filtros__aplicar {
+  justify-content: center;
+}
+
+/* ============================================================
+   Resultados
+   ============================================================ */
+
+.resultados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-32);
+  padding-block: var(--espaciado-32) var(--espaciado-64);
+}
+
+/* --- Chips de filtros activos -------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-12);
+  padding-inline: var(--margen-mobile);
+}
+
+.chips__rotulo {
+  color: var(--color-text-secondary);
+}
+
+.chips__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-8);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-8) var(--espaciado-12);
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+  transition: background-color 0.15s ease;
+}
+
+.chip:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.chips__limpiar {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Pie: conteo y paginación -------------------------------- */
+
+.resultados__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-24);
+  padding-inline: var(--margen-mobile);
+}
+
+.resultados__conteo {
+  color: var(--color-text-secondary);
+}
+
+.paginacion {
+  display: flex;
+  gap: var(--hairline);
+  background-color: var(--color-border-subtle);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.paginacion__paso,
+.paginacion__salto {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+a.paginacion__paso:hover {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+.paginacion__paso.es-activo {
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+/* ============================================================
+   Escritorio: barra lateral fija de 320
+   ============================================================ */
+
+@media (min-width: 1040px) {
+  .catalogo {
+    grid-template-columns: 320px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .filtros {
+    gap: var(--espaciado-32);
+    padding: var(--espaciado-40) var(--espaciado-32) var(--espaciado-80) var(--margen-desktop);
+    /* La retícula ya pinta la línea entre columnas; el sticky necesita
+       que la celda tenga altura propia, no que se estire. */
+    position: sticky;
+    top: 88px;
+  }
+
+  .resultados {
+    padding: var(--espaciado-40) var(--margen-desktop) var(--espaciado-80);
+  }
+
+  .chips,
+  .resultados__pie {
+    padding-inline: 0;
+  }
+
+  /* Tres columnas, no cuatro: la barra lateral se come 320 y con cuatro
+     la card baja de 260 y la foto de producto deja de leerse. */
+  .grilla-productos--catalogo {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

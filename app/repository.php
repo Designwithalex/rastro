@@ -376,12 +376,26 @@ function repo_category(string $slug): ?array
  * Deja afuera la línea propia (`es_propia: true`): esta función alimenta la
  * franja de prueba social de la home, y ahí Rastro no va. Ver el bloque
  * "marca propia vs. marca de terceros" arriba de todo.
+ *
+ * AMPLIACIÓN — 2026-08-26, `$incluir_propias`
+ *
+ * El filtro de marca del catálogo necesita lo contrario: ahí la pregunta no
+ * es "¿de quién somos vendedores oficiales?" sino "¿de qué marca es este
+ * producto?", y la línea propia es la respuesta de 19 de los 30 productos
+ * del catálogo. Sin la propia, ese filtro esconde dos tercios del catálogo.
+ *
+ * Son dos preguntas distintas sobre la misma tabla, así que es un
+ * parámetro y no una función nueva. El valor por defecto es el
+ * comportamiento viejo: ninguna llamada existente cambia de resultado.
+ *
+ * TODO(backend): con MySQL es el mismo SELECT con o sin
+ * `WHERE es_propia = 0`.
  */
-function repo_brands(): array
+function repo_brands(bool $incluir_propias = false): array
 {
     $marcas = array_values(array_filter(
         _repo_json('brands'),
-        static fn (array $m): bool => empty($m['es_propia'])
+        static fn (array $m): bool => $incluir_propias || empty($m['es_propia'])
     ));
 
     usort($marcas, static fn ($a, $b) => ((int) ($a['orden'] ?? 0)) <=> ((int) ($b['orden'] ?? 0)));
