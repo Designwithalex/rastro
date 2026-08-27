@@ -476,16 +476,82 @@ function repo_all_products(): array
 /**
  * Todos los pedidos, del más nuevo al más viejo, para el panel.
  *
+ * LEE LAS DOS FUENTES, y esa es toda la gracia de esta función.
+ *
+ * Los pedidos viven en dos archivos por buenas razones: `data/orders.json`
+ * son tres compras de ejemplo escritas a mano, se versionan y sirven para
+ * dibujar la pantalla; `data/pedidos.json` lo escribe el checkout con cada
+ * compra real, está en .gitignore y tiene datos de compradores. Mezclarlos
+ * en un archivo ensuciaría el mock y llenaría el repo de pruebas.
+ *
+ * Pero para el panel son una sola cosa: la lista de pedidos. Si esta función
+ * leyera nada más que el mock —como leía cuando el checkout todavía no
+ * existía—, una compra real entraría por Mercado Pago, se cobraría, y no
+ * aparecería en ningún lado del panel. Es el peor de los errores posibles
+ * acá: no falla nada, simplemente el pedido no está.
+ *
+ * Cada pedido sale con `origen`, que la pantalla usa para distinguir el
+ * ejemplo de la venta de verdad. Es el único campo que agrega el repository
+ * y no viene del archivo.
+ *
  * `repo_orders()` pide un `usuario_id` porque en /cuenta cada quien ve los
  * suyos. Acá el filtro sería un estorbo: el panel administra los de todos.
+ *
+ * TODO(backend): con MySQL los dos archivos son una sola tabla y `origen`
+ * desaparece, o queda como una columna que marca los de prueba.
  */
 function repo_all_orders(): array
 {
-    $pedidos = _repo_json('orders');
+    $pedidos = [];
 
-    usort($pedidos, static fn ($a, $b) => strcmp((string) ($b['fecha'] ?? ''), (string) ($a['fecha'] ?? '')));
+    foreach (_repo_pedidos_leer() as $pedido) {
+        $pedido['origen'] = 'sitio';
+        $pedidos[] = $pedido;
+    }
+
+    foreach (_repo_json('orders') as $pedido) {
+        $pedido['origen'] = 'mock';
+        $pedidos[] = $pedido;
+    }
+
+    /* Por fecha, y con `creado` para desempatar. Varias compras del mismo día
+       tienen la misma `fecha` y sin el segundo criterio el orden entre ellas
+       lo decide el orden del archivo, que no significa nada. Los del mock no
+       tienen `creado` y por eso quedan últimos dentro de su día: son ejemplos,
+       no ventas. */
+    usort($pedidos, static function (array $a, array $b): int {
+        return [(string) ($b['fecha'] ?? ''), (string) ($b['creado'] ?? '')]
+           <=> [(string) ($a['fecha'] ?? ''), (string) ($a['creado'] ?? '')];
+    });
 
     return $pedidos;
+}
+
+/**
+ * Un pedido por su código, mire donde mire: primero los del checkout y
+ * después el mock. Es el `repo_order()` del panel.
+ *
+ * `repo_order()` a secas sigue leyendo sólo el mock porque lo usa `/cuenta`,
+ * y tiene un TODO abierto de seguridad: no valida quién lo pide. Acá esa
+ * validación ya la hizo `panel_exigir_sesion()`.
+ */
+function repo_any_order(string $codigo): ?array
+{
+    $pedido = repo_order_local($codigo);
+
+    if ($pedido !== null) {
+        $pedido['origen'] = 'sitio';
+
+        return $pedido;
+    }
+
+    $pedido = repo_order($codigo);
+
+    if ($pedido !== null) {
+        $pedido['origen'] = 'mock';
+    }
+
+    return $pedido;
 }
 
 /* ==========================================================================

@@ -417,9 +417,22 @@ function repo_delete_banner(int $id): bool
  * el resto —items, totales, quién compró— es historia y no se edita. Un
  * pedido al que se le puede cambiar el precio después de cobrado no sirve
  * como comprobante de nada.
+ *
+ * ESCRIBE EN EL ARCHIVO DEL QUE SALIÓ EL PEDIDO. Hay dos: el mock que se
+ * versiona y los pedidos que escribe el checkout. Se busca primero en los
+ * reales, que son los que de verdad se despachan.
+ *
+ * Los reales se guardan con `repo_order_update()` y no escribiendo el
+ * archivo de acá: esa función toma el lock que comparte con el webhook.
+ * Sin eso, el panel marcando "en camino" y una notificación de Mercado Pago
+ * llegando en el mismo segundo se pisan, y la que cierra última gana.
  */
 function repo_save_order_status(string $codigo, string $estado): bool
 {
+    if (repo_order_local($codigo) !== null) {
+        return repo_order_update($codigo, ['estado' => $estado]) !== null;
+    }
+
     $pedidos    = _repo_json('orders');
     $encontrado = false;
 

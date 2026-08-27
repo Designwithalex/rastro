@@ -255,8 +255,14 @@
 }
 
 /* --- Chip de estado ------------------------------------------
-   Tres variantes hoy. Si el negocio maneja más estados se suma una
-   variante acá y la tabla no se toca (PENDIENTES #36). */
+   Una variante por cada estado de `estados_pedido()` en helpers.php.
+   Son siete: cuatro los escribe Mercado Pago por el webhook y dos los
+   pone Rastro desde el panel. Si se suma uno allá, se suma una regla
+   acá y otra en admin.css; la tabla no se toca (PENDIENTES #36).
+
+   El texto va SIEMPRE escrito adentro del chip: el color acompaña y no
+   informa (CLAUDE.md §5.4). Un chip que sólo cambia de color no le dice
+   nada a quien no distingue esos dos grises. */
 
 .chip-estado {
   display: inline-flex;
@@ -266,12 +272,26 @@
   white-space: nowrap;
 }
 
+/* Esperando plata: es lo único que el visitante todavía puede resolver,
+   así que va en el acento y no en gris. */
+.chip-estado--pendiente {
+  color: var(--color-accent-text);
+}
+
+.chip-estado--pagado,
+.chip-estado--entregado {
+  color: var(--color-text-primary);
+}
+
 .chip-estado--camino {
   color: var(--color-accent-text);
 }
 
-.chip-estado--entregado {
-  color: var(--color-text-primary);
+/* Disputa y devolución comparten familia con el error a propósito: las
+   dos son excepciones que alguien tiene que mirar. */
+.chip-estado--disputa,
+.chip-estado--devuelto {
+  color: var(--color-danger-text);
 }
 
 .chip-estado--cancelado {

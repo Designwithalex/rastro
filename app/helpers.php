@@ -335,18 +335,42 @@ function config(string $clave, mixed $defecto = null): mixed
  * Sumar un estado es sumar una fila acá y una variante de `.chip-estado` en
  * `cuenta.css`. La tabla de pedidos no se toca.
  *
- * TODO(backend): confirmar cuáles maneja el negocio de verdad. Estos son los
- * que hay en el mock; con el checkout de Mercado Pago van a hacer falta al
- * menos "pendiente de pago" y "pagado" (`PENDIENTES.md` #36).
+ * SON DOS CICLOS PEGADOS, Y ESE ES EL ORDEN DE LA LISTA. Los cuatro
+ * primeros los escribe Mercado Pago a través del webhook y describen el
+ * PAGO; los dos siguientes los pone Rastro a mano desde el panel y
+ * describen la ENTREGA. Un pedido normal los recorre en este orden:
+ *
+ *   pendiente_pago -> pagado -> en_camino -> entregado
+ *
+ * `pendiente_transferencia` es el hermano de `pendiente_pago` para quien
+ * eligió transferencia o efectivo: no hay pasarela que avise, lo confirma
+ * Rastro a mano cuando ve la plata. Son dos estados y no uno porque la
+ * espera es de naturaleza distinta —una la resuelve un webhook y la otra
+ * una persona mirando el banco— y el panel tiene que poder separarlas.
+ *
+ * `en_disputa` y `devuelto` también los escribe Mercado Pago y son
+ * excepciones: un contracargo o una devolución. Aparecen en el desplegable
+ * del panel para poder corregir a mano si hiciera falta, pero lo normal es
+ * que lleguen solos.
+ *
+ * `cancelado` puede venir de cualquiera de los dos lados.
+ *
+ * TODO(backend): confirmar cuáles maneja el negocio de verdad
+ * (`PENDIENTES.md` #36).
  *
  * @return array<string,array{texto:string,clase:string}>
  */
 function estados_pedido(): array
 {
     return [
-        'en_camino' => ['texto' => 'En camino', 'clase' => 'chip-estado--camino'],
-        'entregado' => ['texto' => 'Entregado', 'clase' => 'chip-estado--entregado'],
-        'cancelado' => ['texto' => 'Cancelado', 'clase' => 'chip-estado--cancelado'],
+        'pendiente_pago' => ['texto' => 'Pendiente de pago', 'clase' => 'chip-estado--pendiente'],
+        'pendiente_transferencia' => ['texto' => 'Esperando transferencia', 'clase' => 'chip-estado--pendiente'],
+        'pagado'         => ['texto' => 'Pagado',            'clase' => 'chip-estado--pagado'],
+        'en_camino'      => ['texto' => 'En camino',         'clase' => 'chip-estado--camino'],
+        'entregado'      => ['texto' => 'Entregado',         'clase' => 'chip-estado--entregado'],
+        'en_disputa'     => ['texto' => 'En disputa',        'clase' => 'chip-estado--disputa'],
+        'devuelto'       => ['texto' => 'Devuelto',          'clase' => 'chip-estado--devuelto'],
+        'cancelado'      => ['texto' => 'Cancelado',         'clase' => 'chip-estado--cancelado'],
     ];
 }
 

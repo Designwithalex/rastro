@@ -29,9 +29,24 @@ $sin_foto = array_values(array_filter(
         || str_contains((string) ($p['imagen'] ?? ''), 'sin-foto')
 ));
 
+/* Lo que espera una acción de Rastro. No es "todo lo que no está
+   entregado": un pedido cancelado no espera nada y uno en camino ya se
+   despachó. Los nombres tienen que ser los de `estados_pedido()`; si acá
+   quedara uno viejo, el aviso no contaría nada y nadie se enteraría. */
 $pendientes = array_values(array_filter(
     $pedidos,
-    static fn (array $p): bool => in_array($p['estado'] ?? '', ['pendiente', 'pagado', 'preparando'], true)
+    static fn (array $p): bool => in_array(
+        $p['estado'] ?? '',
+        ['pendiente_pago', 'pendiente_transferencia', 'pagado', 'en_disputa'],
+        true
+    )
+));
+
+/* Los que ya se cobraron y todavía no salieron: es el aviso que de verdad
+   mueve la aguja, porque hay plata adentro y mercadería sin despachar. */
+$para_despachar = array_values(array_filter(
+    $pedidos,
+    static fn (array $p): bool => ($p['estado'] ?? '') === 'pagado'
 ));
 
 $banners_apagados = count(array_filter(
@@ -49,10 +64,23 @@ $placas_hero = count(array_filter(
    vez, y sumar un aviso nuevo es sumar un elemento. */
 $avisos = [];
 
-if ($pendientes !== []) {
+if ($para_despachar !== []) {
     $avisos[] = [
         'texto'  => sprintf(
-            '%d pedido%s sin despachar.',
+            '%d pedido%s pagado%s y sin despachar.',
+            count($para_despachar),
+            count($para_despachar) === 1 ? '' : 's',
+            count($para_despachar) === 1 ? '' : 's'
+        ),
+        'enlace' => '/admin/pedidos?estado=pagado',
+        'accion' => 'Despachar',
+    ];
+}
+
+if ($pendientes !== $para_despachar && $pendientes !== []) {
+    $avisos[] = [
+        'texto'  => sprintf(
+            '%d pedido%s esperando algo: el pago, una transferencia o una disputa.',
             count($pendientes),
             count($pendientes) === 1 ? '' : 's'
         ),

@@ -6,6 +6,11 @@
  * y son el comprobante de una operación. Acá sólo se miran y se les cambia
  * el estado. Un pedido editable después de cobrado no sirve como respaldo
  * de nada, ni para el cliente ni para Rastro.
+ *
+ * LA LISTA MEZCLA DOS ORÍGENES. `repo_all_orders()` junta las compras que
+ * escribe el checkout con las tres del mock, y cada fila dice de cuál viene.
+ * Sin esa marca, los pedidos de ejemplo se leen como ventas y alguien va a
+ * intentar despachar uno.
  */
 
 declare(strict_types=1);
@@ -14,6 +19,11 @@ panel_exigir_sesion();
 
 $pedidos = repo_all_orders();
 $estados = panel_estados_pedido();
+
+/* Los nombres de los medios de pago salen de `checkout_medios()`, que es
+   donde el checkout los define. Escribirlos de nuevo acá haría que el día
+   que entre "efectivo en el local" el panel siga mostrando la clave cruda. */
+$medios = checkout_medios();
 
 $filtro_estado = param('estado', '', array_keys($estados));
 
@@ -74,6 +84,7 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                     <th scope="col">Código</th>
                     <th scope="col">Fecha</th>
                     <th scope="col">Pago</th>
+                    <th scope="col">Origen</th>
                     <th scope="col" class="panel-tabla__num">Artículos</th>
                     <th scope="col" class="panel-tabla__num">Total</th>
                     <th scope="col">Estado</th>
@@ -95,7 +106,17 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                             </a>
                         </th>
                         <td><?= e((string) ($pedido['fecha'] ?? '')) ?></td>
-                        <td><?= e(ucfirst((string) ($pedido['medio_pago'] ?? '—'))) ?></td>
+                        <td>
+                            <?= e($medios[$pedido['medio_pago'] ?? '']['nombre']
+                                  ?? (string) ($pedido['medio_pago'] ?? '—')) ?>
+                        </td>
+                        <td>
+                            <?php if (($pedido['origen'] ?? '') === 'mock'): ?>
+                                <span class="panel-pastilla panel-pastilla--mock">Ejemplo</span>
+                            <?php else: ?>
+                                <span class="panel-pastilla">Venta</span>
+                            <?php endif; ?>
+                        </td>
                         <td class="panel-tabla__num"><?= e((string) $articulos) ?></td>
                         <td class="panel-tabla__num"><?= e(moneda($pedido['total'] ?? 0)) ?></td>
                         <td>

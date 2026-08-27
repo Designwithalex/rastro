@@ -14,8 +14,9 @@ declare(strict_types=1);
 panel_exigir_sesion();
 
 $codigo  = (string) ($params['codigo'] ?? '');
-$pedido  = repo_order($codigo);
+$pedido  = repo_any_order($codigo);
 $estados = panel_estados_pedido();
+$medios  = checkout_medios();
 
 if ($pedido === null) {
     router_404();
@@ -45,18 +46,51 @@ if (panel_es_post()) {
     panel_ir_con_aviso('/admin/pedidos/' . $codigo, 'error', 'No se pudo cambiar el estado.');
 }
 
-$cliente = repo_user((int) ($pedido['usuario_id'] ?? 0));
+/* Quién compró sale de dos lados distintos según de dónde venga el pedido.
+   Los del mock apuntan a un usuario con `usuario_id`; los del checkout
+   guardan los datos del comprador ADENTRO del pedido, porque hoy se puede
+   comprar sin cuenta y `usuario_id` queda en 0. Se normalizan acá a la misma
+   forma para que la pantalla dibuje una sola cosa. */
+$es_del_sitio = ($pedido['origen'] ?? '') === 'sitio';
+
+if ($es_del_sitio) {
+    $comprador = (array) ($pedido['comprador'] ?? []);
+    $entrega   = (array) ($pedido['entrega'] ?? []);
+
+    $cliente = $comprador === [] ? null : [
+        'nombre'    => (string) ($comprador['nombre'] ?? ''),
+        'apellido'  => (string) ($comprador['apellido'] ?? ''),
+        'email'     => (string) ($comprador['email'] ?? ''),
+        'telefono'  => (string) ($comprador['telefono'] ?? ''),
+        'empresa'   => null,
+        'direccion' => $entrega === [] ? null : [
+            'calle'         => (string) ($entrega['calle'] ?? ''),
+            'ciudad'        => (string) ($entrega['localidad'] ?? ''),
+            'provincia'     => (string) ($entrega['provincia'] ?? ''),
+            'codigo_postal' => (string) ($entrega['codigo_postal'] ?? ''),
+        ],
+    ];
+} else {
+    $cliente = repo_user((int) ($pedido['usuario_id'] ?? 0));
+}
 
 $titulo = 'Pedido ' . $codigo;
 $bajada = sprintf(
     '%s · %s',
     (string) ($pedido['fecha'] ?? ''),
-    ucfirst((string) ($pedido['medio_pago'] ?? 'sin medio de pago'))
+    $medios[$pedido['medio_pago'] ?? '']['nombre'] ?? 'sin medio de pago'
 );
 $volver = ['texto' => 'Todos los pedidos', 'href' => url('/admin/pedidos')];
 
 require RASTRO_VIEWS . '/admin/layout/cabeza.php';
 ?>
+
+<?php if (!$es_del_sitio): ?>
+    <p class="panel-nota">
+        <strong>Es un pedido de ejemplo</strong>, de los tres que vienen cargados para
+        que la pantalla tenga algo que mostrar. No es una venta: no lo despaches.
+    </p>
+<?php endif; ?>
 
 <div class="panel-columnas">
 
@@ -151,6 +185,73 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                 Cambiar estado
             </button>
         </form>
+
+        <?php /* ============================================================
+                 El pago, tal como lo contestó Mercado Pago.
+
+                 Sólo existe en los pedidos que creó el checkout, y sólo
+                 después de que vuelva la notificación. Es lo primero que se
+                 mira cuando alguien escribe "pagué y no me llegó nada": el
+                 `payment_id` es lo que se busca en el panel de Mercado Pago.
+                 ============================================================ */ ?>
+        <?php if (!empty($pedido['pago']) && is_array($pedido['pago'])): ?>
+            <?php $pago = $pedido['pago']; ?>
+            <section class="panel-grupo" aria-labelledby="pago-titulo">
+                <h2 class="panel-grupo__titulo" id="pago-titulo">El pago</h2>
+
+                <dl class="panel-datos">
+                    <div>
+                        <dt>Número</dt>
+                        <dd><code><?= e((string) ($pago['payment_id'] ?? '—')) ?></code></dd>
+                    </div>
+                    <div>
+                        <dt>Dice Mercado Pago</dt>
+                        <dd><?= e((string) ($pago['estado'] ?? '—')) ?></dd>
+                    </div>
+                    <?php if (!empty($pago['detalle'])): ?>
+                        <div>
+                            <dt>Detalle</dt>
+                            <dd><?= e(mp_motivo_rechazo((string) $pago['detalle'])) ?></dd>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($pago['metodo'])): ?>
+                        <div>
+                            <dt>Medio</dt>
+                            <dd>
+                                <?= e((string) $pago['metodo']) ?>
+                                <?php if ((int) ($pago['cuotas'] ?? 0) > 1): ?>
+                                    · <?= e((string) (int) $pago['cuotas']) ?> cuotas
+                                <?php endif; ?>
+                            </dd>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($pago['monto'])): ?>
+                        <div>
+                            <dt>Cobrado</dt>
+                            <dd><?= e(moneda($pago['monto'])) ?></dd>
+                        </div>
+                    <?php endif; ?>
+                </dl>
+
+                <?php /* El monto que cobró Mercado Pago tiene que coincidir
+                         con el total del pedido. Si no coincide, algo se
+                         tocó entre que se armó el pedido y se pagó, y es lo
+                         primero que hay que mirar antes de despachar. */ ?>
+                <?php if (!empty($pago['monto']) && (int) round((float) $pago['monto']) !== (int) ($pedido['total'] ?? 0)): ?>
+                    <p class="panel-aviso panel-aviso--error" role="alert">
+                        <span class="panel-aviso__icono" aria-hidden="true">!</span>
+                        Lo cobrado no coincide con el total del pedido. Revisalo antes de despachar.
+                    </p>
+                <?php endif; ?>
+            </section>
+        <?php elseif ($es_del_sitio): ?>
+            <section class="panel-grupo">
+                <h2 class="panel-grupo__titulo">El pago</h2>
+                <p class="panel-vacio panel-vacio--chico">
+                    Todavía no llegó la confirmación de Mercado Pago.
+                </p>
+            </section>
+        <?php endif; ?>
 
         <section class="panel-grupo" aria-labelledby="cliente-titulo">
             <h2 class="panel-grupo__titulo" id="cliente-titulo">Quién compró</h2>

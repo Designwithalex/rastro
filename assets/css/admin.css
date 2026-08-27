@@ -791,17 +791,24 @@ textarea.campo-panel__control {
   color: var(--color-text-secondary);
 }
 
-/* Los modificadores de estado son los de `estados_pedido()` en helpers.php
-   —`en_camino`, `entregado`, `cancelado`— y no otros. Si se suma un estado
-   allá, se suma una regla acá y otra en cuenta.css. */
+/* Los modificadores de estado son los siete de `estados_pedido()` en
+   helpers.php y no otros. Si se suma un estado allá, se suma una regla acá
+   y otra en cuenta.css. */
 
 .panel-pastilla--ok,
+.panel-pastilla--pagado,
 .panel-pastilla--entregado {
   color: var(--color-text-primary);
   border-color: var(--color-plata-3);
 }
 
-.panel-pastilla--alerta {
+/* Lo que hay que atender: un pago que no entró todavía, un contracargo,
+   una devolución. */
+.panel-pastilla--alerta,
+.panel-pastilla--pendiente_pago,
+.panel-pastilla--pendiente_transferencia,
+.panel-pastilla--en_disputa,
+.panel-pastilla--devuelto {
   color: var(--color-danger-text);
   border-color: var(--color-danger-border);
 }
@@ -816,6 +823,15 @@ textarea.campo-panel__control {
 .panel-pastilla--cancelado {
   color: var(--color-text-disabled);
   border-color: var(--color-border-subtle);
+}
+
+/* De dónde salió el pedido: una venta de verdad o el ejemplo del mock.
+   Va en gris y con la palabra escrita, no en color: es una etiqueta de
+   procedencia, no un estado. */
+.panel-pastilla--mock {
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-subtle);
+  border-style: dashed;
 }
 
 /* ============================================================
