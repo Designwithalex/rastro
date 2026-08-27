@@ -39,6 +39,11 @@
  *   $precargar_titular
  *                 bool    precarga Saira Condensed Black. La usa sólo el
  *                         titular del hero, así que la pone sólo la home.
+ *   $scripts      array   scripts propios de la página, por nombre de
+ *                         archivo sin extensión. Los carga footer.php
+ *                         DESPUÉS de nav.js y carrito.js: los defer se
+ *                         ejecutan en el orden del marcado y un archivo
+ *                         que use window.Carrito tiene que ir detrás.
  *
  * Las define el layout (la vista las puede leer, no pisar):
  *   $settings            array   repo_settings(), ya cacheado

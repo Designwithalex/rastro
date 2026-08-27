@@ -153,5 +153,19 @@ $layout_columnas = [
 
 <script src="<?= e(asset('js/nav.js')) ?>" defer></script>
 <script src="<?= e(asset('js/carrito.js')) ?>" defer></script>
+
+<?php
+/* Scripts propios de una página, DESPUÉS de los comunes. El orden importa:
+   los defer se ejecutan en el orden del marcado, así que un archivo que
+   use window.Carrito tiene que venir detrás de carrito.js. Por eso lo pone
+   el layout y no la vista.
+
+   La vista lo declara antes de incluir head.php:  $scripts = ['carrito-pagina']; */
+foreach (array_filter(
+    (array) ($scripts ?? []),
+    static fn ($js): bool => is_string($js) && preg_match('/^[a-z0-9-]+$/', $js) === 1
+) as $js): ?>
+    <script src="<?= e(asset('js/' . $js . '.js')) ?>" defer></script>
+<?php endforeach; ?>
 </body>
 </html>

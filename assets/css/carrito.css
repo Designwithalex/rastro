@@ -1,0 +1,260 @@
+/* ============================================================
+   carrito.css — Rastro Fitness
+   Filas y resumen. Móvil primero.
+   Referencia: frame "Carrito · Desktop 1440" y su estado vacío.
+   https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=64-3
+   ============================================================ */
+
+.barra-pagina--carrito {
+  padding-block: var(--espaciado-32) var(--espaciado-16);
+}
+
+.carrito {
+  grid-template-columns: 1fr;
+}
+
+/* ============================================================
+   Las filas
+   ============================================================ */
+
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-24);
+  padding: var(--espaciado-24) var(--margen-mobile) var(--espaciado-40);
+}
+
+.lineas__lista {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Una fila -----------------------------------------------
+   En celular es una grilla de dos columnas: la foto a la
+   izquierda y todo lo demás apilado a la derecha. En escritorio
+   pasa a cinco columnas en una sola línea. */
+
+.linea {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-areas:
+    "foto datos"
+    "cant importe"
+    "quitar quitar";
+  align-items: center;
+  gap: var(--espaciado-12) var(--espaciado-16);
+  padding-block: var(--espaciado-20);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.linea:last-child {
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.linea__foto {
+  grid-area: foto;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  padding: var(--espaciado-4);
+  background-color: var(--color-bg-product-well);
+}
+
+.linea__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.linea__datos {
+  grid-area: datos;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  min-width: 0;
+}
+
+.linea__sku,
+.linea__unitario {
+  color: var(--color-text-secondary);
+}
+
+.linea__enlace {
+  transition: color 0.15s ease;
+}
+
+.linea__enlace:hover {
+  color: var(--color-accent-text);
+}
+
+.linea__stepper {
+  grid-area: cant;
+  justify-self: start;
+}
+
+.linea__importe {
+  grid-area: importe;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--espaciado-4);
+  text-align: right;
+}
+
+.linea__publicado span {
+  font-variant-numeric: tabular-nums;
+}
+
+.linea__transferencia {
+  color: var(--color-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.linea__rotulo {
+  color: var(--color-text-secondary);
+}
+
+.linea__quitar {
+  grid-area: quitar;
+  justify-self: start;
+  padding-block: var(--espaciado-8);
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.linea__quitar:hover {
+  color: var(--color-danger-text);
+}
+
+/* --- Producto que ya no existe -------------------------------- */
+
+.linea--huerfana {
+  grid-template-columns: 1fr;
+  grid-template-areas: "aviso" "quitar";
+}
+
+.linea__aviso {
+  grid-area: aviso;
+  color: var(--color-danger-text);
+}
+
+.lineas__seguir {
+  align-self: flex-start;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.lineas__seguir:hover {
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   Resumen
+   ============================================================ */
+
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-40);
+  background-color: var(--color-bg-surface);
+}
+
+.resumen__titulo {
+  margin-bottom: var(--espaciado-8);
+}
+
+.resumen__filas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.resumen__fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  color: var(--color-text-secondary);
+}
+
+.resumen__fila dd {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumen__ahorro {
+  color: var(--color-accent-text);
+}
+
+.resumen__total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding-top: var(--espaciado-16);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.resumen__publicado,
+.resumen__transferencia {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+}
+
+.resumen__publicado span {
+  font-variant-numeric: tabular-nums;
+}
+
+.resumen__publicado .t-mono-label-sm {
+  color: var(--color-text-secondary);
+}
+
+.resumen__transferencia .t-mono-dato {
+  color: var(--color-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumen__nota,
+.resumen__legal {
+  color: var(--color-text-secondary);
+}
+
+.resumen__pagar,
+.resumen__transferir {
+  justify-content: space-between;
+  width: 100%;
+  margin-top: var(--espaciado-8);
+}
+
+/* ============================================================
+   Escritorio
+   ============================================================ */
+
+@media (min-width: 900px) {
+  .linea {
+    grid-template-columns: 72px minmax(0, 1fr) auto auto auto;
+    grid-template-areas: "foto datos cant importe quitar";
+    gap: var(--espaciado-24);
+  }
+
+  .linea--huerfana {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "aviso quitar";
+  }
+}
+
+@media (min-width: 1040px) {
+  .carrito {
+    grid-template-columns: minmax(0, 1fr) 480px;
+    align-items: start;
+  }
+
+  .lineas {
+    padding: var(--espaciado-40) var(--espaciado-40) var(--espaciado-64) var(--margen-desktop);
+  }
+
+  .resumen {
+    padding: var(--espaciado-40) var(--margen-desktop) var(--espaciado-48) var(--espaciado-40);
+  }
+}
