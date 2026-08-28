@@ -76,7 +76,22 @@ Entrar a `https://EL-SITIO/admin`. Tiene que pedir mail y contraseña.
 | "Mail o contraseña incorrectos" con la clave correcta | El hash se copió cortado, o va entre comillas dobles. |
 | Un 404 | El deploy todavía no subió las rutas del panel. Revisá que el merge esté en `main`. |
 
-### 1.4 Permisos de escritura
+### 1.4 Sembrar los datos (sólo la primera vez)
+
+`data/` está excluido del deploy, así que los JSON del repositorio no llegan solos.
+La primera vez —y cada vez que cambie la **estructura** de uno— hay que sembrarlos:
+
+**GitHub → Actions → "Sembrar datos en el servidor" → Run workflow**, escribiendo
+`SEMBRAR` para confirmar.
+
+> **Pisa lo que haya cargado el cliente desde el panel.** La primera vez da igual
+> porque todavía no cargó nada. Después de eso, sólo si sabés lo que estás
+> haciendo. Los pedidos no se tocan: no están en el repositorio.
+
+Si no se hace, la portada se ve sin la foto de fondo: el `banners.json` del servidor
+es anterior al hero v3 y no tiene la posición `hero_fondo`.
+
+### 1.5 Permisos de escritura
 
 El panel escribe en dos carpetas. Si no puede, al guardar dice **"no se pudo
 guardar"**.
@@ -229,16 +244,17 @@ la tienda. El detalle está en `MERCADOPAGO.md` §8 y en `PENDIENTES.md`.
 ```
 [ ] 1. Generar el hash            php -r 'echo password_hash("...", PASSWORD_DEFAULT);'
 [ ] 2. app/config.php             panel_email + panel_password_hash
-[ ] 3. Permisos 755/644           data/  y  assets/img/subidas/
-[ ] 4. Probar                     https://EL-SITIO/admin
+[ ] 3. Sembrar los datos          Actions -> "Sembrar datos en el servidor"
+[ ] 4. Permisos 755/644           data/  y  assets/img/subidas/
+[ ] 5. Probar                     https://EL-SITIO/admin
 
-[ ] 5. Credenciales de PRUEBA     mp_access_token + mp_public_key + mp_modo='test'
-[ ] 6. Verificar base_url         el dominio real, sin barra final
-[ ] 7. Alta del webhook           https://EL-SITIO/webhooks/mercadopago  (evento: Pagos)
-[ ] 8. Clave secreta              mp_webhook_secret
-[ ] 9. Probar                     php bin/mp-probar.php  +  una compra de prueba
+[ ] 6. Credenciales de PRUEBA     mp_access_token + mp_public_key + mp_modo='test'
+[ ] 7. Verificar base_url         el dominio real, sin barra final
+[ ] 8. Alta del webhook           https://EL-SITIO/webhooks/mercadopago  (evento: Pagos)
+[ ] 9. Clave secreta              mp_webhook_secret
+[ ] 10. Probar                    php bin/mp-probar.php  +  una compra de prueba
 
-[ ] 10. Producción                credenciales nuevas + mp_modo='produccion'
-[ ] 11. Webhook de producción     alta nueva + clave secreta nueva
-[ ] 12. Una compra real chica     y devolverla
+[ ] 11. Producción                credenciales nuevas + mp_modo='produccion'
+[ ] 12. Webhook de producción     alta nueva + clave secreta nueva
+[ ] 13. Una compra real chica     y devolverla
 ```

@@ -1,0 +1,97 @@
+name: Sembrar datos en el servidor
+
+# ============================================================
+# LEER ESTO ANTES DE CORRERLO.
+#
+# Este workflow PISA los JSON de data/ en el servidor con los del
+# repositorio. Es lo contrario de lo que hace el deploy normal, que
+# los excluye justamente para no tocarlos.
+#
+# POR QUÉ EXISTE
+#
+# Desde que el panel de administración y el checkout escriben en
+# data/, esos archivos son datos de producción y el deploy no los
+# sincroniza (ver deploy.yml). El efecto lateral es que un data/*.json
+# NUEVO —o el cambio de forma de uno existente— no llega solo al
+# servidor: hay que subirlo a mano por FTP. Esto es esa mano.
+#
+# CUÁNDO SE CORRE
+#
+#   · Al montar el servidor por primera vez.
+#   · Cuando se agrega un data/*.json nuevo al repositorio.
+#   · Cuando cambia la ESTRUCTURA de un archivo y el código nuevo no
+#     entiende el viejo (por ejemplo, la posición `hero_fondo` de los
+#     banners, que entró con el hero v3).
+#
+# CUÁNDO NO
+#
+#   · Nunca "por las dudas" ni como parte de un deploy normal.
+#   · Nunca después de que el cliente haya cargado cosas desde el
+#     panel, salvo que se quiera perder exactamente eso.
+#
+# QUÉ SE PIERDE
+#
+# Todo lo que se haya cargado desde /admin y no esté en el repositorio:
+# productos, precios, banners, categorías, marcas, clientes,
+# configuración y la página Nosotros.
+#
+# QUÉ NO SE PIERDE
+#
+# Los pedidos y la bitácora de pagos: data/pedidos.json y
+# data/mp-eventos.log están en .gitignore, no existen en el
+# repositorio, y la acción no borra lo que nunca subió.
+#
+# ANTES DE CORRERLO: bajar data/ del servidor por FTP y guardarlo con
+# la fecha. Son 60 KB y es el único respaldo que hay.
+# ============================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribí SEMBRAR para confirmar que querés pisar los datos del servidor'
+        required: true
+        default: ''
+
+# No comparte grupo con el deploy: si los dos corren juntos, el orden
+# en que terminan decide qué queda, y eso no puede depender del azar.
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
+jobs:
+  sembrar:
+    name: Subir data/ al servidor
+    runs-on: ubuntu-latest
+    steps:
+      # La puerta. Un workflow que pisa datos de producción no puede
+      # dispararse con dos clics distraídos desde la interfaz de GitHub.
+      - name: Confirmar
+        run: |
+          if [ "${{ github.event.inputs.confirmacion }}" != "SEMBRAR" ]; then
+            echo "::error::Hay que escribir SEMBRAR para confirmar. Nada se tocó."
+            exit 1
+          fi
+          echo "Confirmado. Se van a pisar los JSON de data/ en el servidor."
+
+      - name: Traer el repositorio
+        uses: actions/checkout@v4
+
+      # `dangerous-clean-slate: false` y una lista de exclusión que deja
+      # afuera TODO menos data/: la acción sube el árbol entero por
+      # defecto, y acá sólo queremos esa carpeta.
+      - name: Subir sólo data/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftps
+          local-dir: ./data/
+          server-dir: /public_html/data/
+          # El archivo de estado de esta subida va aparte del que usa el
+          # deploy normal. Si compartieran archivo, cada uno le borraría
+          # al otro el registro de lo que subió y los dos empezarían a
+          # resubir el sitio entero en cada corrida.
+          state-name: .ftp-deploy-sync-state-datos.json

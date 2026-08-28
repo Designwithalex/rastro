@@ -68,16 +68,37 @@ Los del repo son **la semilla**, no la verdad.
 
 ### Montaje inicial, una sola vez
 
-1. Subir el contenido de `data/` por FTP o por el Administrador de archivos de hPanel.
+1. Correr el workflow **"Sembrar datos en el servidor"** (ver abajo), o subir el
+   contenido de `data/` a mano por FTP.
 2. Verificar que la carpeta y los archivos queden **escribibles por PHP**
    (en Hostinger, `755` la carpeta y `644` los archivos suele alcanzar; si el panel
    avisa "no se pudo guardar", es esto).
 3. Verificar que `…/data/products.json` devuelva **403** por HTTP.
 
+### El workflow de siembra
+
+`.github/workflows/sembrar-datos.yml` sube `data/` **pisando lo que haya en el
+servidor**. Se corre a mano desde GitHub → Actions → *Sembrar datos en el servidor*
+→ *Run workflow*, y hay que escribir `SEMBRAR` para confirmar.
+
+**Se corre en tres casos y en ninguno más:**
+
+- al montar el servidor por primera vez;
+- cuando se agrega un `data/*.json` nuevo al repositorio;
+- cuando cambia la **estructura** de un archivo y el código nuevo no entiende el
+  viejo. Pasó con los banners: la posición `hero_fondo` del hero v3 no existe en el
+  archivo anterior, así que sin sembrar, la portada se deploya sin foto de fondo.
+
+**Qué se pierde:** todo lo que el cliente haya cargado desde `/admin` y no esté en
+el repositorio. **Qué no:** los pedidos y la bitácora de pagos, que no están
+versionados y que la acción no toca.
+
+Antes de correrlo, bajar `data/` del servidor y guardarlo con la fecha.
+
 ### Cuando se agrega un `data/*.json` nuevo
 
-No llega solo: hay que subirlo a mano, igual que la primera vez. Es el precio de que
-los deploys no pisen la carga del cliente.
+No llega con el deploy normal: o se corre la siembra, o se sube a mano. Es el precio
+de que los deploys no pisen la carga del cliente.
 
 ### Imágenes que sube el cliente
 
