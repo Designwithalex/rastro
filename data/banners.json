@@ -1,8 +1,17 @@
 [
     {
         "id": 1,
-        "titulo": "Equipamiento profesional para gimnasios que trabajan todo el día",
-        "imagen": "img/ambiente/ambiente-barra-en-rack.jpg",
+        "titulo": "Pared de ladrillo del galpón",
+        "imagen": "img/ambiente/ambiente-pared-ladrillo-negro.jpg",
+        "enlace": "",
+        "posicion": "hero_fondo",
+        "activo": true,
+        "orden": 1
+    },
+    {
+        "id": 4,
+        "titulo": "Descuentos especiales · Equipá tu gym",
+        "imagen": "img/banners/banner-descuentos-especiales.jpg",
         "enlace": "/catalogo",
         "posicion": "hero",
         "activo": true,

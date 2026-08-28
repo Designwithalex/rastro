@@ -32,7 +32,39 @@ jobs:
           protocol: ftps
           server-dir: /public_html/
           # Sube solo lo que el sitio necesita para correr.
-          # app/config.php NO se sincroniza: vive únicamente en el servidor.
+          #
+          # DOS COSAS NO SE SINCRONIZAN, Y POR RAZONES DISTINTAS:
+          #
+          # app/config.php  — son credenciales: las claves de la base, el
+          #   access token de Mercado Pago y el usuario del panel. Vive
+          #   únicamente en el servidor y nunca sale del repo (CLAUDE.md §7.1).
+          #
+          # data/**  — todo lo de data/ lo ESCRIBE EL SERVIDOR, y por dos
+          #   caminos distintos: el cliente desde el panel de administración
+          #   (productos, precios, banners) y el sitio solo (los pedidos del
+          #   checkout en pedidos.json y la bitácora de Mercado Pago en
+          #   mp-eventos.log). Si el deploy los sincronizara, cada push que
+          #   tocara un mock borraría de un saque la carga del cliente y los
+          #   pedidos de producción, sin aviso y sin forma de recuperarlos:
+          #   no hay base de datos con backup atrás.
+          #
+          #   Los JSON del repo son la semilla, no la verdad. Se suben UNA
+          #   vez, a mano, cuando se monta el servidor. Está explicado en
+          #   docs/DEPLOY.md, "Los datos viven en el servidor".
+          #
+          #   Excluir la carpeta entera y no archivo por archivo es a
+          #   propósito: pedidos.json y mp-eventos.log ya están en
+          #   .gitignore, pero una exclusión por nombre deja de proteger el
+          #   día que alguien haga un `git add -f` de apuro, o el día que
+          #   aparezca un data/*.json nuevo que nadie se acuerde de sumar
+          #   a esta lista.
+          #
+          #   Ojo al agregar un data/*.json nuevo: no llega solo, hay que
+          #   subirlo a mano igual que la primera vez.
+          #
+          # assets/img/subidas/ SÍ se sincroniza, pero sólo su .htaccess:
+          # las imágenes que sube el cliente no están en el repo y la acción
+          # no borra lo que nunca subió.
           exclude: |
             **/.git*
             **/.git*/**
@@ -43,4 +75,5 @@ jobs:
             **/bin/**
             **/*.md
             **/app/config.php
+            **/data/**
             **/node_modules/**

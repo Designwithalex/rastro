@@ -1,0 +1,317 @@
+/* ============================================================
+   checkout.css — Rastro Fitness
+   /checkout y /checkout/retorno. Móvil primero.
+
+   Reusa casi todo: .reticula, .resumen y .lineas__seguir salen
+   de carrito.css, .campo y .formulario de componentes.css, y
+   .mensaje de cuenta.css. Acá está sólo lo que esas dos páginas
+   agregan: la grilla a dos columnas, las tarjetas de medio de
+   pago y la caja de la página de retorno.
+   ============================================================ */
+
+.checkout {
+  grid-template-columns: 1fr;
+}
+
+.checkout__datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-24);
+  padding: var(--espaciado-24) var(--margen-mobile) var(--espaciado-40);
+}
+
+.formulario--checkout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-24);
+}
+
+.formulario__leyenda {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  padding-inline: 0;
+  margin-bottom: var(--espaciado-8);
+  color: var(--color-text-secondary);
+}
+
+.formulario__leyenda .indice {
+  color: var(--color-accent-text);
+}
+
+/* Los campos de una fila se apilan en celular y se reparten en
+   escritorio. Sin anchos fijos: el `minmax(0, 1fr)` es lo que
+   evita que un <select> con una provincia larga estire la fila. */
+.formulario__fila {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaciado-12);
+}
+
+.formulario__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  min-width: 0;
+}
+
+.campo__error {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  color: var(--color-danger-text);
+}
+
+.campo__ayuda {
+  color: var(--color-text-secondary);
+}
+
+.campo__opcional {
+  color: var(--color-text-disabled);
+}
+
+/* Un campo marcado por el servidor. El borde solo no alcanza
+   —hay daltonismo y hay pantallas malas—: al lado de cada campo
+   con error va el texto con su ícono (CLAUDE.md §5.4). */
+.campo[aria-invalid='true'] {
+  border-color: var(--color-danger-border);
+}
+
+.formulario__nota {
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   Medios de pago
+
+   Dos tarjetas seleccionables. El radio nativo queda visible a
+   propósito: es lo que entiende cualquier lector de pantalla y
+   lo que ya sabe operar quien navega con teclado.
+   ============================================================ */
+
+.medios {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaciado-12);
+}
+
+.medio {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espaciado-12);
+  padding: var(--espaciado-16);
+  border: var(--hairline) solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.medio:hover {
+  border-color: var(--color-border-strong);
+}
+
+/* :has() está en todos los navegadores desde 2023 y acá degrada
+   solo: sin soporte, la tarjeta elegida se distingue igual por
+   el punto del radio. */
+.medio:has(input:checked) {
+  border-color: var(--color-text-primary);
+}
+
+.medio:has(input:focus-visible) {
+  outline: var(--hairline) solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.medio__cuerpo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaciado-4);
+}
+
+.medio__detalle {
+  color: var(--color-text-secondary);
+}
+
+.medio--bloqueado {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.checkout__enviar {
+  width: 100%;
+  justify-content: center;
+}
+
+.checkout__legal {
+  color: var(--color-text-secondary);
+}
+
+.checkout__legal a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ============================================================
+   Resumen del pedido
+
+   Hereda de .resumen (carrito.css) y sólo suma la lista de
+   líneas, que en el carrito no existe porque ahí las filas son
+   la página entera.
+   ============================================================ */
+
+.resumen__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+  padding-bottom: var(--espaciado-16);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.resumen__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--espaciado-12);
+}
+
+.resumen__item-detalle {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Aviso de ambiente de prueba
+
+   Amarillo no hay en la paleta: el sistema tiene un solo acento
+   (CLAUDE.md §5.3). El aviso se distingue por el borde fuerte y
+   por su ícono, no por un color nuevo.
+   ============================================================ */
+
+.mensaje--aviso {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  margin-block: var(--espaciado-16);
+}
+
+.mensaje--aviso .t-mono-dato {
+  color: var(--color-accent-text);
+}
+
+/* ============================================================
+   Página de retorno
+   ============================================================ */
+
+.retorno {
+  padding-block: var(--espaciado-48) var(--espaciado-96);
+}
+
+.retorno__caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  max-width: 720px;
+  padding: var(--espaciado-32) var(--margen-mobile);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.retorno__indice {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaciado-8);
+  color: var(--color-text-secondary);
+}
+
+.retorno__bajada {
+  color: var(--color-text-secondary);
+  max-width: 56ch;
+}
+
+/* El único borde que cambia de color según el desenlace. El
+   texto ya dice qué pasó: esto lo acompaña, no lo reemplaza. */
+.retorno--pagado {
+  border-color: var(--color-border-strong);
+}
+
+.retorno--rechazado {
+  border-color: var(--color-danger-border);
+}
+
+.retorno__datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--espaciado-16);
+  padding-block: var(--espaciado-16);
+  border-block: var(--hairline) solid var(--color-border-subtle);
+}
+
+.retorno__dato dt {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--espaciado-4);
+}
+
+.retorno__codigo {
+  /* El código se dicta por teléfono y se copia a mano: se puede
+     seleccionar de un doble clic y no se parte en dos líneas. */
+  user-select: all;
+  white-space: nowrap;
+}
+
+.retorno__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.retorno__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--espaciado-12);
+}
+
+.retorno__item span:last-child {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.retorno__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-12);
+  margin-top: var(--espaciado-8);
+}
+
+.retorno__prueba {
+  color: var(--color-text-disabled);
+}
+
+/* ============================================================
+   Escritorio
+   ============================================================ */
+
+@media (min-width: 720px) {
+  .formulario__fila {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .medios {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .retorno__caja {
+    padding: var(--espaciado-48);
+  }
+}
+
+@media (min-width: 1040px) {
+  .checkout {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    align-items: start;
+  }
+
+  .checkout__datos {
+    padding: var(--espaciado-40);
+  }
+}

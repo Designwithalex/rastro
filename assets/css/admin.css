@@ -1,0 +1,1287 @@
+/* ============================================================
+   admin.css — el panel de administración de Rastro Fitness.
+
+   Se carga junto con tokens.css y con nada más. No hereda base.css
+   ni componentes.css a propósito: el sitio público está armado para
+   vender —tipografía sobredimensionada, canto vivo, mucho aire— y el
+   panel es una herramienta de trabajo. Comparten la paleta y las
+   familias tipográficas, que es lo que hace que se vean del mismo
+   proyecto, y nada más.
+
+   TRES DECISIONES QUE EXPLICAN TODO LO DEMÁS
+
+   1. Sólo escritorio. El panel se abre en una computadora, con las dos
+      manos y sin apuro. Hay un ajuste para pantallas angostas para que
+      no quede roto si alguien lo abre en una tablet, pero no se diseña
+      para el celular: cargar una ficha de producto con veinte campos
+      en 390 px no es un caso de uso, es un castigo.
+
+   2. Densidad antes que aire. En el sitio, el espacio es parte del
+      mensaje. Acá, cada píxel de aire de más es una fila menos de
+      catálogo a la vista.
+
+   3. Nada se dice sólo con color. Cada estado —publicado, sin stock,
+      apagado— lleva su palabra escrita. Es la misma regla del sitio
+      (CLAUDE.md §5.4) y acá pesa más: son datos, no decoración.
+   ============================================================ */
+
+/* --- Reinicio -----------------------------------------------
+   El panel NO carga base.css, así que el `box-sizing: border-box`
+   que vive ahí no llega. Sin él, cada `width: 100%` con padding
+   —o sea, todos los campos y el propio contenedor de la pantalla—
+   mide su ancho MÁS el padding y desborda: el botón de la esquina
+   queda cortado y la página entera se corre para el costado.
+   Es la mitad del reinicio del sitio, la que el panel usa. */
+
+/* Todo el reinicio va adentro de :where(), que vale 0 en especificidad.
+   Sin eso, `.panel fieldset { border: 0 }` (0,1,1) le gana a
+   `.panel-grupo { border: 1px }` (0,1,0) y los recuadros de los grupos
+   desaparecen; y `.panel legend { margin: 0 }` le gana al margen del
+   título, que queda pegado al primer campo. Un reinicio tiene que ser lo
+   más débil de la hoja, no lo más fuerte. */
+
+:where(.panel, .panel *),
+:where(.panel *)::before,
+:where(.panel *)::after {
+  box-sizing: border-box;
+}
+
+:where(.panel h1, .panel h2, .panel p, .panel dl, .panel dd,
+       .panel fieldset, .panel legend) {
+  margin: 0;
+}
+
+:where(.panel fieldset) {
+  border: 0;
+  padding: 0;
+}
+
+:where(.panel img) {
+  max-width: 100%;
+}
+
+.panel {
+  /* Medidas propias del panel. No son tokens del sistema: no existen
+     en el sitio y no tienen por qué ensuciar tokens.css. */
+  --panel-lateral: 208px;
+  --panel-barra: 56px;
+  --panel-ancho: 1280px;
+
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   Utilidades
+   ============================================================ */
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.panel__saltar {
+  position: absolute;
+  top: -100px;
+  left: var(--espaciado-16);
+  z-index: 10;
+  padding: var(--espaciado-8) var(--espaciado-16);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-elevated);
+  border: var(--hairline) solid var(--color-border-focus);
+}
+
+.panel__saltar:focus {
+  top: var(--espaciado-8);
+}
+
+/* El foco se ve SIEMPRE y con el mismo dibujo en todo el panel. En una
+   herramienta que se recorre con Tab, perder el foco de vista es perder
+   el lugar en un formulario de veinte campos. */
+.panel :focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Estructura
+   ============================================================ */
+
+.panel__barra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-24);
+  height: var(--panel-barra);
+  padding-inline: var(--espaciado-20);
+  background-color: var(--color-bg-surface);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 32 px de alto: el logotipo completo lleva "RASTRO" y "FITNESS" en dos
+   líneas, y abajo de eso la segunda no se lee. */
+.panel__marca img {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
+.panel__marca-rotulo {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  padding-left: var(--espaciado-12);
+  border-left: var(--hairline) solid var(--color-border-strong);
+}
+
+.panel__barra-derecha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-20);
+}
+
+.panel__quien {
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.panel__salir {
+  margin: 0;
+}
+
+.panel__enlace-barra {
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.panel__enlace-barra:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.panel__cuerpo {
+  display: grid;
+  grid-template-columns: var(--panel-lateral) minmax(0, 1fr);
+  align-items: start;
+}
+
+.panel__lateral {
+  position: sticky;
+  top: var(--panel-barra);
+  height: calc(100vh - var(--panel-barra));
+  padding: var(--espaciado-16) 0;
+  background-color: var(--color-bg-surface);
+  border-right: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel__menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel__menu-enlace {
+  display: block;
+  padding: var(--espaciado-8) var(--espaciado-20);
+  font-family: var(--fuente-mono);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.panel__menu-enlace:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface-alt);
+}
+
+/* La sección abierta se marca con una barra de acento Y con el texto en
+   blanco: dos señales, porque una sola en color no alcanza. */
+.panel__menu-enlace.es-activo {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface-alt);
+  border-left-color: var(--color-accent-base);
+}
+
+.panel__contenido {
+  width: 100%;
+  max-width: var(--panel-ancho);
+  padding: var(--espaciado-24) var(--espaciado-32) var(--espaciado-80);
+}
+
+.panel__pie {
+  padding: var(--espaciado-20) var(--espaciado-32);
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-disabled);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* ============================================================
+   Encabezado de pantalla
+   ============================================================ */
+
+.panel__volver {
+  display: inline-block;
+  margin-bottom: var(--espaciado-12);
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.panel__volver:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.panel__encabezado {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaciado-24);
+  margin-bottom: var(--espaciado-24);
+  padding-bottom: var(--espaciado-16);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel__titulo {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.panel__bajada {
+  margin: var(--espaciado-8) 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   Avisos
+   ============================================================ */
+
+.panel-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaciado-12);
+  margin: 0 0 var(--espaciado-20);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  font-size: 13px;
+  border: var(--hairline) solid var(--color-border-strong);
+  background-color: var(--color-bg-surface-alt);
+}
+
+/* El ícono no es decoración: es la segunda señal que distingue un
+   aviso bueno de uno malo sin depender del color. */
+.panel-aviso__icono {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  border: var(--hairline) solid currentcolor;
+  border-radius: var(--radio-full);
+}
+
+.panel-aviso--ok {
+  border-color: var(--color-plata-3);
+  color: var(--color-text-primary);
+}
+
+.panel-aviso--error {
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+
+.panel-aviso p {
+  margin: 0 0 var(--espaciado-8);
+}
+
+.panel-aviso p:last-child {
+  margin-bottom: 0;
+}
+
+.panel-nota {
+  margin: 0 0 var(--espaciado-20);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-surface);
+  border-left: 2px solid var(--color-border-strong);
+}
+
+.panel-nota--alerta {
+  border-left-color: var(--color-accent-base);
+}
+
+.panel-vacio {
+  margin: 0 0 var(--espaciado-24);
+  padding: var(--espaciado-32);
+  text-align: center;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) dashed var(--color-border-subtle);
+}
+
+.panel-vacio--chico {
+  padding: var(--espaciado-16);
+  text-align: left;
+}
+
+/* ============================================================
+   Botones y enlaces
+   ============================================================ */
+
+.panel-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-8);
+  min-height: 36px;
+  padding: 0 var(--espaciado-16);
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-elevated);
+  border: var(--hairline) solid var(--color-border-strong);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.panel-boton:hover {
+  border-color: var(--color-text-primary);
+}
+
+.panel-boton--acento {
+  color: var(--color-accent-on);
+  background-color: var(--color-accent-base);
+  border-color: var(--color-accent-base);
+}
+
+.panel-boton--acento:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.panel-boton--chico {
+  min-height: 30px;
+  padding: 0 var(--espaciado-12);
+  font-size: 11px;
+}
+
+.panel-boton--ancho {
+  width: 100%;
+}
+
+.panel-enlace {
+  color: var(--color-text-primary);
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.panel-enlace:hover {
+  color: var(--color-accent-text);
+}
+
+.panel-enlace--peligro {
+  color: var(--color-danger-text);
+}
+
+.panel-enlace:disabled {
+  color: var(--color-text-disabled);
+  cursor: default;
+  text-decoration: none;
+}
+
+/* ============================================================
+   Campos
+   ============================================================ */
+
+.campo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  margin-bottom: var(--espaciado-16);
+}
+
+.campo-panel--crece {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.campo-panel--angosto {
+  flex: 0 0 96px;
+}
+
+.campo-panel__rotulo {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.campo-panel__control {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--espaciado-8) var(--espaciado-12);
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-base);
+  border: var(--hairline) solid var(--color-border-strong);
+}
+
+.campo-panel__control:hover {
+  border-color: var(--color-plata-3);
+}
+
+.campo-panel__control--mono {
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+}
+
+.campo-panel__control--grande {
+  font-family: var(--fuente-display);
+  font-size: 28px;
+  min-height: 56px;
+}
+
+textarea.campo-panel__control {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* El campo con error lleva borde Y mensaje escrito abajo. El borde solo
+   sería color sin texto, que es exactamente lo que no se hace acá. */
+.campo-panel__control.es-error {
+  border-color: var(--color-danger-border);
+}
+
+.campo-panel__error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-danger-text);
+}
+
+.campo-panel__ayuda {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.campo-panel__ayuda code,
+.panel-ficha__dato code {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  padding: 1px 4px;
+  background-color: var(--color-bg-surface-alt);
+}
+
+.campo-panel__casilla {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  margin-bottom: var(--espaciado-12);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.campo-panel__casilla input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent-base);
+  cursor: pointer;
+}
+
+.panel-fila {
+  display: flex;
+  gap: var(--espaciado-16);
+  align-items: flex-start;
+}
+
+.panel-linea {
+  display: flex;
+  gap: var(--espaciado-12);
+  align-items: flex-end;
+  margin: 0;
+}
+
+.panel-linea .campo-panel {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   Grupos y columnas
+   ============================================================ */
+
+.panel-grupo {
+  margin: 0 0 var(--espaciado-24);
+  padding: var(--espaciado-20);
+  border: var(--hairline) solid var(--color-border-subtle);
+  background-color: var(--color-bg-surface);
+}
+
+.panel-grupo--destacado {
+  border-color: var(--color-accent-base);
+}
+
+.panel-grupo__titulo {
+  margin: 0 0 var(--espaciado-16);
+  padding: 0;
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+}
+
+.panel-grupo > *:last-child {
+  margin-bottom: 0;
+}
+
+.panel-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--espaciado-24);
+  align-items: start;
+}
+
+.panel-columnas__lateral {
+  position: sticky;
+  top: calc(var(--panel-barra) + var(--espaciado-24));
+}
+
+.panel-seccion__titulo {
+  margin: 0 0 var(--espaciado-12);
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.panel-seccion__bajada {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.panel-seccion__encabezado {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  margin-bottom: var(--espaciado-12);
+}
+
+.panel-seccion__cuenta {
+  flex: none;
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.panel-bloque {
+  margin-bottom: var(--espaciado-48);
+}
+
+.panel-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+  align-items: flex-start;
+}
+
+.panel-acciones--pegada {
+  padding: var(--espaciado-20);
+  border: var(--hairline) solid var(--color-border-subtle);
+  background-color: var(--color-bg-surface);
+}
+
+.panel-previa {
+  margin: 0 0 var(--espaciado-16);
+  padding: var(--espaciado-12);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-surface-alt);
+  border-left: 2px solid var(--color-accent-base);
+}
+
+.panel-previa strong {
+  color: var(--color-text-primary);
+}
+
+.panel-previa span {
+  display: block;
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+}
+
+.panel-previa--grande {
+  font-size: 15px;
+}
+
+/* ============================================================
+   Tablas
+   ============================================================ */
+
+.panel-tabla-marco {
+  /* La tabla scrollea adentro de su marco y no arrastra la página:
+     con nueve columnas en una pantalla de 1280 es lo que evita que
+     el panel entero se corra para el costado. */
+  overflow-x: auto;
+  margin-bottom: var(--espaciado-24);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.panel-tabla th,
+.panel-tabla td {
+  padding: var(--espaciado-8) var(--espaciado-12);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* El encabezado NO va sticky. `.panel-tabla-marco` tiene overflow-x
+   para que la tabla scrollee adentro de su marco, y eso lo convierte
+   en el bloque de referencia de cualquier sticky que tenga adentro.
+   Como el marco no scrollea en vertical, un `top: 56px` no pega el
+   encabezado a nada: lo empuja 56 px hacia abajo y lo superpone sobre
+   la primera fila. Una tabla de 30 filas se recorre sin encabezado
+   fijo; una fila tapada es un dato que no se lee. */
+.panel-tabla thead th {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-surface-alt);
+}
+
+.panel-tabla tbody tr:hover {
+  background-color: var(--color-bg-surface);
+}
+
+.panel-tabla tbody tr:last-child th,
+.panel-tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.panel-tabla__num {
+  text-align: right;
+  font-family: var(--fuente-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-tabla__num--alerta {
+  color: var(--color-danger-text);
+}
+
+.panel-tabla__principal {
+  font-weight: 400;
+}
+
+.panel-tabla__sku {
+  display: block;
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.panel-tabla__miniatura {
+  width: 60px;
+}
+
+.panel-tabla__miniatura img {
+  display: block;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  background-color: var(--color-bg-product-well);
+}
+
+.panel-tabla__sin-foto {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-text-disabled);
+  border: var(--hairline) dashed var(--color-border-subtle);
+}
+
+.panel-tabla__acciones {
+  white-space: nowrap;
+}
+
+.panel-tabla__acciones form {
+  display: inline;
+  margin-left: var(--espaciado-12);
+}
+
+/* ============================================================
+   Pastillas de estado
+
+   Cada una lleva su texto: el color acompaña, no informa.
+   ============================================================ */
+
+.panel-pastilla {
+  display: inline-block;
+  padding: 2px var(--espaciado-8);
+  font-family: var(--fuente-mono);
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: var(--hairline) solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+/* Los modificadores de estado son los siete de `estados_pedido()` en
+   helpers.php y no otros. Si se suma un estado allá, se suma una regla acá
+   y otra en cuenta.css. */
+
+.panel-pastilla--ok,
+.panel-pastilla--pagado,
+.panel-pastilla--entregado {
+  color: var(--color-text-primary);
+  border-color: var(--color-plata-3);
+}
+
+/* Lo que hay que atender: un pago que no entró todavía, un contracargo,
+   una devolución. */
+.panel-pastilla--alerta,
+.panel-pastilla--pendiente_pago,
+.panel-pastilla--pendiente_transferencia,
+.panel-pastilla--en_disputa,
+.panel-pastilla--devuelto {
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-border);
+}
+
+.panel-pastilla--nota,
+.panel-pastilla--en_camino {
+  color: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+.panel-pastilla--apagado,
+.panel-pastilla--cancelado {
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-subtle);
+}
+
+/* De dónde salió el pedido: una venta de verdad o el ejemplo del mock.
+   Va en gris y con la palabra escrita, no en color: es una etiqueta de
+   procedencia, no un estado. */
+.panel-pastilla--mock {
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-subtle);
+  border-style: dashed;
+}
+
+/* ============================================================
+   Pestañas y filtros
+   ============================================================ */
+
+.panel-pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-4);
+  margin-bottom: var(--espaciado-20);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel-pestana {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-8);
+  padding: var(--espaciado-8) var(--espaciado-16);
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.panel-pestana:hover {
+  color: var(--color-text-primary);
+}
+
+.panel-pestana.es-activa {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-accent-base);
+}
+
+.panel-pestana__cuenta {
+  font-size: 10px;
+  padding: 1px 5px;
+  background-color: var(--color-bg-surface-alt);
+}
+
+.panel-filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espaciado-16);
+  margin-bottom: var(--espaciado-20);
+  padding: var(--espaciado-16);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel-filtros .campo-panel,
+.panel-filtros .campo-panel__casilla {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   Fichas — la fila que es su propio formulario
+   ============================================================ */
+
+.panel-fichas {
+  margin: 0 0 var(--espaciado-20);
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-12);
+}
+
+.panel-ficha {
+  position: relative;
+  padding: var(--espaciado-16);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* Lo apagado se ve apagado, pero sigue siendo legible: es lo que hay
+   que poder leer para decidir si se vuelve a prender. */
+.panel-ficha--apagada {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.panel-ficha__formulario {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  gap: var(--espaciado-16);
+  align-items: start;
+}
+
+.panel-ficha__marca {
+  display: grid;
+  place-items: center;
+  min-height: 64px;
+  background-color: var(--color-bg-surface-alt);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel-ficha__marca img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.panel-ficha__marca--logo img {
+  max-height: 56px;
+  object-fit: contain;
+}
+
+.panel-ficha__marca--banner img {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+}
+
+.panel-ficha__hueco {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-disabled);
+}
+
+.panel-ficha__campos > *:last-child {
+  margin-bottom: 0;
+}
+
+.panel-ficha__dato {
+  margin: 0;
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.panel-ficha__borrar {
+  margin-top: var(--espaciado-12);
+  padding-top: var(--espaciado-12);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-12);
+}
+
+.panel-ficha__nota {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-disabled);
+}
+
+/* ============================================================
+   Alta
+   ============================================================ */
+
+.panel-alta {
+  margin-top: var(--espaciado-20);
+  padding: var(--espaciado-20);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) dashed var(--color-border-strong);
+}
+
+.panel-alta__resumen {
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.panel-alta__resumen:hover {
+  color: var(--color-text-primary);
+}
+
+.panel-alta--plegable[open] .panel-alta__resumen {
+  margin-bottom: var(--espaciado-16);
+  color: var(--color-text-primary);
+}
+
+.panel-alta__formulario > *:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   Foto de un formulario
+   ============================================================ */
+
+.panel-foto {
+  display: flex;
+  gap: var(--espaciado-16);
+  align-items: flex-start;
+  margin-bottom: var(--espaciado-16);
+}
+
+.panel-foto__vista {
+  flex: none;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  background-color: var(--color-bg-product-well);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel-foto__hueco {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-disabled);
+  border: var(--hairline) dashed var(--color-border-subtle);
+}
+
+.panel-foto__campos {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ============================================================
+   Listas de datos y totales
+   ============================================================ */
+
+.panel-datos,
+.panel-totales {
+  margin: 0;
+}
+
+.panel-datos > div,
+.panel-totales > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-8) 0;
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.panel-datos > div:last-child,
+.panel-totales > div:last-child {
+  border-bottom: 0;
+}
+
+.panel-datos dt,
+.panel-totales dt {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.panel-datos dd,
+.panel-totales dd {
+  margin: 0;
+  text-align: right;
+}
+
+.panel-totales dd {
+  font-family: var(--fuente-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-totales__final {
+  font-size: 16px;
+  border-top: var(--hairline) solid var(--color-border-strong);
+}
+
+.panel-totales__final dd {
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   Tablero
+   ============================================================ */
+
+.tablero__avisos,
+.tablero__cifras,
+.tablero__pedidos {
+  margin-bottom: var(--espaciado-32);
+}
+
+.tablero__lista-avisos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.tablero__aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-12) var(--espaciado-16);
+  background-color: var(--color-bg-surface);
+  border-left: 2px solid var(--color-accent-base);
+}
+
+.tablero__aviso-texto {
+  font-size: 13px;
+}
+
+.tablero__grilla {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--hairline);
+  background-color: var(--color-border-subtle);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* La retícula de hairlines del sitio, acá también: el gap de 1 px sobre
+   un fondo de borde es lo que dibuja la línea continua entre celdas
+   (CLAUDE.md §5.6). */
+.tablero__cifra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-16);
+  background-color: var(--color-bg-surface);
+}
+
+.tablero__cifra-valor {
+  font-family: var(--fuente-display);
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.tablero__cifra-rotulo {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.tablero__cifra--alerta .tablero__cifra-valor {
+  color: var(--color-danger-text);
+}
+
+.tablero__cifra--acento .tablero__cifra-valor {
+  color: var(--color-accent-text);
+}
+
+.tablero__cifra-enlace {
+  font-family: var(--fuente-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   Ingreso
+   ============================================================ */
+
+.panel--pelado {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--espaciado-24);
+}
+
+.ingreso__caja {
+  width: 100%;
+  max-width: 380px;
+  padding: var(--espaciado-32);
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-subtle);
+}
+
+.ingreso__marca {
+  display: block;
+  height: auto;
+  max-width: 170px;
+  margin-bottom: var(--espaciado-24);
+}
+
+.ingreso__titulo {
+  margin: 0 0 var(--espaciado-24);
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.ingreso__pie {
+  margin: var(--espaciado-24) 0 0;
+  font-size: 12px;
+  text-align: center;
+}
+
+.ingreso__pie a {
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   Pantallas angostas
+
+   No es un diseño para celular: es que el panel no quede roto si
+   alguien lo abre en una tablet. Ver el comentario del encabezado.
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .panel__cuerpo {
+    grid-template-columns: 1fr;
+  }
+
+  .panel__lateral {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: var(--hairline) solid var(--color-border-subtle);
+  }
+
+  .panel__menu {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .panel__menu-enlace {
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .panel__menu-enlace.es-activo {
+    border-left: 0;
+    border-bottom-color: var(--color-accent-base);
+  }
+
+  .panel__contenido {
+    padding-inline: var(--espaciado-20);
+  }
+
+  .panel-columnas,
+  .panel-ficha__formulario {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-columnas__lateral {
+    position: static;
+  }
+
+  .panel-fila,
+  .panel-linea,
+  .panel-filtros {
+    flex-wrap: wrap;
+  }
+
+}

@@ -26,6 +26,24 @@ function router_tabla(): array
         '#^/carrito$#'                 => ['carrito',                []],
         '#^/mayoristas$#'              => ['mayoristas',             []],
 
+        /* Checkout y pago.
+
+           /checkout recibe el formulario y se lo manda a sí misma, igual que
+           /ingresar: así los errores de validación se pintan al lado de cada
+           campo sin perder lo que la persona ya escribió.
+
+           /webhooks/mercadopago no es una página: es el endpoint que llama
+           Mercado Pago para avisar que un pago cambió de estado. Contesta
+           texto plano y no imprime una sola etiqueta HTML. El router no mira
+           el método, así que esa vista verifica que sea POST.
+
+           Las rutas de pago existen aunque no haya credenciales cargadas: sin
+           ellas el checkout muestra solamente el camino por transferencia.
+           Ver app/mercadopago.php y docs/MERCADOPAGO.md. */
+        '#^/checkout$#'                => ['checkout/index',          []],
+        '#^/checkout/retorno$#'        => ['checkout/retorno',        []],
+        '#^/webhooks/mercadopago$#'    => ['webhooks/mercadopago',    []],
+
         // /nosotros se lleva también el contacto: el menú apunta a
         // /nosotros#contacto y no hay una página de contacto aparte.
         '#^/nosotros$#'                => ['nosotros',               []],
@@ -39,6 +57,33 @@ function router_tabla(): array
         // todas las páginas, así que la ruta existe desde el primer día.
         '#^/arrepentimiento$#'         => ['legales/arrepentimiento', []],
         '#^/terminos$#'                => ['legales/terminos',        []],
+
+        /* --- Panel de administración ---------------------------------
+           Van al final para que ninguna ruta pública quede tapada por un
+           patrón de acá. Cada vista se ocupa de exigir la sesión: el
+           router traduce URLs, no decide quién entra (app/panel.php).
+
+           Las pantallas de colección son una sola vista que hace de lista
+           y de formulario. Un alta y una edición del mismo registro son la
+           misma pantalla con o sin datos adentro; separarlas duplicaría el
+           formulario y garantizaría que se desincronicen. */
+        '#^/admin$#'                        => ['admin/tablero',       []],
+        '#^/admin/ingresar$#'               => ['admin/ingresar',      []],
+        '#^/admin/salir$#'                  => ['admin/salir',         []],
+
+        '#^/admin/productos$#'              => ['admin/productos',     []],
+        '#^/admin/productos/nuevo$#'        => ['admin/producto',      []],
+        '#^/admin/productos/(\d+)$#'        => ['admin/producto',      ['id']],
+
+        '#^/admin/pedidos$#'                => ['admin/pedidos',       []],
+        '#^/admin/pedidos/([A-Za-z0-9-]+)$#' => ['admin/pedido',       ['codigo']],
+
+        '#^/admin/categorias$#'             => ['admin/categorias',    []],
+        '#^/admin/marcas$#'                 => ['admin/marcas',        []],
+        '#^/admin/clientes$#'               => ['admin/clientes',      []],
+        '#^/admin/banners$#'                => ['admin/banners',       []],
+        '#^/admin/nosotros$#'               => ['admin/nosotros',      []],
+        '#^/admin/configuracion$#'          => ['admin/configuracion', []],
     ];
 }
 

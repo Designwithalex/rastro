@@ -307,6 +307,74 @@ function asset(string $ruta): string
 }
 
 /**
+ * Un valor de app/config.php, o el defecto si no está.
+ *
+ * `config.php` no se versiona y puede no existir: en esa máquina el sitio
+ * público igual levanta con mocks. Lo que NO levanta sin configuración es
+ * el panel, que necesita de acá el mail y el hash del administrador
+ * (`app/panel.php`).
+ */
+function config(string $clave, mixed $defecto = null): mixed
+{
+    $config = defined('RASTRO_CONFIG') ? RASTRO_CONFIG : [];
+
+    return is_array($config) ? ($config[$clave] ?? $defecto) : $defecto;
+}
+
+/**
+ * Los estados que puede tener un pedido, con su rótulo y su chip.
+ *
+ * UNA SOLA LISTA PARA LAS DOS PUNTAS. La usa `/cuenta`, donde el cliente lee
+ * en qué anda su compra, y la usa el panel, donde se cambia. Estuvieron
+ * separadas el tiempo que tardó en aparecer el panel, y alcanzó para que el
+ * panel ofreciera estados —"pagado", "en preparación"— que la página del
+ * cliente no sabía dibujar: los mostraba con la clave cruda, `en_camino`.
+ * Un estado que se puede elegir de un lado y no se entiende del otro es una
+ * lista que hay que acordarse de actualizar dos veces.
+ *
+ * Sumar un estado es sumar una fila acá y una variante de `.chip-estado` en
+ * `cuenta.css`. La tabla de pedidos no se toca.
+ *
+ * SON DOS CICLOS PEGADOS, Y ESE ES EL ORDEN DE LA LISTA. Los cuatro
+ * primeros los escribe Mercado Pago a través del webhook y describen el
+ * PAGO; los dos siguientes los pone Rastro a mano desde el panel y
+ * describen la ENTREGA. Un pedido normal los recorre en este orden:
+ *
+ *   pendiente_pago -> pagado -> en_camino -> entregado
+ *
+ * `pendiente_transferencia` es el hermano de `pendiente_pago` para quien
+ * eligió transferencia o efectivo: no hay pasarela que avise, lo confirma
+ * Rastro a mano cuando ve la plata. Son dos estados y no uno porque la
+ * espera es de naturaleza distinta —una la resuelve un webhook y la otra
+ * una persona mirando el banco— y el panel tiene que poder separarlas.
+ *
+ * `en_disputa` y `devuelto` también los escribe Mercado Pago y son
+ * excepciones: un contracargo o una devolución. Aparecen en el desplegable
+ * del panel para poder corregir a mano si hiciera falta, pero lo normal es
+ * que lleguen solos.
+ *
+ * `cancelado` puede venir de cualquiera de los dos lados.
+ *
+ * TODO(backend): confirmar cuáles maneja el negocio de verdad
+ * (`PENDIENTES.md` #36).
+ *
+ * @return array<string,array{texto:string,clase:string}>
+ */
+function estados_pedido(): array
+{
+    return [
+        'pendiente_pago' => ['texto' => 'Pendiente de pago', 'clase' => 'chip-estado--pendiente'],
+        'pendiente_transferencia' => ['texto' => 'Esperando transferencia', 'clase' => 'chip-estado--pendiente'],
+        'pagado'         => ['texto' => 'Pagado',            'clase' => 'chip-estado--pagado'],
+        'en_camino'      => ['texto' => 'En camino',         'clase' => 'chip-estado--camino'],
+        'entregado'      => ['texto' => 'Entregado',         'clase' => 'chip-estado--entregado'],
+        'en_disputa'     => ['texto' => 'En disputa',        'clase' => 'chip-estado--disputa'],
+        'devuelto'       => ['texto' => 'Devuelto',          'clase' => 'chip-estado--devuelto'],
+        'cancelado'      => ['texto' => 'Cancelado',         'clase' => 'chip-estado--cancelado'],
+    ];
+}
+
+/**
  * Ruta que se está mostrando, normalizada y sin barra final.
  * "/" se mantiene como "/".
  */

@@ -70,7 +70,7 @@ if ($camino !== '/' && $archivo !== false && is_file($archivo)) {
     // 3. Archivos que el .htaccess de la raíz niega en cualquier ubicación.
     $nombre = basename($archivo);
 
-    if (preg_match('/\.(json|md|env)$/i', $nombre) || str_starts_with($nombre, '.')) {
+    if (preg_match('/\.(json|md|env|log)$/i', $nombre) || str_starts_with($nombre, '.')) {
         http_response_code(403);
         echo '403 · archivo no público';
         return true;
