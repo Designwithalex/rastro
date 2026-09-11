@@ -51,6 +51,7 @@ function router_tabla(): array
         '#^/ingresar$#'                => ['auth/ingresar',          []],
         '#^/registro$#'                => ['auth/registro',          []],
         '#^/cuenta$#'                  => ['cuenta/index',           []],
+        '#^/salir$#'                   => ['auth/salir',            []],
 
         // Obligatorias por la ley argentina de defensa del consumidor.
         // El enlace al botón de arrepentimiento tiene que estar en el pie de

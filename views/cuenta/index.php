@@ -10,13 +10,13 @@
  * cuenta que muestra los pedidos de alguien sin preguntar quién sos es
  * exactamente lo que no puede pasar cuando esto sea real.
  *
- * TODO(backend) — y es el importante de toda la Fase 2:
- *   1. Exigir sesión. Sin sesión, esta ruta redirige a /ingresar.
- *   2. El usuario sale de la sesión, no de una constante.
- *   3. `repo_order()` hoy no valida quién pide el pedido y el código es
- *      adivinable (RF-año-ddmm). Antes de exponer el detalle hay que
- *      comparar `usuario_id` contra el usuario logueado. Está anotado en
- *      el propio repository.php.
+ * Exige sesión: sin nadie identificado, la ruta manda a /ingresar y vuelve
+ * acá después de entrar. El usuario sale de la sesión, no de una constante.
+ *
+ * TODO(backend): el DETALLE de un pedido sigue sin pantalla, y a propósito.
+ * `repo_order()` no valida quién lo pide y el código es adivinable
+ * (RF-año-ddmm en los pedidos viejos). Antes de exponerlo hay que comparar
+ * `usuario_id` contra el usuario de la sesión. Está anotado en repository.php.
  *
  * Las secciones se eligen por `?seccion=`, no por ruta, porque el router
  * tiene una sola entrada para /cuenta y las tres son la misma página con
@@ -25,12 +25,12 @@
 
 declare(strict_types=1);
 
-/* TODO(backend): esto sale de la sesión. */
-const CUENTA_USUARIO_DEMO = 1;
+sesion_exigir_usuario();
 
-$usuario = repo_user(CUENTA_USUARIO_DEMO);
+$usuario = sesion_usuario();
 
 if ($usuario === null) {
+    // sesion_exigir_usuario() ya redirigió; esto es para el analizador.
     router_404();
 }
 
@@ -159,12 +159,6 @@ $estados = estados_pedido();
                     </div>
 
                     <?php
-                    $nota_maqueta = 'Los pedidos salen de repo_orders(). El detalle de cada uno '
-                                  . 'todavía no tiene pantalla: repo_order() no valida quién lo pide '
-                                  . 'y el código es adivinable, así que no se expone hasta que haya '
-                                  . 'sesión. El estado es un campo del pedido: si aparecen estados '
-                                  . 'nuevos se suma una variante del chip y la tabla no se toca.';
-                    require RASTRO_VIEWS . '/partials/nota-maqueta.php';
                     ?>
                 <?php endif; ?>
 
@@ -212,17 +206,10 @@ $estados = estados_pedido();
                 </dl>
 
                 <?php
-                $nota_maqueta = 'Los datos salen de repo_user(). Falta el formulario de edición '
-                              . 'y que el backend lo guarde.';
-                require RASTRO_VIEWS . '/partials/nota-maqueta.php';
                 ?>
             <?php endif; ?>
 
             <?php
-            $nota_maqueta = 'No hay sesión todavía: esta pantalla muestra siempre el usuario de '
-                          . 'prueba (demo@rastrofitness.com.ar). Cuando entre la sesión, /cuenta '
-                          . 'tiene que redirigir a /ingresar si no hay nadie logueado.';
-            require RASTRO_VIEWS . '/partials/nota-maqueta.php';
             ?>
         </section>
     </div>

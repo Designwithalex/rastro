@@ -569,3 +569,19 @@
     display: none;
   }
 }
+
+/* El "Salir" de la cabecera es un <form> para que sea un POST, pero tiene
+   que verse exactamente igual que los enlaces de al lado: el visitante no
+   tiene por qué notar la diferencia de mecanismo. */
+.cabecera__salir {
+  display: inline-flex;
+  margin: 0;
+}
+
+.cabecera__salir button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}

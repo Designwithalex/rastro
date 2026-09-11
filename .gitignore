@@ -32,3 +32,7 @@ assets/img/**/*.ai
 # Fotos originales sin optimizar. bin/optimizar-imagenes.sh deja acá una copia
 # intacta antes de redimensionar. Pesan 29 MB: no van al repo ni al servidor.
 .originales-img/
+
+# Pedidos de arrepentimiento: tienen datos de compradores y los escribe el
+# sitio, no una persona. Misma razón que data/pedidos.json.
+data/arrepentimientos.json

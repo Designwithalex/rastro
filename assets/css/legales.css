@@ -176,3 +176,44 @@
     padding: var(--espaciado-32);
   }
 }
+
+/* --- La constancia del arrepentimiento ----------------------
+   Reemplaza al formulario cuando el trámite quedó hecho. El número
+   va en mono y grande porque es lo único que la persona tiene que
+   copiar, y lo va a dictar por teléfono. */
+
+.legal__constancia {
+  padding: var(--espaciado-24);
+  border: var(--hairline) solid var(--color-border-strong);
+  background-color: var(--color-bg-surface);
+}
+
+.legal__constancia > * + * {
+  margin-top: var(--espaciado-16);
+}
+
+.legal__tramite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-16);
+  background-color: var(--color-bg-surface-alt);
+  border-left: 2px solid var(--color-accent-base);
+}
+
+.legal__tramite strong {
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+/* El error de un campo va debajo del campo, con texto: nunca sólo
+   el borde en color (CLAUDE.md §5.4). */
+.formulario__error {
+  display: block;
+  margin-top: var(--espaciado-4);
+  color: var(--color-danger-text);
+}
+
+.campo.es-error {
+  border-color: var(--color-danger-border);
+}

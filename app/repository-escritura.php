@@ -409,6 +409,49 @@ function repo_delete_banner(int $id): bool
 }
 
 /* ==========================================================================
+   Usuarios
+   ========================================================================== */
+
+/**
+ * Da de alta o actualiza un usuario. Devuelve el usuario guardado SIN el
+ * hash, o null si no se pudo escribir.
+ *
+ * LA CONTRASEÑA ENTRA EN CLARO Y SALE HASHEADA, y esa asimetría es a
+ * propósito: si esta función aceptara un hash ya armado, cualquier pantalla
+ * podría elegir con qué algoritmo hashear —o no hashear— y no habría un
+ * solo lugar donde mirarlo. Se pasa en `password` y acá se convierte.
+ *
+ * Sin `password` no se toca el hash que había: así una pantalla de "editar
+ * mis datos" puede guardar el teléfono sin conocer la contraseña.
+ *
+ * TODO(backend): INSERT ... ON DUPLICATE KEY UPDATE sobre `usuarios`, con
+ * UNIQUE en email. El chequeo de mail repetido lo hace repo_register().
+ */
+function repo_save_user(array $datos): ?array
+{
+    $usuarios = _repo_json('users');
+
+    $clara = (string) ($datos['password'] ?? '');
+    unset($datos['password']);
+
+    if ($clara !== '') {
+        $datos['password_hash'] = password_hash($clara, PASSWORD_DEFAULT);
+    }
+
+    [$usuarios, $usuario] = _repo_upsert($usuarios, $datos);
+
+    if (!_repo_escribir_json('users', $usuarios)) {
+        return null;
+    }
+
+    /* Nunca sale el hash de acá, ni siquiera hacia la vista que acaba de
+       crearlo: es la misma regla que cumple repo_user() del otro lado. */
+    unset($usuario['password_hash']);
+
+    return $usuario;
+}
+
+/* ==========================================================================
    Pedidos
    ========================================================================== */
 
@@ -449,6 +492,68 @@ function repo_save_order_status(string $codigo, string $estado): bool
     }
 
     return _repo_escribir_json('orders', $pedidos);
+}
+
+/* ==========================================================================
+   Arrepentimientos
+   ========================================================================== */
+
+/**
+ * Guarda un pedido de arrepentimiento y devuelve el registro con su número
+ * de trámite, o null si no se pudo escribir.
+ *
+ * POR QUÉ ESTO SE GUARDA Y NO ALCANZA CON MANDAR UN MAIL
+ *
+ * La Resolución 424/2020 no pide sólo recibir el arrepentimiento: pide
+ * poder DEMOSTRAR que se recibió y cuándo. Un mail que se pierde, que cae
+ * en spam o que alguien borra no demuestra nada. El archivo es la
+ * constancia; el mail es el aviso. Si el mail falla, el trámite existe
+ * igual y la persona tiene su número.
+ *
+ * El número no es correlativo a propósito: `ARR-2026-7K3M`. Un correlativo
+ * le dice a cualquiera cuántos arrepentimientos hubo, y se adivina el del
+ * vecino. Cuatro caracteres al azar de un alfabeto sin 0/O ni 1/I, porque
+ * estos números se dictan por teléfono.
+ *
+ * TODO(backend): tabla `arrepentimientos`, con índice por fecha. Y una
+ * pantalla en el panel: hoy la única forma de verlos es abrir el archivo
+ * (PENDIENTES #73).
+ */
+function repo_save_arrepentimiento(array $datos): ?array
+{
+    $ruta = dirname(__DIR__) . '/data/arrepentimientos.json';
+
+    $previos = is_file($ruta)
+        ? json_decode((string) @file_get_contents($ruta), true)
+        : [];
+
+    $previos = is_array($previos) ? $previos : [];
+
+    $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    $sufijo   = '';
+
+    for ($i = 0; $i < 4; $i++) {
+        $sufijo .= $alfabeto[random_int(0, strlen($alfabeto) - 1)];
+    }
+
+    $datos['codigo'] = sprintf('ARR-%s-%s', date('Y'), $sufijo);
+    $datos['creado'] = date('c');
+    $datos['estado'] = 'recibido';
+
+    $previos[] = $datos;
+
+    $json = json_encode(
+        array_values($previos),
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    if ($json === false || @file_put_contents($ruta, $json . "\n", LOCK_EX) === false) {
+        error_log('repo: no se pudo guardar el arrepentimiento');
+
+        return null;
+    }
+
+    return $datos;
 }
 
 /* ==========================================================================

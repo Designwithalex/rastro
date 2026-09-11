@@ -161,13 +161,32 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                 </form>
             </div>
 
-            <?php /* TODO(backend): con sesión abierta este enlace va a /cuenta
-                     y muestra el nombre del usuario en vez de "Cuenta". */ ?>
-            <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/ingresar'))) ?>"
-               href="<?= e(url('/ingresar')) ?>"
-               <?= es_ruta_exacta('/ingresar') ? 'aria-current="page"' : '' ?>>
-                Cuenta
-            </a>
+            <?php /* Con sesión abierta el enlace lleva a /cuenta y saluda por
+                     el nombre; sin sesión, a /ingresar. `sesion_usuario()`
+                     resuelve una sola vez por request y no arranca ninguna
+                     sesión si el visitante no trae la cookie, así que esto
+                     no le cuesta nada a quien pasa por la home sin cuenta. */ ?>
+            <?php $layout_usuario = sesion_usuario(); ?>
+            <?php if ($layout_usuario !== null): ?>
+                <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/cuenta'))) ?>"
+                   href="<?= e(url('/cuenta')) ?>"
+                   <?= es_ruta_exacta('/cuenta') ? 'aria-current="page"' : '' ?>>
+                    <?= e((string) ($layout_usuario['nombre'] ?? 'Mi cuenta')) ?>
+                </a>
+
+                <?php /* Salir es un POST porque un GET que cierra sesión lo
+                         dispara cualquier cosa que precargue enlaces. */ ?>
+                <form class="cabecera__salir" method="post" action="<?= e(url('/salir')) ?>">
+                    <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
+                    <button class="cabecera__cuenta t-mono-label" type="submit">Salir</button>
+                </form>
+            <?php else: ?>
+                <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/ingresar'))) ?>"
+                   href="<?= e(url('/ingresar')) ?>"
+                   <?= es_ruta_exacta('/ingresar') ? 'aria-current="page"' : '' ?>>
+                    Cuenta
+                </a>
+            <?php endif; ?>
 
             <a class="<?= e(trim('boton-carrito t-mono-label ' . activo('/carrito'))) ?>"
                href="<?= e(url('/carrito')) ?>"

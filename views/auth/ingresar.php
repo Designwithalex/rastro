@@ -5,21 +5,26 @@
  * Sigue el frame "Login · Desktop 1440".
  * https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs/?node-id=68-3
  *
- * QUÉ HACE Y QUÉ NO
+ * QUÉ HACE
  *
- * El POST llega hasta `repo_login()`, que verifica el hash de verdad, y
- * la vista dibuja el resultado. Lo que NO hace es abrir sesión: no hay
- * `session_start()` en ningún lado del proyecto todavía. Un login que
- * dice "listo" y no deja a nadie adentro sería peor que uno que dice qué
- * le falta, así que lo dice.
+ * El POST llega a `repo_login()`, que verifica el hash, y si está bien
+ * abre la sesión y manda a donde la persona quería ir. Todo eso vive en
+ * `app/sesion.php`.
  *
- * TODO(backend): abrir la sesión, regenerar el id de sesión, sumar un
- * token CSRF al formulario y límite de intentos por IP y por correo.
- * `repo_login()` ya gasta el mismo tiempo cuando el correo no existe,
- * para no filtrar qué direcciones están registradas.
+ * LAS TRES DEFENSAS, Y POR QUÉ CADA UNA
+ *
+ * · Token CSRF. Sin él, un sitio ajeno puede identificar a alguien con una
+ *   cuenta que controla el atacante y hacerle comprar ahí sin que note que
+ *   cambió de cuenta.
+ * · Id de sesión nuevo al entrar (`session_regenerate_id`), contra la
+ *   fijación de sesión.
+ * · Freno por IP: ocho intentos fallidos cada quince minutos. Por IP y no
+ *   por correo a propósito: contar por correo deja que cualquiera bloquee
+ *   la cuenta de otro, que es un ataque en sí mismo.
  *
  * NUNCA se dice cuál de los dos campos estuvo mal. "El correo no existe"
- * le confirma a cualquiera qué direcciones tienen cuenta acá.
+ * le confirma a cualquiera qué direcciones tienen cuenta acá. Por la misma
+ * razón `repo_login()` gasta el mismo tiempo cuando el correo no existe.
  */
 
 declare(strict_types=1);
@@ -29,18 +34,48 @@ $descripcion = 'Entrá a tu cuenta para ver tus pedidos y comprar más rápido.'
 $clase_body  = 'pagina-auth';
 $estilos     = ['componentes', 'catalogo', 'cuenta'];
 
+/* Quien ya entró no tiene nada que hacer acá. Sin esto, volver atrás
+   después de ingresar muestra el formulario otra vez y parece que la
+   sesión se perdió. */
+if (sesion_hay_usuario()) {
+    header('Location: ' . url('/cuenta'), true, 303);
+
+    exit;
+}
+
 $enviado = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 $email   = $enviado ? trim((string) ($_POST['email'] ?? '')) : '';
 $usuario = null;
 $error   = null;
 
 if ($enviado) {
-    $usuario = repo_login($email, (string) ($_POST['password'] ?? ''));
+    if (!sesion_csrf_valido()) {
+        // No se dice "CSRF": no le sirve a quien lo lee ni a quien lo intenta.
+        $error = 'El formulario venció. Volvé a intentar.';
+    } elseif (sesion_bloqueado()) {
+        $error = 'Demasiados intentos. Esperá unos minutos y volvé a probar.';
+    } else {
+        $usuario = repo_login($email, (string) ($_POST['password'] ?? ''));
 
-    if ($usuario === null) {
-        $error = 'No pudimos entrar con esos datos. Revisá el correo y la contraseña.';
+        if ($usuario === null) {
+            sesion_anotar_intento();
+            $error = 'No pudimos entrar con esos datos. Revisá el correo y la contraseña.';
+        } else {
+            sesion_limpiar_intentos();
+            sesion_entrar($usuario);
+
+            header('Location: ' . url(sesion_destino()), true, 303);
+
+            exit;
+        }
     }
 }
+
+/* El token CSRF se acuña ACÁ y no en el formulario: acuñarlo crea la sesión,
+   crear la sesión manda una cabecera, y para cuando el formulario se dibuja
+   ya salió medio HTML. Se pide antes de abrir el documento y la vista lo
+   imprime después. */
+$csrf = sesion_csrf();
 
 require RASTRO_VIEWS . '/layout/head.php';
 ?>
@@ -84,6 +119,7 @@ require RASTRO_VIEWS . '/layout/head.php';
             <?php endif; ?>
 
             <form class="formulario formulario--auth" method="post" action="<?= e(url('/ingresar')) ?>">
+                <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
                 <p class="formulario__campo">
                     <label class="formulario__etiqueta t-mono-label-sm" for="email">Correo electrónico</label>
                     <input class="campo t-mono-texto" type="email" id="email" name="email"
@@ -114,11 +150,6 @@ require RASTRO_VIEWS . '/layout/head.php';
             </p>
 
             <?php
-            $nota_maqueta = 'El backend conecta la sesión, el token CSRF y el límite de '
-                          . 'intentos. La verificación de la contraseña ya funciona contra '
-                          . 'data/users.json. Los estados de error del campo están resueltos '
-                          . 'en el componente Input de Figma.';
-            require RASTRO_VIEWS . '/partials/nota-maqueta.php';
             ?>
         </div>
     </div>

@@ -524,6 +524,29 @@ repo_all_orders(): array     // de todos los usuarios
 
 Un banner apagado que el panel no ve es un banner que no se puede volver a prender.
 
+### Cuentas y arrepentimientos — 11/09/2026
+
+```php
+repo_save_user(array $datos): ?array          // alta/edición; hashea `password`
+repo_save_arrepentimiento(array $datos): ?array
+```
+
+**`repo_save_user()` recibe la contraseña EN CLARO y la hashea acá.** La
+asimetría es a propósito: si aceptara un hash ya armado, cada pantalla podría
+elegir con qué algoritmo hashear —o no hashear— y no habría un solo lugar
+donde mirarlo. Sin `password` no toca el hash que había, para que una pantalla
+de "editar mis datos" pueda guardar el teléfono sin conocer la contraseña.
+Nunca devuelve el `password_hash`, ni siquiera a la vista que acaba de crearlo.
+
+**`repo_save_arrepentimiento()` guarda la constancia.** La Resolución 424/2020
+no pide sólo recibir el arrepentimiento: pide poder demostrar que se recibió y
+cuándo. Por eso se guarda ANTES de mandar los mails y el número de trámite se
+muestra en pantalla aunque el correo falle. El código es `ARR-2026-7K3M`, no
+correlativo: un correlativo revela cuántos hubo y deja adivinar el del vecino.
+
+**TODO(backend):** las dos pasan a tablas. `usuarios` ya está en la estructura
+sugerida; `arrepentimientos` es nueva, con índice por fecha.
+
 ### Cinco reglas que el backend tiene que sostener
 
 1. **Devuelven lo guardado, no un booleano.** La vista necesita el id recién asignado

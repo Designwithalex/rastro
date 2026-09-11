@@ -86,8 +86,38 @@ define('RASTRO_RUTA', $camino);
    cuando la ruta es del panel. El sitio público no escribe nada, y arrancar
    una sesión en cada visita a la home costaría un archivo de sesión por
    visitante para no guardar nada adentro. */
-if (RASTRO_RUTA === '/admin' || str_starts_with(RASTRO_RUTA, '/admin/')) {
+/* La sesión de los clientes va en TODAS las páginas, porque la cabecera
+   necesita saber si decir "Mi cuenta" o "Ingresar". No es caro: sesion_abrir()
+   sin forzar no arranca nada si el visitante no trae la cookie, así que quien
+   nunca se identificó no paga un archivo de sesión (app/sesion.php).
+
+   Las pantallas que además ESCRIBEN —registro, y el arrepentimiento que deja
+   constancia— necesitan el lado de escritura del repository. */
+require __DIR__ . '/app/sesion.php';
+
+/* Se abre ACÁ, antes de que la vista imprima un solo byte. Una sesión de PHP
+   manda una cabecera Set-Cookie, y una cabecera no se puede mandar después
+   del HTML: si se arranca a mitad del renderizado, PHP no la inicia y escupe
+   tres warnings adentro de la página.
+
+   Sin forzar: si el visitante no trae la cookie no se arranca nada, que es
+   la razón por la que esto se puede permitir en todas las rutas. */
+sesion_abrir();
+
+if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento'], true)) {
     require __DIR__ . '/app/repository-escritura.php';
+}
+
+// El arrepentimiento avisa por mail: a Rastro y a quien lo pide.
+if (RASTRO_RUTA === '/arrepentimiento') {
+    require __DIR__ . '/app/correo.php';
+}
+
+if (RASTRO_RUTA === '/admin' || str_starts_with(RASTRO_RUTA, '/admin/')) {
+    if (!function_exists('repo_save_product')) {
+        require __DIR__ . '/app/repository-escritura.php';
+    }
+
     require __DIR__ . '/app/panel.php';
 
     /* El panel no se indexa ni se cachea. Es lo primero que se manda porque

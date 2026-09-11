@@ -41,6 +41,13 @@ $valores  = [
     'es_empresa' => false,
 ];
 
+/* Quien ya tiene la sesión abierta no se registra de nuevo. */
+if (sesion_hay_usuario()) {
+    header('Location: ' . url('/cuenta'), true, 303);
+
+    exit;
+}
+
 if ($enviado) {
     foreach ($valores as $clave => $_) {
         $valores[$clave] = $clave === 'es_empresa'
@@ -48,10 +55,48 @@ if ($enviado) {
             : trim((string) ($_POST[$clave] ?? ''));
     }
 
-    $resultado = repo_register($valores + ['password' => (string) ($_POST['password'] ?? '')]);
-    $errores   = $resultado['errores'];
-    $creado    = $resultado['ok'] ? $resultado['usuario'] : null;
+    $clave_elegida = (string) ($_POST['password'] ?? '');
+
+    if (!sesion_csrf_valido()) {
+        $errores['general'] = 'El formulario venció. Volvé a intentar.';
+    } else {
+        $resultado = repo_register($valores + ['password' => $clave_elegida]);
+        $errores   = $resultado['errores'];
+
+        if ($resultado['ok']) {
+            /* repo_register() valida y arma el usuario, pero NO lo guarda:
+               devuelve id 0. Guardarlo es tarea del lado de escritura, que
+               es también el único lugar donde la contraseña se convierte en
+               hash (repo_save_user). */
+            $nuevo = $resultado['usuario'];
+            unset($nuevo['id']);   // que el repository le asigne el suyo
+
+            $creado = repo_save_user($nuevo + ['password' => $clave_elegida]);
+
+            if ($creado === null) {
+                $errores['general'] = 'No pudimos crear la cuenta. Probá de nuevo en un momento.';
+            } else {
+                /* Se entra directo: pedirle a alguien que acaba de elegir una
+                   contraseña que la escriba otra vez es hacerle repetir un
+                   trámite que el servidor ya resolvió.
+
+                   TODO(backend): el mail de bienvenida. Hoy no se manda y la
+                   pantalla no lo promete (PENDIENTES #72). */
+                sesion_entrar($creado);
+
+                header('Location: ' . url(sesion_destino('/cuenta')), true, 303);
+
+                exit;
+            }
+        }
+    }
 }
+
+/* El token CSRF se acuña ACÁ y no en el formulario: acuñarlo crea la sesión,
+   crear la sesión manda una cabecera, y para cuando el formulario se dibuja
+   ya salió medio HTML. Se pide antes de abrir el documento y la vista lo
+   imprime después. */
+$csrf = sesion_csrf();
 
 require RASTRO_VIEWS . '/layout/head.php';
 
@@ -98,6 +143,7 @@ $campos = [
             <?php endif; ?>
 
             <form class="formulario formulario--auth" method="post" action="<?= e(url('/registro')) ?>" novalidate>
+                <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
 
                 <?php foreach ($campos as $campo): ?>
                     <?php $tiene_error = isset($errores[$campo['nombre']]); ?>
@@ -187,12 +233,6 @@ $campos = [
             </p>
 
             <?php
-            $nota_maqueta = 'La validación de repo_register() ya corre y los errores que '
-                          . 'ves son los reales. Falta que el backend guarde el usuario con '
-                          . 'password_hash(), mande el mail de bienvenida y abra la sesión. '
-                          . 'Qué pasa con una cuenta marcada como mayorista sigue abierto '
-                          . '(PENDIENTES #39).';
-            require RASTRO_VIEWS . '/partials/nota-maqueta.php';
             ?>
         </div>
     </div>
