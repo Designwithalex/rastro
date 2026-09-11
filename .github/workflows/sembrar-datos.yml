@@ -89,7 +89,8 @@ jobs:
           port: ${{ secrets.FTP_PORT }}
           protocol: ftps
           local-dir: ./data/
-          server-dir: /public_html/data/
+          # Misma razón que en deploy.yml: la raíz del FTP es la del sitio.
+          server-dir: ./data/
           # El archivo de estado de esta subida va aparte del que usa el
           # deploy normal. Si compartieran archivo, cada uno le borraría
           # al otro el registro de lo que subió y los dos empezarían a

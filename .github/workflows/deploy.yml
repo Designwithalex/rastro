@@ -30,7 +30,15 @@ jobs:
           # en texto plano por la red del runner. Si un deploy falla acá con un
           # error de handshake TLS, ver docs/DEPLOY.md antes de volver a `ftp`.
           protocol: ftps
-          server-dir: /public_html/
+          # La raíz del usuario FTP YA ES la raíz del sitio: index.php y
+          # .htaccess están ahí, y /public_html/ directamente no existe
+          # (el servidor contesta 550). Hasta el 11/09/2026 la cuenta vieja
+          # sí tenía esa carpeta, y por eso decía /public_html/.
+          #
+          # Con la ruta vieja el deploy no falla de forma visible: crea un
+          # public_html/ adentro del sitio, sube todo ahí, y el sitio sigue
+          # sirviendo lo de antes. Se ve verde y no cambió nada.
+          server-dir: ./
           # Sube solo lo que el sitio necesita para correr.
           #
           # DOS COSAS NO SE SINCRONIZAN, Y POR RAZONES DISTINTAS:
