@@ -11,6 +11,25 @@ DirectoryIndex index.php
     RewriteEngine On
     RewriteBase /
 
+    # --- Una sola dirección para el sitio --------------------
+    # www.rastrofitness.com redirige a rastrofitness.com. Las dos
+    # servían el mismo contenido sin redirigir una a la otra, y para
+    # un buscador eso son dos sitios iguales compitiendo entre sí.
+    #
+    # Va PRIMERO, antes que cualquier otra regla: si se redirige
+    # después de resolver la ruta, el visitante hace el viaje dos
+    # veces y la URL final puede no ser la que se calculó.
+    #
+    # 301 y no 302 a propósito: el cambio es permanente y es lo que
+    # hace que un buscador transfiera lo que ya tenía indexado.
+    #
+    # Se elige el dominio sin www porque es al que ya redirige el
+    # http de Hostinger. El %1 es lo que capturó el paréntesis del
+    # HTTP_HOST, así que la regla sigue funcionando el día que el
+    # sitio cambie de dominio otra vez.
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
     # Un archivo o una carpeta que existe de verdad se sirve tal cual:
     # así salen los assets sin pasar por PHP.
     RewriteCond %{REQUEST_FILENAME} -f [OR]
