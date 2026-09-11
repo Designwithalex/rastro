@@ -604,7 +604,21 @@ function checkout_sincronizar_pago(array $pedido, string $payment_id): array
  */
 function checkout_mismo_origen(): bool
 {
-    $propio = parse_url(checkout_url_absoluta('/'), PHP_URL_HOST);
+    /* `www.rastrofitness.com` y `rastrofitness.com` son el mismo sitio, así
+       que se compara sin el `www.` de adelante.
+
+       Sin esto, un formulario servido desde www se rechazaba con "no
+       pudimos verificar de dónde vino": el .htaccess manda el POST al
+       dominio sin www, pero la cabecera Origin sigue diciendo www, y la
+       comparación cruda daba distinto. Pasó el 11/09/2026 —el CDN tenía
+       cacheadas las páginas de www— y el síntoma era que apretabas "pagar"
+       y volvías al checkout sin ninguna explicación.
+
+       Recortar el `www.` no afloja nada: cualquier otro host sigue sin
+       coincidir, que es lo único que esta función tiene que impedir. */
+    $sin_www = static fn (?string $host): string => preg_replace('/^www\./i', '', (string) $host);
+
+    $propio = $sin_www(parse_url(checkout_url_absoluta('/'), PHP_URL_HOST));
 
     foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $cabecera) {
         $valor = (string) ($_SERVER[$cabecera] ?? '');
@@ -613,7 +627,7 @@ function checkout_mismo_origen(): bool
             continue;
         }
 
-        return parse_url($valor, PHP_URL_HOST) === $propio;
+        return $sin_www(parse_url($valor, PHP_URL_HOST)) === $propio;
     }
 
     // Sin Origin ni Referer no se puede decidir. Se deja pasar para no romper
