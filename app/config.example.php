@@ -37,7 +37,7 @@ return [
     // URL base del sitio, sin barra final.
     // Mercado Pago la usa para las back_urls y NO acepta localhost ni una IP:
     // necesita un dominio con DNS. Ver docs/MERCADOPAGO.md.
-    'base_url' => 'https://darkorange-buffalo-311255.hostingersite.com',
+    'base_url' => 'https://rastrofitness.com',
 
     /* ------------------------------------------------------------------
        PANEL DE ADMINISTRACIÓN  (/admin)

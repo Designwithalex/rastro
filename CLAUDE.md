@@ -69,7 +69,7 @@ mandar los mails y conciliar los pagos que no notifican. Todo en
 - **Datos MOCK en JSON** dentro de `data/`.
 - Hosting **compartido Hostinger**. Deploy por **FTP con GitHub Actions**.
 - Sitio provisorio (ya provisionado, hoy con la página por defecto):
-  `https://darkorange-buffalo-311255.hostingersite.com/`
+  `https://rastrofitness.com/`
 
 ---
 
@@ -341,5 +341,5 @@ de estar cobrando.
 
 - Notion del proyecto: https://app.notion.com/p/3c18437e26f380ec9a3bc3202527f36a
 - Drive del cliente: https://drive.google.com/drive/folders/17A56drHb-n59DK6x9uPZNrufPmcwhxpX
-- Sitio provisorio Hostinger: https://darkorange-buffalo-311255.hostingersite.com/
+- Sitio provisorio Hostinger: https://rastrofitness.com/
 - Assets originales: `/Users/ale/Documents/chichalabs-clientes/rastro`

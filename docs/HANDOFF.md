@@ -308,7 +308,7 @@ Los que más pesan:
 | Todo lo que está abierto | [`PENDIENTES.md`](../PENDIENTES.md) |
 | Diseño | [`design/README.md`](../design/README.md) |
 | Figma | https://www.figma.com/design/32nxqpSmVmX4nvo0zyCRSs |
-| Sitio provisorio | https://darkorange-buffalo-311255.hostingersite.com/ |
+| Sitio provisorio | https://rastrofitness.com/ |
 
 Cualquier duda de contrato, escribinos antes de cambiar una vista. Ese archivo
 es el corazón del handoff y es lo que permite que las dos partes avancen sin

@@ -182,7 +182,7 @@ cp app/config.example.php app/config.php
 Y completar:
 
 ```php
-'base_url'            => 'https://darkorange-buffalo-311255.hostingersite.com',
+'base_url'            => 'https://rastrofitness.com',
 'mp_modo'             => 'test',
 'mp_access_token'     => 'APP_USR-...',   // de la solapa de PRUEBA
 'mp_public_key'       => 'APP_USR-...',   // de la solapa de PRUEBA
@@ -214,7 +214,7 @@ Se pueden tener hasta 10 y caducan a los 60 días sin uso.
 
 - **Modo:** Prueba (hay una solapa por modo; la clave secreta es distinta en
   cada una).
-- **URL:** `https://darkorange-buffalo-311255.hostingersite.com/webhooks/mercadopago`
+- **URL:** `https://rastrofitness.com/webhooks/mercadopago`
 - **Eventos:** marcar **Pagos** (`payment`). Nada más, por ahora.
 - Guardar y apretar **"Revelar clave secreta"**.
 

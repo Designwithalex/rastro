@@ -25,7 +25,7 @@ Sos el responsable de infraestructura y handoff de **Rastro Fitness**, en `/User
 ## Contexto de hosting
 
 Hostinger compartido. Sitio provisorio ya provisionado:
-`https://darkorange-buffalo-311255.hostingersite.com/` (hoy con la página por defecto).
+`https://rastrofitness.com/` (hoy con la página por defecto).
 `gh` está autenticado como **Designwithalex** con scopes `repo` y `workflow`.
 
 Todo el repo se despliega dentro de `public_html`. Las carpetas `app/`, `views/` y

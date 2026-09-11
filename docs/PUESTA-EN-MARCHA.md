@@ -67,7 +67,7 @@ $2y$12$Sc0K9v...........................................
 
 ### 1.3 Probar
 
-Entrar a `https://EL-SITIO/admin`. Tiene que pedir mail y contraseña.
+Entrar a `https://rastrofitness.com/admin`. Tiene que pedir mail y contraseña.
 
 | Qué ves | Qué significa |
 |---|---|
@@ -141,7 +141,7 @@ ambiente de prueba. **Tiene que coincidir con las credenciales de arriba.**
 Verificá también que `base_url` sea el dominio real, sin barra final:
 
 ```php
-    'base_url' => 'https://darkorange-buffalo-311255.hostingersite.com',
+    'base_url' => 'https://rastrofitness.com',
 ```
 
 De ahí salen las URLs de vuelta de Mercado Pago. Con `localhost` o vacío, la
@@ -158,7 +158,7 @@ Configurar notificaciones**.
 
 | Campo | Valor |
 |---|---|
-| URL | `https://EL-SITIO/webhooks/mercadopago` |
+| URL | `https://rastrofitness.com/webhooks/mercadopago` |
 | Evento | **Pagos** (`payment`) |
 
 Al guardar aparece **"Revelar clave secreta"**. Esa clave va en
@@ -195,6 +195,20 @@ Cuando la prueba salga bien:
 ---
 
 ## Lo que hay que saber para no romper nada
+
+### Si cambia el dominio
+
+Pasó el 11/09/2026: el sitio se mudó de `darkorange-buffalo-311255.hostingersite.com`
+a `rastrofitness.com`. Tres cosas hay que tocar, y las tres rompen en silencio si
+se olvidan:
+
+1. **`base_url` en `app/config.php`.** De ahí salen las URLs de vuelta de Mercado
+   Pago. Con el dominio viejo, la persona paga y vuelve a un sitio que ya no
+   existe.
+2. **La URL del webhook en el panel de Mercado Pago.** Sigue apuntando al dominio
+   anterior hasta que se la cambie a mano: el pago se cobra y el pedido nunca
+   pasa a "pagado".
+3. **`app/config.php` y `data/` en el servidor nuevo.** No los sube el deploy.
 
 ### Los datos viven en el servidor
 
@@ -246,11 +260,11 @@ la tienda. El detalle está en `MERCADOPAGO.md` §8 y en `PENDIENTES.md`.
 [ ] 2. app/config.php             panel_email + panel_password_hash
 [ ] 3. Sembrar los datos          Actions -> "Sembrar datos en el servidor"
 [ ] 4. Permisos 755/644           data/  y  assets/img/subidas/
-[ ] 5. Probar                     https://EL-SITIO/admin
+[ ] 5. Probar                     https://rastrofitness.com/admin
 
 [ ] 6. Credenciales de PRUEBA     mp_access_token + mp_public_key + mp_modo='test'
 [ ] 7. Verificar base_url         el dominio real, sin barra final
-[ ] 8. Alta del webhook           https://EL-SITIO/webhooks/mercadopago  (evento: Pagos)
+[ ] 8. Alta del webhook           https://rastrofitness.com/webhooks/mercadopago  (evento: Pagos)
 [ ] 9. Clave secreta              mp_webhook_secret
 [ ] 10. Probar                    php bin/mp-probar.php  +  una compra de prueba
 
