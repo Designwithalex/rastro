@@ -80,7 +80,29 @@ $aviso = mp_leer_notificacion($_GET, $cuerpo);
 $firma      = (string) ($_SERVER['HTTP_X_SIGNATURE'] ?? '');
 $request_id = (string) ($_SERVER['HTTP_X_REQUEST_ID'] ?? '');
 
-/* --- 1. La firma ---------------------------------------------------------- */
+/* --- 1. ¿Nos interesa? ----------------------------------------------------
+
+   Mercado Pago manda varios tipos por la misma URL. Hoy sólo se atiende
+   `payment`; el resto se acepta con un 200 para que no reintente.
+
+   VA ANTES DE VALIDAR LA FIRMA, y el orden importa. Los avisos de
+   `merchant_order` se firman distinto que los de `payment`, así que nunca
+   pasan esta validación: si se los mide con la misma vara, contestan 401 y
+   Mercado Pago los reintenta durante horas. Se vio en el primer pago de
+   prueba real —11/09/2026— con dos reintentos del mismo merchant_order
+   desde IPs distintas.
+
+   No afloja nada. Un tipo que no se atiende no lee ni escribe nada: se
+   contesta "recibido" y se corta. La firma sigue siendo obligatoria para
+   `payment`, que es el único camino que toca un pedido. */
+
+if ($aviso['tipo'] !== 'payment' || $aviso['id'] === '') {
+    repo_log_pago('webhook.ignorado', ['tipo' => $aviso['tipo'], 'id' => $aviso['id']]);
+
+    $responder(200, 'ignorado');
+}
+
+/* --- 2. La firma ---------------------------------------------------------- */
 
 if (!mp_firma_valida($firma, $request_id, $aviso['id'])) {
     /* Se registra, porque un webhook que empieza a recibir firmas inválidas
@@ -97,16 +119,6 @@ if (!mp_firma_valida($firma, $request_id, $aviso['id'])) {
     ]);
 
     $responder(401, 'firma invalida');
-}
-
-/* --- 2. ¿Nos interesa? ---------------------------------------------------- */
-
-/* Mercado Pago manda varios tipos por la misma URL. Hoy sólo se atiende
-   `payment`; el resto se acepta con un 200 para que no reintente. */
-if ($aviso['tipo'] !== 'payment' || $aviso['id'] === '') {
-    repo_log_pago('webhook.ignorado', ['tipo' => $aviso['tipo'], 'id' => $aviso['id']]);
-
-    $responder(200, 'ignorado');
 }
 
 /* --- 3. Qué pasó de verdad ------------------------------------------------ */
