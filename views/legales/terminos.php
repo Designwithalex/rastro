@@ -109,7 +109,14 @@ $bloques = [
                         <p class="marcador marcador--bloque t-mono-label">[ Falta el texto legal ]</p>
                     <?php endif; ?>
 
-                    <?php if (!empty($bloque['pendiente'])): ?>
+                    <?php /* Las notas de qué falta en cada bloque están escritas
+                             para el equipo —nombran números de PENDIENTES— así que
+                             sólo se dibujan en desarrollo, igual que la nota de
+                             maqueta. El hueco `[ Falta el texto legal ]` de arriba
+                             SÍ se sigue viendo en producción, y es a propósito: un
+                             texto legal inventado que se lee como definitivo es peor
+                             que un hueco que se ve. */ ?>
+                    <?php if (!empty($bloque['pendiente']) && config('entorno') === 'local'): ?>
                         <p class="legal__pendiente t-mono-texto-sm">
                             <span aria-hidden="true">!</span> <?= e($bloque['pendiente']) ?>
                         </p>
