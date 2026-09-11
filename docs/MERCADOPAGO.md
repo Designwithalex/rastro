@@ -344,7 +344,7 @@ a las 6, 48 y 96 horas.
 | Los códigos de pedido no son adivinables | `RF-2026-4F7A`: cuatro caracteres al azar de un alfabeto sin `0/O` ni `1/I`. Los del mock eran `RF-año-ddmm`, enumerables con la fecha. |
 | La página de retorno no filtra datos personales | Muestra código, líneas, total y estado. **No** muestra dirección, teléfono ni apellido, porque el código viaja en la URL y todavía no hay sesión que lo ate a nadie. |
 | Los datos de compradores no van al repo | `data/pedidos.json` y `data/mp-eventos.log` están en `.gitignore`, en una carpeta con `Require all denied`, y el `.htaccess` de la raíz niega `.json` y `.log` en cualquier ubicación. |
-| El CSP no se tocó | Checkout Pro no necesita ninguna excepción: es una redirección del servidor, no un script de terceros. |
+| El CSP casi no se tocó | Checkout Pro no carga ningún script de terceros ni embebe un iframe, así que `script-src`, `connect-src` y `frame-src` quedan cerrados. La única excepción es **`form-action`**: Chrome lo aplica también a las redirecciones que salen de enviar un formulario, y sin los dominios de Mercado Pago ahí el navegador cancela la ida al checkout sin decir nada en pantalla. No se ve probando con curl, que no aplica CSP. |
 
 ### Lo que sigue abierto
 

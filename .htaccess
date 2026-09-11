@@ -67,16 +67,33 @@ DirectoryIndex index.php
     # Ojo: con esta política no se pueden usar atributos style="" ni <script> en
     # línea.
     #
-    # MERCADO PAGO NO NECESITA NINGUNA EXCEPCIÓN ACÁ, y esa es una de las
-    # razones por las que se eligió Checkout Pro sobre Bricks: el pago pasa
-    # por una redirección del servidor al dominio de Mercado Pago, que es una
-    # navegación y no la gobierna el CSP. No se carga ningún script suyo ni se
-    # embebe ningún iframe.
+    # MERCADO PAGO NECESITA UNA SOLA EXCEPCIÓN: form-action.
+    #
+    # Acá había escrito que no hacía falta ninguna, porque el pago es una
+    # redirección del servidor y no un script de terceros. Eso es cierto
+    # para script-src, connect-src y frame-src, y es la razón por la que
+    # Checkout Pro le gana a Bricks. Pero es FALSO para form-action, y el
+    # detalle cuesta un checkout entero:
+    #
+    #   form-action no sólo limita a dónde puede apuntar un formulario:
+    #   Chrome lo aplica también a las REDIRECCIONES que salen de enviarlo.
+    #
+    # El navegador manda el POST a /checkout —mismo origen, permitido—, el
+    # servidor contesta 303 hacia mercadopago.com, y Chrome cancela esa
+    # navegación porque el destino no está en la lista. La persona aprieta
+    # "Ir a pagar" y no pasa absolutamente nada: sin error en pantalla, sin
+    # cambio de página, sólo una línea en la consola.
+    #
+    # Y no se ve probando con curl ni con wget, porque ninguno aplica CSP.
+    # Pasó el 11/09/2026 y se diagnosticó leyendo esta cabecera, no el log.
+    #
+    # Se listan los dominios con y sin comodín a propósito: en CSP
+    # `*.mercadopago.com.ar` NO incluye a `mercadopago.com.ar`.
     #
     # Si algún día se prueba Bricks (el checkout embebido), hay que sumar
     # https://sdk.mercadopago.com a script-src y sus dominios a connect-src y
     # frame-src. Está anotado en docs/MERCADOPAGO.md.
-    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'"
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self' https://mercadopago.com.ar https://*.mercadopago.com.ar https://mercadopago.com https://*.mercadopago.com https://mercadolibre.com.ar https://*.mercadolibre.com.ar; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'"
 
     # Las tipografías propias se pueden cachear un año: el nombre no cambia.
     <FilesMatch "\.(woff2?)$">
