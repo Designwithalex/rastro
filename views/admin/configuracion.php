@@ -16,8 +16,44 @@ panel_exigir_sesion();
 
 $errores = [];
 
+$prueba_correo = null;
+
 if (panel_es_post()) {
     panel_exigir_csrf();
+
+    /* La prueba de correo comparte pantalla con la configuración pero es
+       otra acción: no guarda nada. Se distingue por el nombre del botón y
+       corta acá, antes de tocar settings. */
+    if (panel_texto('accion') === 'probar_correo') {
+        $destino = panel_texto('destino_prueba');
+
+        if ($destino === '' || !filter_var($destino, FILTER_VALIDATE_EMAIL)) {
+            panel_ir_con_aviso('/admin/configuracion', 'error', 'Escribí un correo válido para la prueba.');
+        }
+
+        $ok = correo_enviar(
+            $destino,
+            'Prueba de correo de rastrofitness.com',
+            sprintf(
+                "Este es un mail de prueba enviado desde el panel de Rastro Fitness.\n\n"
+                . "Fecha: %s\nRemitente: %s\nServidor: %s\n\n"
+                . "Si te llegó, el sitio puede avisar por mail cuando alguien pide un\n"
+                . "arrepentimiento. Si llegó a spam, falta configurar DKIM en hPanel.\n",
+                date('d/m/Y H:i'),
+                correo_remitente(),
+                (string) ($_SERVER['SERVER_NAME'] ?? '')
+            )
+        );
+
+        panel_ir_con_aviso(
+            '/admin/configuracion',
+            $ok ? 'ok' : 'error',
+            $ok
+                ? 'El servidor aceptó el mensaje. Revisá la bandeja de ' . $destino
+                  . ' y también la carpeta de spam: que lo acepte no garantiza que llegue.'
+                : 'El servidor rechazó el envío. El sitio no puede mandar mails así como está.'
+        );
+    }
 
     $descuento = panel_entero('descuento_transferencia_pct', 0) ?? 0;
 
@@ -235,5 +271,49 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
         </aside>
     </div>
 </form>
+
+<?php /* ============================================================
+         Prueba de correo
+
+         Va en un formulario APARTE del de configuración: no se pueden
+         anidar formularios, y además esto no guarda nada, manda un mail.
+
+         Existe porque `mail()` miente a medias: devuelve true cuando el
+         servidor ACEPTÓ el mensaje, no cuando llegó. La única forma de
+         saber si el sitio puede avisar por mail es mandarse uno y mirar
+         la bandeja — y hasta ahora eso requería entrar por SSH.
+         ============================================================ */ ?>
+<section class="panel-bloque" aria-labelledby="correo-titulo">
+    <div class="panel-seccion__encabezado">
+        <div>
+            <h2 class="panel-seccion__titulo" id="correo-titulo">Probar el correo</h2>
+            <p class="panel-seccion__bajada">
+                El sitio avisa por mail cuando alguien pide un arrepentimiento.
+                Acá se comprueba que pueda hacerlo.
+            </p>
+        </div>
+    </div>
+
+    <form class="panel-alta__formulario panel-linea" method="post"
+          action="<?= e(url('/admin/configuracion')) ?>">
+        <input type="hidden" name="csrf" value="<?= e(panel_csrf()) ?>">
+        <input type="hidden" name="accion" value="probar_correo">
+
+        <div class="campo-panel campo-panel--crece">
+            <label class="campo-panel__rotulo" for="destino_prueba">Mandar una prueba a</label>
+            <input class="campo-panel__control" type="email" id="destino_prueba"
+                   name="destino_prueba" required
+                   value="<?= e((string) ($settings['email'] ?? '')) ?>">
+        </div>
+
+        <button class="panel-boton" type="submit">Enviar prueba</button>
+    </form>
+
+    <p class="campo-panel__ayuda">
+        Sale desde <code><?= e(correo_remitente()) ?></code>.
+        Si el mensaje llega a spam, falta <strong>DKIM</strong>: se activa en
+        hPanel, en Correos → (el dominio) → Configuración DNS.
+    </p>
+</section>
 
 <?php require RASTRO_VIEWS . '/admin/layout/pie.php'; ?>

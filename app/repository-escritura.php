@@ -45,6 +45,9 @@
 
 declare(strict_types=1);
 
+/** Cuánto vale un enlace de recuperación. Una hora: lo justo para leer el mail. */
+const RECUPERACION_VIGENCIA = 3600;
+
 /* ==========================================================================
    Cimientos
    ========================================================================== */
@@ -495,6 +498,162 @@ function repo_save_order_status(string $codigo, string $estado): bool
 }
 
 /* ==========================================================================
+   Recuperar la contraseña
+   ========================================================================== */
+
+/**
+ * Crea un pedido de recuperación y devuelve el token EN CLARO, que es lo
+ * único que viaja en el mail. Devuelve null si no se pudo escribir.
+ *
+ * ---------------------------------------------------------------------
+ * LO QUE SE GUARDA ES EL HASH DEL TOKEN, NO EL TOKEN
+ *
+ * El token es, durante una hora, equivalente a la contraseña: quien lo
+ * tiene puede cambiarla. Guardarlo en claro significa que cualquiera que
+ * lea el archivo —un backup, un log, un descuido de permisos— puede tomar
+ * la cuenta. Se guarda hasheado, igual que una contraseña, y se compara
+ * hasheando el que llega.
+ *
+ * NO SE DICE SI EL CORREO EXISTE
+ *
+ * La pantalla contesta lo mismo exista o no la cuenta. Si dijera "no
+ * encontramos ese correo", el formulario se vuelve una herramienta para
+ * averiguar quién tiene cuenta acá.
+ *
+ * UNO POR VEZ
+ *
+ * Pedir un enlace nuevo invalida el anterior. Si no, cada pedido deja un
+ * token vivo y una casilla comprometida hace un mes sigue sirviendo.
+ * ---------------------------------------------------------------------
+ */
+function repo_crear_recuperacion(string $email): ?string
+{
+    $email = mb_strtolower(trim($email));
+
+    if ($email === '') {
+        return null;
+    }
+
+    $ruta = dirname(__DIR__) . '/data/recuperaciones.json';
+
+    $previas = is_file($ruta)
+        ? json_decode((string) @file_get_contents($ruta), true)
+        : [];
+
+    $previas = is_array($previas) ? $previas : [];
+    $ahora   = time();
+
+    /* Se limpian las vencidas y las de este mismo correo. Lo primero evita
+       que el archivo crezca para siempre; lo segundo es la regla de uno por
+       vez. */
+    $previas = array_values(array_filter(
+        $previas,
+        static fn (array $r): bool => (int) ($r['vence'] ?? 0) > $ahora
+            && mb_strtolower((string) ($r['email'] ?? '')) !== $email
+    ));
+
+    $token = bin2hex(random_bytes(32));
+
+    $previas[] = [
+        'email' => $email,
+        'hash'  => hash('sha256', $token),
+        'vence' => $ahora + RECUPERACION_VIGENCIA,
+        'creado' => date('c'),
+    ];
+
+    $json = json_encode($previas, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+    if ($json === false || @file_put_contents($ruta, $json . "\n", LOCK_EX) === false) {
+        error_log('repo: no se pudo guardar la recuperación');
+
+        return null;
+    }
+
+    return $token;
+}
+
+/**
+ * A qué correo corresponde un token, si sigue vivo. null si no existe,
+ * si venció o si ya se usó.
+ */
+function repo_email_de_recuperacion(string $token): ?string
+{
+    $ruta = dirname(__DIR__) . '/data/recuperaciones.json';
+
+    if ($token === '' || !is_file($ruta)) {
+        return null;
+    }
+
+    $datos = json_decode((string) @file_get_contents($ruta), true);
+    $datos = is_array($datos) ? $datos : [];
+    $buscado = hash('sha256', $token);
+    $ahora   = time();
+
+    foreach ($datos as $r) {
+        if ((int) ($r['vence'] ?? 0) <= $ahora) {
+            continue;
+        }
+
+        /* hash_equals y no ===: comparar cadenas secretas con === filtra,
+           por el tiempo que tarda, cuántos caracteres del principio
+           acertaste. */
+        if (hash_equals((string) ($r['hash'] ?? ''), $buscado)) {
+            return (string) ($r['email'] ?? '');
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Quema un token. Se llama apenas la contraseña se cambió: un enlace que
+ * sirve dos veces sirve para el que lo encuentre después en el historial.
+ */
+function repo_quemar_recuperacion(string $token): void
+{
+    $ruta = dirname(__DIR__) . '/data/recuperaciones.json';
+
+    if (!is_file($ruta)) {
+        return;
+    }
+
+    $datos = json_decode((string) @file_get_contents($ruta), true);
+    $datos = is_array($datos) ? $datos : [];
+    $buscado = hash('sha256', $token);
+
+    $datos = array_values(array_filter(
+        $datos,
+        static fn (array $r): bool => !hash_equals((string) ($r['hash'] ?? ''), $buscado)
+    ));
+
+    @file_put_contents(
+        $ruta,
+        json_encode($datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
+        LOCK_EX
+    );
+}
+
+/**
+ * Cambia la contraseña de un usuario buscándolo por correo.
+ * Devuelve el usuario, o null si no existe o no se pudo escribir.
+ */
+function repo_cambiar_password(string $email, string $clara): ?array
+{
+    $email = mb_strtolower(trim($email));
+
+    foreach (_repo_json('users') as $u) {
+        if (mb_strtolower((string) ($u['email'] ?? '')) === $email) {
+            return repo_save_user([
+                'id'       => (int) ($u['id'] ?? 0),
+                'password' => $clara,
+            ]);
+        }
+    }
+
+    return null;
+}
+
+/* ==========================================================================
    Arrepentimientos
    ========================================================================== */
 
@@ -554,6 +713,45 @@ function repo_save_arrepentimiento(array $datos): ?array
     }
 
     return $datos;
+}
+
+/**
+ * Cambia el estado de un arrepentimiento. Es lo único editable: el resto
+ * —quién, cuándo, qué pidió— es la constancia y no se toca.
+ */
+function repo_save_arrepentimiento_estado(string $codigo, string $estado): bool
+{
+    $ruta = dirname(__DIR__) . '/data/arrepentimientos.json';
+
+    if (!is_file($ruta)) {
+        return false;
+    }
+
+    $datos = json_decode((string) @file_get_contents($ruta), true);
+    $datos = is_array($datos) ? $datos : [];
+
+    $encontrado = false;
+
+    foreach ($datos as $i => $fila) {
+        if ((string) ($fila['codigo'] ?? '') === $codigo) {
+            $datos[$i]['estado']     = $estado;
+            $datos[$i]['actualizado'] = date('c');
+            $encontrado = true;
+            break;
+        }
+    }
+
+    if (!$encontrado) {
+        return false;
+    }
+
+    $json = json_encode(
+        array_values($datos),
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    return $json !== false
+        && @file_put_contents($ruta, $json . "\n", LOCK_EX) !== false;
 }
 
 /* ==========================================================================

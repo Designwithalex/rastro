@@ -554,6 +554,50 @@ function repo_any_order(string $codigo): ?array
     return $pedido;
 }
 
+/**
+ * Todos los usuarios, sin el hash de la contraseña.
+ *
+ * La usa la recuperación de contraseña para saber si un correo tiene
+ * cuenta. `repo_user()` busca por id y `repo_login()` necesita la clave;
+ * no había forma de preguntar "¿existe este correo?" sin una de las dos.
+ *
+ * Pasa por `_repo_usuario_publico()` como todo lo que sale de acá: el hash
+ * no se va del repository ni siquiera hacia una función interna.
+ */
+function repo_all_users(): array
+{
+    return array_map('_repo_usuario_publico', _repo_json('users'));
+}
+
+/**
+ * Los pedidos de arrepentimiento, del más nuevo al más viejo.
+ *
+ * Los escribe el formulario de /arrepentimiento y hasta ahora sólo se veían
+ * abriendo el archivo por FTP. La Resolución 424/2020 da 10 días corridos
+ * para resolver cada uno: algo que hay que atender en diez días no puede
+ * depender de que a alguien le llegue un mail que puede caer en spam.
+ *
+ * TODO(backend): tabla `arrepentimientos`, con índice por fecha.
+ */
+function repo_arrepentimientos(): array
+{
+    $ruta = dirname(__DIR__) . '/data/arrepentimientos.json';
+
+    if (!is_file($ruta)) {
+        return [];
+    }
+
+    $datos = json_decode((string) @file_get_contents($ruta), true);
+    $datos = is_array($datos) ? $datos : [];
+
+    usort($datos, static fn ($a, $b) => strcmp(
+        (string) ($b['creado'] ?? ''),
+        (string) ($a['creado'] ?? '')
+    ));
+
+    return $datos;
+}
+
 /* ==========================================================================
    Contenido de página
    ========================================================================== */

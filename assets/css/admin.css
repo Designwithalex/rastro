@@ -1285,3 +1285,16 @@ textarea.campo-panel__control {
   }
 
 }
+
+/* El comentario de un arrepentimiento, en su propia fila debajo de la
+   principal: es texto libre y en una celda angosta se corta feo. */
+.panel-tabla__detalle {
+  padding-top: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.panel-tabla__detalle .panel-tabla__sku {
+  display: inline;
+  margin-right: var(--espaciado-8);
+}

@@ -492,6 +492,7 @@ function panel_secciones(): array
         ['ruta' => '/admin/marcas',        'titulo' => 'Marcas',        'exacta' => false],
         ['ruta' => '/admin/clientes',      'titulo' => 'Clientes',      'exacta' => false],
         ['ruta' => '/admin/banners',       'titulo' => 'Banners',       'exacta' => false],
+        ['ruta' => '/admin/arrepentimientos', 'titulo' => 'Arrepentimientos', 'exacta' => false],
         ['ruta' => '/admin/nosotros',      'titulo' => 'Nosotros',      'exacta' => false],
         ['ruta' => '/admin/configuracion', 'titulo' => 'Configuración', 'exacta' => false],
     ];
@@ -511,4 +512,20 @@ function panel_estados_pedido(): array
         static fn (array $estado): string => $estado['texto'],
         estados_pedido()
     );
+}
+
+/**
+ * Los estados de un pedido de arrepentimiento.
+ *
+ * Son pocos porque el trámite es corto: llega, se retira el producto, se
+ * devuelve la plata. La ley da 10 días corridos para todo eso.
+ */
+function panel_estados_arrepentimiento(): array
+{
+    return [
+        'recibido'  => 'Recibido',
+        'en_curso'  => 'Retiro coordinado',
+        'resuelto'  => 'Resuelto y devuelto',
+        'rechazado' => 'No corresponde',
+    ];
 }

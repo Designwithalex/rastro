@@ -52,6 +52,8 @@ function router_tabla(): array
         '#^/registro$#'                => ['auth/registro',          []],
         '#^/cuenta$#'                  => ['cuenta/index',           []],
         '#^/salir$#'                   => ['auth/salir',            []],
+        '#^/recuperar$#'               => ['auth/recuperar',        []],
+        '#^/recuperar/([a-f0-9]{64})$#' => ['auth/restablecer',      ['token']],
 
         // Obligatorias por la ley argentina de defensa del consumidor.
         // El enlace al botón de arrepentimiento tiene que estar en el pie de
@@ -83,6 +85,7 @@ function router_tabla(): array
         '#^/admin/marcas$#'                 => ['admin/marcas',        []],
         '#^/admin/clientes$#'               => ['admin/clientes',      []],
         '#^/admin/banners$#'                => ['admin/banners',       []],
+        '#^/admin/arrepentimientos$#'       => ['admin/arrepentimientos', []],
         '#^/admin/nosotros$#'               => ['admin/nosotros',      []],
         '#^/admin/configuracion$#'          => ['admin/configuracion', []],
     ];

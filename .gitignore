@@ -36,3 +36,6 @@ assets/img/**/*.ai
 # Pedidos de arrepentimiento: tienen datos de compradores y los escribe el
 # sitio, no una persona. Misma razón que data/pedidos.json.
 data/arrepentimientos.json
+
+# Tokens de recuperación de contraseña: los escribe el sitio y valen una hora.
+data/recuperaciones.json

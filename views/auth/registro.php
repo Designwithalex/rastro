@@ -76,12 +76,29 @@ if ($enviado) {
             if ($creado === null) {
                 $errores['general'] = 'No pudimos crear la cuenta. Probá de nuevo en un momento.';
             } else {
+                /* El mail de bienvenida se manda DESPUÉS de guardar y no
+                   condiciona nada: si el correo falla, la cuenta existe
+                   igual y la persona ya está adentro. Atar el alta al envío
+                   de un mail es regalarle el registro al primer problema de
+                   entrega. */
+                correo_enviar(
+                    (string) $creado['email'],
+                    'Tu cuenta en Rastro Fitness',
+                    sprintf(
+                        "Hola %s,\n\nYa tenés cuenta en Rastro Fitness.\n\n"
+                        . "Desde tu cuenta podés ver tus pedidos y comprar más rápido:\n%s\n\n"
+                        . "Si alguna vez olvidás la contraseña, pedí una nueva acá:\n%s\n\n"
+                        . "Rastro Fitness\n",
+                        (string) ($creado['nombre'] ?? ''),
+                        rtrim((string) config('base_url', ''), '/') . url('/cuenta'),
+                        rtrim((string) config('base_url', ''), '/') . url('/recuperar')
+                    ),
+                    (string) (repo_settings()['email'] ?? '')
+                );
+
                 /* Se entra directo: pedirle a alguien que acaba de elegir una
                    contraseña que la escriba otra vez es hacerle repetir un
-                   trámite que el servidor ya resolvió.
-
-                   TODO(backend): el mail de bienvenida. Hoy no se manda y la
-                   pantalla no lo promete (PENDIENTES #72). */
+                   trámite que el servidor ya resolvió. */
                 sesion_entrar($creado);
 
                 header('Location: ' . url(sesion_destino('/cuenta')), true, 303);

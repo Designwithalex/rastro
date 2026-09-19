@@ -104,12 +104,17 @@ require __DIR__ . '/app/sesion.php';
    la razón por la que esto se puede permitir en todas las rutas. */
 sesion_abrir();
 
-if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento'], true)) {
+if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento'], true)
+    || str_starts_with(RASTRO_RUTA, '/recuperar')) {
     require __DIR__ . '/app/repository-escritura.php';
 }
 
-// El arrepentimiento avisa por mail: a Rastro y a quien lo pide.
-if (RASTRO_RUTA === '/arrepentimiento') {
+/* El arrepentimiento avisa por mail, y el panel tiene una prueba de envío
+   en Configuración: los dos necesitan el mismo archivo. */
+if (RASTRO_RUTA === '/arrepentimiento'
+    || RASTRO_RUTA === '/registro'
+    || str_starts_with(RASTRO_RUTA, '/admin')
+    || str_starts_with(RASTRO_RUTA, '/recuperar')) {
     require __DIR__ . '/app/correo.php';
 }
 

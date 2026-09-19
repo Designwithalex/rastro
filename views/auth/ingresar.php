@@ -142,6 +142,10 @@ require RASTRO_VIEWS . '/layout/head.php';
                     <span class="t-mono-label">Ingresar</span>
                     <span class="boton__flecha" aria-hidden="true">→</span>
                 </button>
+
+                <p class="auth__alterna t-mono-texto">
+                    <a class="auth__enlace" href="<?= e(url('/recuperar')) ?>">Olvidé mi contraseña</a>
+                </p>
             </form>
 
             <p class="auth__alterna t-mono-texto">
