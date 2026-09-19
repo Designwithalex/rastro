@@ -48,30 +48,30 @@
 :root {
 
   /* --- color · modo Sitio (oscuro) --- */
-  --color-accent-base: #780606;
-  --color-accent-hover: #8f0808;
+  --color-accent-base: #5e0a0a;
+  --color-accent-hover: #961e1e;
   --color-accent-on: #ffffff;
-  --color-accent-pressed: #5c0404;
+  --color-accent-pressed: #430707;
   --color-accent-soft: #5c0404;
   --color-accent-text: #de6464;
-  --color-bg-base: #000000;
+  --color-bg-base: #0b0b0b;
   --color-bg-elevated: #1f1f1f;
   --color-bg-inverse: #ffffff;
   --color-bg-product-well: #e9e9e9;
-  --color-bg-surface: #0b0b0b;
+  --color-bg-surface: #141414;
   --color-bg-surface-alt: #151515;
   --color-border-focus: #ffffff;
-  --color-border-strong: #666666;
+  --color-border-strong: #4a4a4a;
   --color-border-subtle: #1f1f1f;
   --color-danger-border: #de6464;
   --color-danger-text: #de6464;
-  --color-plata-1: #f2f2f2;
-  --color-plata-2: #c4c4c4;
-  --color-plata-3: #8a8a8a;
-  --color-text-disabled: #666666;
+  --color-plata-1: #e9e9e9;
+  --color-plata-2: #d3d3d3;
+  --color-plata-3: #9f9f9f;
+  --color-text-disabled: #6c6c6c;
   --color-text-inverse: #000000;
   --color-text-primary: #ffffff;
-  --color-text-secondary: #c4c4c4;
+  --color-text-secondary: #a8a8a8;
 
   /* --- espaciado · escala de 4 --- */
   --espaciado-4: 4px;
@@ -111,7 +111,73 @@
   --margen-mobile: var(--espaciado-20);
   --hairline: 1px;
 
-  /* --- degradé plata del isotipo. Solo números y logo. --- */
+  /* --- Acero cepillado -------------------------------------
+     El metal de la marca NO es un color plano: es acero cepillado.
+     El valor medio es #d3d3d3 y el rango va de #9f9f9f a #e9e9e9,
+     que son los que pasó el cliente el 27/08/2026.
+
+     Se resuelve con un degradé de muchas paradas y no con dos: el
+     cepillado son vetas paralelas, y un degradé de dos puntos da una
+     transición suave que se lee como plástico. Las paradas repetidas
+     a distinta distancia imitan la irregularidad de la veta.
+
+     A 100 grados y no a 90: el eje del cepillado inclinado apenas
+     evita que las vetas queden perfectamente horizontales, que es lo
+     que delata que es un degradé y no una chapa.
+
+     Se probó superponer la textura fotográfica real
+     (assets/img/texturas/acero-cepillado.jpg) y se descartó: mide
+     1200 × 147 y estirada al alto de un titular de 148 px queda
+     borrosa, y mezclada en soft-light lavaba el barrido hasta
+     dejarlo gris plano. La veta dibujada se ve más nítida y no
+     depende de que cargue una imagen. */
+  --acero-claro:  #e9e9e9;
+  --acero:        #d3d3d3;
+  --acero-medio:  #bebebe;
+  --acero-oscuro: #9f9f9f;
+
+  /* Dos capas, y cada una hace una cosa distinta:
+
+       1. La VETA. Un degradé repetido de líneas de 1 px a 97 grados.
+          Es lo que hace que se lea como cepillado y no como degradé:
+          el cepillado son surcos paralelos, y un surco es una línea
+          clara al lado de una oscura. Van en rgba para que se apoyen
+          sobre el barrido de abajo en vez de taparlo.
+
+       2. El BARRIDO. Pocas paradas y bien separadas, con el rango que
+          pasó el cliente (#9f9f9f a #e9e9e9, medio #d3d3d3). La
+          versión anterior tenía catorce paradas y a tamaño de titular
+          promediaban a un gris plano: de lejos, muchas paradas juntas
+          son un color sólido.
+
+     97 grados y no 90: las vetas perfectamente horizontales delatan
+     que es CSS. Siete grados alcanzan para que parezca una chapa
+     apoyada y no una grilla. */
+  --metal:
+    repeating-linear-gradient(
+      97deg,
+      rgba(255, 255, 255, 0.28) 0px,
+      rgba(255, 255, 255, 0.28) 1px,
+      rgba(0, 0, 0, 0.16) 1px,
+      rgba(0, 0, 0, 0.16) 2px,
+      rgba(255, 255, 255, 0.06) 2px,
+      rgba(255, 255, 255, 0.06) 5px
+    ),
+    linear-gradient(
+      100deg,
+      #9f9f9f 0%,
+      #bebebe 12%,
+      #e9e9e9 26%,
+      #d3d3d3 42%,
+      #9f9f9f 56%,
+      #d3d3d3 68%,
+      #e9e9e9 84%,
+      #bebebe 100%
+    );
+
+  /* El degradé plata del isotipo sigue existiendo para los números y
+     los precios: es más brillante y más limpio que el acero, y ahí
+     lo que se busca es que el número resalte, no que parezca chapa. */
   --plata: linear-gradient(135deg, #ffffff 0%, var(--color-plata-2) 45%, #fafafa 55%, var(--color-plata-3) 100%);
 }
 
@@ -170,6 +236,35 @@
   .t-display-hero-sub { font-size: 32px; line-height: 33px; letter-spacing: -0.64px; }
   .t-display-l { font-size: 22px; line-height: 28px; letter-spacing: -0.25px; }
   .t-precio-lg { font-size: 26px; line-height: 30px; letter-spacing: -0.25px; }
+}
+
+/* --- Acero cepillado sobre texto ----------------------------
+   Va en los titulares grandes y en mayúsculas, nunca en texto
+   corrido: el relleno recortado necesita trazos anchos para que se
+   vea la veta, y en un párrafo de 16 px sólo ensucia la letra.
+
+   Dos capas: la textura fotográfica arriba en `soft-light`, que
+   aporta el grano, y el degradé abajo, que aporta la forma de la
+   luz. Si la imagen no carga, queda el degradé y el texto se sigue
+   leyendo igual.
+
+   `color: transparent` es lo que deja ver el fondo a través de la
+   letra. Cuando un navegador no soporta background-clip, la regla
+   de @supports de abajo devuelve un color sólido: sin eso, el
+   titular desaparecería. */
+.metal {
+  background-image: var(--metal);
+  background-size: auto, 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .metal {
+    background-image: none;
+    color: var(--acero);
+  }
 }
 
 /* Números en degradé plata. Se usa en precios y cifras grandes,

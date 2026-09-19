@@ -134,9 +134,9 @@ $mayorista_publicos = [
         <div class="contenedor hero__interior">
 
             <div class="hero__texto">
-                <p class="hero__ojal">Equipamiento</p>
+                <p class="hero__ojal metal">Equipamiento</p>
 
-                <h1 class="hero__titulo t-display-hero" id="hero-titulo">Profesional</h1>
+                <h1 class="hero__titulo t-display-hero metal" id="hero-titulo">Profesional</h1>
 
                 <span class="hero__regla" aria-hidden="true"></span>
 
@@ -148,8 +148,8 @@ $mayorista_publicos = [
                          dos colores. Va en un <p> con <span>, no en dos <p>:
                          "Rastro." y "Marca el camino." son la misma oración. */ ?>
                 <p class="hero__claim t-display-hero-sub">
-                    <span class="hero__claim-marca">Rastro.</span>
-                    <span class="hero__claim-frase">Marca el camino.</span>
+                    <span class="hero__claim-marca metal">Rastro.</span>
+                    <span class="hero__claim-frase metal">Marca el camino.</span>
                 </p>
 
                 <div class="hero__acciones">

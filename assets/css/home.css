@@ -78,6 +78,20 @@
    La escala sí resuelve el titular (.t-display-hero) y el claim
    (.t-display-hero-sub), que son los dos que sí son estilos. */
 
+/* --- El hero va en acero -----------------------------------
+   Decisión del cliente, 27/08/2026: EQUIPAMIENTO y MARCA EL CAMINO
+   pasan de bordeaux a metal, y el bordeaux se reserva para detalles
+   y para lo importante. Su frase: "más sutil".
+
+   PROFESIONAL y RASTRO. ya tenían que ir con relleno de chapa desde
+   la v2 del lenguaje visual (CLAUDE.md §5.6) pero eso había quedado
+   sólo escrito en Figma: en el CSS eran un gris plano. Ahora los
+   cuatro son la misma chapa, que es lo que el frame pedía.
+
+   El acento bordeaux no desaparece del hero: queda en la regla
+   debajo del titular y en el botón de "Ver catálogo". Eso es
+   exactamente "en detalles o cosas importantes". */
+
 .hero__ojal {
   font-family: var(--fuente-mono);
   font-weight: 700;
@@ -85,13 +99,17 @@
   line-height: 17px;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: var(--color-accent-text);
   margin-bottom: var(--espaciado-8);
 }
 
-.hero__titulo {
-  color: var(--hero-titular);
-}
+/* El titular NO lleva `color`: lo pone `.metal`, que necesita
+   `color: transparent` para que se vea el relleno a través de la
+   letra. Un color acá lo tapaba y el titular quedaba gris plano
+   mientras el resto del hero sí mostraba la chapa. Las dos reglas
+   pesan lo mismo y home.css se carga después, así que ganaba esta.
+
+   El titular es el trazo más ancho de la página: es donde la veta
+   del cepillado se ve de verdad. */
 
 .hero__regla {
   display: block;
@@ -116,15 +134,10 @@
 
 .hero__claim-marca,
 .hero__claim-frase {
+  /* Las dos líneas del claim en la misma chapa: "Rastro." y "Marca
+     el camino." son una sola oración partida en dos, y con colores
+     distintos se leían como dos cosas. */
   display: block;
-}
-
-.hero__claim-marca {
-  color: var(--hero-titular);
-}
-
-.hero__claim-frase {
-  color: var(--color-accent-text);
 }
 
 .hero__acciones {

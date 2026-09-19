@@ -227,14 +227,25 @@ es la que hace legible esa información.
 (`#00674F` y `#2E6F40`); las dos quedan descartadas. La paleta del sitio es
 **negro + plata/grises + bordeaux**.
 
+**Ajuste del cliente, 27/08/2026.** Ape pasó la paleta definitiva y dos
+decisiones que la ordenan: **el metal no es un color, es acero cepillado**, y
+**el bordeaux se vuelve más sutil** — "lo usaría en detalles o cosas
+importantes". El bordeaux bajó de `#780606` a `#5E0A0A`.
+
 | Rol | Valor |
 |---|---|
-| Fondo base | negro `#000000` · superficie `#0B0B0B` |
+| Fondo base | `#0B0B0B` · superficie `#141414` |
 | Superficies elevadas | `#151515` · `#1F1F1F` |
-| Grises | `#3D3D3D` · `#666666` · `#C4C4C4` · `#E0E0E0` |
-| Plata | degradé del isotipo — logo, bordes de acento, detalles |
-| **Bordeaux (único acento)** | `#780606` · escala `#DE6464` `#FFA6A6` `#FFD9D9` |
-| Texto | blanco sobre negro; `#C4C4C4` para secundario |
+| **Acero cepillado** | `#9F9F9F` → `#E9E9E9`, medio **`#D3D3D3`**. Ver §5.7 |
+| **Bordeaux (único acento)** | `#5E0A0A` · vivo `#961E1E` (sólo CTA y precio en oferta) |
+| Texto | blanco sobre negro; `#A8A8A8` secundario; `#6C6C6C` pies y metadatos |
+| Filetes | `#4A4A4A` sobre negro · `#6C6C6C` sobre metal |
+| Sobre metal, el texto es | `#0E0E0E`, y el secundario `#565656` |
+
+`#DE6464` sobrevive en un solo rol: **texto chico en acento** —los índices
+`[ 01 ]`, el precio por transferencia—. El bordeaux de la marca a ese tamaño
+sobre negro da 2,3:1 de contraste y no se lee; el claro da 5,7:1. Ape dijo
+que ese rojo de los corchetes le gusta, así que se queda.
 
 Con un solo color de acento, el peso visual lo cargan el **contraste**, la
 **tipografía** y el **espacio** — no el color. Eso empuja la estética hacia el
@@ -282,9 +293,10 @@ propuesta. Las reglas que la definen:
 - **Composición asimétrica.** Bento en hero y categorías, no grillas parejas.
 - **Números en degradé plata.** El degradé del isotipo sale del logo y pasa a los
   precios y las cifras grandes. Es el único lugar donde se usa.
-- **Chapa sólo en el titular del hero.** `PROFESIONAL` y `RASTRO.` van con relleno
-  de textura (`assets/img/texturas/acero-cepillado.jpg`), no con el degradé. Es el
-  único punto del sitio con textura fotográfica adentro del texto.
+- **Chapa en el hero.** Las cuatro líneas —`EQUIPAMIENTO`, `PROFESIONAL`,
+  `RASTRO.` y `MARCA EL CAMINO.`— van con relleno de acero cepillado (§5.7).
+  Hasta el 19/09/2026 esto estaba escrito pero no implementado: en el CSS eran
+  un gris plano y el acento bordeaux se comía dos de las cuatro líneas.
 - **Fotos de ambiente en duotono bordeaux**; fotos de producto sobre **blanco pleno**.
 - **Secciones numeradas** con el índice `[ 01 ]` en tipografía técnica.
 - **Datos visibles**: cada producto muestra código, stock y medida, no solo nombre
@@ -292,6 +304,41 @@ propuesta. Las reglas que la definen:
 
 La versión anterior queda en la página `Archivo · Home v1` de Figma, y congelada
 como imagen en la página de comparativa.
+
+### 5.7 El acero cepillado
+
+**El metal de la marca no es un color plano.** Es acero cepillado, y así lo
+usa Ape en las publicaciones. Vive en `tokens.css` como `--metal` y se aplica
+con la clase `.metal`.
+
+Son dos capas y cada una hace una cosa:
+
+1. **La veta** — un `repeating-linear-gradient` de líneas de 1 px a 97°. Es lo
+   que hace que se lea como cepillado: un surco es una línea clara al lado de
+   una oscura. Va en `rgba` para apoyarse sobre el barrido en vez de taparlo.
+2. **El barrido** — pocas paradas y bien separadas, en el rango del cliente.
+   La primera versión tenía catorce paradas juntas y a tamaño de titular
+   promediaban a un gris plano: de lejos, muchas paradas son un color sólido.
+
+97° y no 90°: las vetas perfectamente horizontales delatan que es CSS.
+
+**Va en titulares grandes y en mayúsculas, nunca en texto corrido.** El
+relleno recortado necesita trazos anchos para que se vea la veta; en un
+párrafo de 16 px sólo ensucia la letra.
+
+Hoy lo llevan las cuatro líneas del hero: `EQUIPAMIENTO`, `PROFESIONAL`,
+`RASTRO.` y `MARCA EL CAMINO.`
+
+> **Ojo con el `color`.** `.metal` necesita `color: transparent` para que se
+> vea el relleno a través de la letra. Cualquier regla posterior que le ponga
+> un color lo tapa y el texto queda gris plano, sin que nada falle. Pasó con
+> `.hero__titulo`, que traía `color: var(--hero-titular)`.
+
+La textura fotográfica de `assets/img/texturas/acero-cepillado.jpg` se probó
+como relleno y se descartó: mide 1200 × 147 y estirada al alto de un titular
+de 148 px queda borrosa, y mezclada en `soft-light` lavaba el barrido hasta
+dejarlo gris. La veta dibujada se ve más nítida y no depende de que cargue
+una imagen.
 
 ## 6. Assets disponibles
 
