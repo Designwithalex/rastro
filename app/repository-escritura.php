@@ -62,6 +62,22 @@ const RECUPERACION_VIGENCIA = 3600;
  */
 function _repo_escribir_json(string $archivo, array $datos): bool
 {
+    /* Con base configurada, el destino es MySQL y los data/*.json quedan
+       como semilla histórica. Es obligatorio que sea acá y no en cada
+       repo_save_*: si la escritura siguiera yendo al archivo mientras la
+       lectura sale de la base, el panel diría "guardado" y la pantalla
+       siguiente mostraría el dato viejo, sin un solo error en el log. */
+    if (db_activa()) {
+        if (!_repo_mysql_guardar($archivo, $datos)) {
+            return false;
+        }
+
+        // La caché de lectura de este request quedó vieja, igual que antes.
+        _repo_json($archivo, true);
+
+        return true;
+    }
+
     $ruta = dirname(__DIR__) . '/data/' . $archivo . '.json';
 
     $json = json_encode(

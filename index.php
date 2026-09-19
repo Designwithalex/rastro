@@ -37,6 +37,13 @@ if ($entorno === 'local') {
 }
 
 require __DIR__ . '/app/helpers.php';
+
+/* db.php y repository-mysql.php van ANTES que repository.php porque
+   `_repo_json()` los llama en su primera línea. Cargarlos no abre ninguna
+   conexión: si app/config.php no tiene credenciales, `db_activa()` devuelve
+   false mirando el archivo y el sitio lee los JSON como siempre. */
+require __DIR__ . '/app/db.php';
+require __DIR__ . '/app/repository-mysql.php';
 require __DIR__ . '/app/repository.php';
 require __DIR__ . '/app/router.php';
 

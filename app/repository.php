@@ -97,7 +97,18 @@ declare(strict_types=1);
  * Lo usa `_repo_escribir_json()` y nadie más: una vista nunca tiene motivo
  * para pedir una recarga.
  *
- * TODO(backend): reemplazar por la conexión PDO que sale de app/config.php.
+ * DE DÓNDE SALEN HOY LOS DATOS
+ *
+ * De MySQL, si `app/config.php` tiene credenciales. De `data/*.json`, si no.
+ * Lo decide `db_activa()` y es el único lugar del proyecto donde se elige:
+ * las 62 funciones `repo_*` no saben ni les importa, porque de las dos
+ * formas reciben el mismo array. La equivalencia está verificada campo por
+ * campo en `bin/verificar-paridad.php`.
+ *
+ * Si la base está configurada y falla, esto lanza y la página no se dibuja.
+ * Es a propósito: volver a los JSON en silencio serviría el catálogo semilla
+ * —precios y stock de la maqueta— como si fuera el real. Una página caída se
+ * nota y se arregla; un precio viejo cobrado de verdad, no.
  */
 function _repo_json(string $archivo, bool $recargar = false): array
 {
@@ -105,6 +116,10 @@ function _repo_json(string $archivo, bool $recargar = false): array
 
     if (!$recargar && isset($cache[$archivo])) {
         return $cache[$archivo];
+    }
+
+    if (db_activa()) {
+        return $cache[$archivo] = _repo_mysql_leer($archivo);
     }
 
     $ruta = dirname(__DIR__) . '/data/' . $archivo . '.json';
