@@ -42,9 +42,15 @@ oficial.
 | Repo + GitHub Action de deploy FTP | |
 | `docs/HANDOFF.md` | |
 
-El panel es **sólo escritorio** y escribe sobre los JSON de `data/`. El día que
-entre MySQL se cambia el cuerpo de las funciones de `repository-escritura.php` y
-ninguna pantalla del panel se toca — el mismo contrato que ya vale para la lectura.
+El panel es **sólo escritorio**. Escribía sobre los JSON de `data/` y hoy escribe
+sobre MySQL, sin que se tocara una sola pantalla: el contrato aguantó. Lo que
+cambió fueron dos funciones, `_repo_json()` y `_repo_escribir_json()`, y no las 62
+funciones `repo_*` que las usan.
+
+**Cuál de los dos está activo lo decide `app/config.php`**: con `db_host` cargado,
+MySQL; vacío, los archivos. Volver atrás es vaciar ese valor, sin redesplegar.
+Todo está en [`docs/MYSQL.md`](docs/MYSQL.md), y `php bin/verificar.php` comprueba
+que las dos formas se comporten igual.
 
 **Consecuencia operativa que no se puede olvidar:** desde que el panel escribe,
 `data/` está **excluido del deploy por FTP**. Los JSON del repo son la semilla; la
@@ -92,7 +98,8 @@ views/             layout, partials y páginas            [privada]
 data/              datos JSON — los escribe el panel     [privada]
 assets/            css, js, img, fonts                   [pública]
   img/subidas/               lo que sube el cliente, + .htaccess propio
-docs/              HANDOFF, DATA-CONTRACT, DEPLOY
+docs/              HANDOFF, DATA-CONTRACT, DEPLOY, MYSQL
+db/                esquema.sql + migraciones/            [no se despliega]
 design/            links y exports de Figma
 ```
 
