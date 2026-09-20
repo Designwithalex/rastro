@@ -88,13 +88,21 @@ $estados = estados_pedido();
                          defina no se dibuja un ítem que no lleva a ningún lado. */ ?>
 
                 <li>
-                    <?php /* TODO(backend): cerrar sesión es un POST, no un enlace:
-                             un GET lo puede disparar cualquier imagen remota. Se
-                             deja como botón deshabilitado hasta que exista. */ ?>
-                    <button class="cuenta__item cuenta__item--salir" type="button" disabled>
-                        <span class="cuenta__numero t-mono-label-sm"><?= e(sprintf('%02d', $n + 1)) ?></span>
-                        <span class="t-mono-label">Cerrar sesión</span>
-                    </button>
+                    <?php /* Un POST y no un enlace: un GET que cierra sesión lo
+                             dispara cualquier cosa que precargue enlaces, desde
+                             el navegador hasta una imagen remota. Estuvo apagado
+                             mientras la ruta no existía; ya existe.
+
+                             El <form> se ve igual que los <a> de arriba: el
+                             visitante no tiene por qué notar la diferencia de
+                             mecanismo. El CSS está en .cuenta__salir. */ ?>
+                    <form class="cuenta__salir" method="post" action="<?= e(url('/salir')) ?>">
+                        <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
+                        <button class="cuenta__item cuenta__item--salir" type="submit">
+                            <span class="cuenta__numero t-mono-label-sm"><?= e(sprintf('%02d', $n + 1)) ?></span>
+                            <span class="t-mono-label">Cerrar sesión</span>
+                        </button>
+                    </form>
                 </li>
             </ul>
         </nav>

@@ -175,13 +175,24 @@
   color: var(--color-accent-text);
 }
 
-.cuenta__item--salir:disabled {
-  color: var(--color-text-disabled);
-  cursor: not-allowed;
+/* "Cerrar sesión" es un <form> para que sea un POST, pero tiene que verse
+   exactamente igual que los enlaces de arriba: el visitante no tiene por qué
+   notar la diferencia de mecanismo. Mismo criterio que .cabecera__salir. */
+.cuenta__salir {
+  margin: 0;
 }
 
-.cuenta__item--salir:disabled .cuenta__numero {
-  color: var(--color-text-disabled);
+.cuenta__salir button {
+  background: none;
+  /* El border-left vuelve a declararse porque `border: 0` se lleva puesto
+     el de .cuenta__item, que es lo que reserva el lugar de la barra activa.
+     Sin él, este ítem quedaría 2px corrido respecto de los otros. */
+  border: 0;
+  border-left: 2px solid transparent;
+  padding-block: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .cuenta__panel {

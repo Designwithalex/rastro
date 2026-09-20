@@ -150,20 +150,9 @@ $cajon_secundario = $cajon_usuario !== null
                     </li>
                 <?php endforeach; ?>
 
-                <?php if ($cajon_usuario !== null): ?>
-                    <?php /* Salir es un POST, igual que en la cabecera: un GET que
-                             cierra sesión lo dispara cualquier cosa que precargue
-                             enlaces. Se ve como los enlaces de al lado porque el
-                             visitante no tiene por qué notar la diferencia. */ ?>
-                    <li>
-                        <form class="cajon__salir" method="post" action="<?= e(url('/salir')) ?>">
-                            <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
-                            <button class="cajon__enlace-secundario t-body-sm" type="submit">
-                                Salir
-                            </button>
-                        </form>
-                    </li>
-                <?php endif; ?>
+                <?php /* Acá no va un "Cerrar sesión": sería un tercer lugar para
+                         lo mismo. Desde el celular se llega por "Mis pedidos",
+                         que lleva a /cuenta, y ahí está el botón de verdad. */ ?>
             </ul>
 
             <div class="cajon__regla">
