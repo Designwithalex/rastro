@@ -178,7 +178,7 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                          dispara cualquier cosa que precargue enlaces. */ ?>
                 <form class="cabecera__salir" method="post" action="<?= e(url('/salir')) ?>">
                     <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
-                    <button class="cabecera__cuenta t-mono-label" type="submit">Salir</button>
+                    <button class="cabecera__cuenta t-mono-label" type="submit">Cerrar sesión</button>
                 </form>
             <?php else: ?>
                 <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/ingresar'))) ?>"

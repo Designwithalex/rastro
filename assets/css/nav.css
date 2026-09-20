@@ -525,21 +525,6 @@
   color: var(--color-text-primary);
 }
 
-/* "Salir" del cajón: es un <form> para que sea un POST, pero tiene que
-   verse exactamente igual que los enlaces de arriba. Mismo criterio que
-   .cabecera__salir en la barra de escritorio. */
-.cajon__salir {
-  margin: 0;
-}
-
-.cajon__salir button {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
 
 .cajon__regla {
   padding: var(--espaciado-8) var(--espaciado-20);
