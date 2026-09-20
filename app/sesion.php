@@ -287,6 +287,10 @@ function _sesion_intentos_ruta(): string
 /** Cuántos intentos fallidos lleva esta IP dentro de la ventana. */
 function sesion_intentos(): int
 {
+    if (db_activa()) {
+        return _repo_my_intentos_contar(_sesion_clave_ip(), time() - SESION_VENTANA);
+    }
+
     $ruta = _sesion_intentos_ruta();
 
     if (!is_file($ruta)) {
@@ -315,6 +319,12 @@ function sesion_bloqueado(): bool
 /** Anota un intento fallido. */
 function sesion_anotar_intento(): void
 {
+    if (db_activa()) {
+        _repo_my_intento_anotar(_sesion_clave_ip(), SESION_VENTANA);
+
+        return;
+    }
+
     $ruta  = _sesion_intentos_ruta();
     $clave = _sesion_clave_ip();
     $desde = time() - SESION_VENTANA;

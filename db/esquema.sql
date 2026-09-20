@@ -380,6 +380,10 @@ CREATE TABLE arrepentimientos (
 
     creado  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
+    -- Cuándo se movió el estado por última vez. Es la constancia de que
+    -- se atendió dentro de los 10 días que da la resolución.
+    actualizado DATETIME     NULL,
+
     PRIMARY KEY (id),
     UNIQUE KEY uq_arrepentimientos_codigo (codigo),
 

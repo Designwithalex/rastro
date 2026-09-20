@@ -596,6 +596,10 @@ function repo_all_users(): array
  */
 function repo_arrepentimientos(): array
 {
+    if (db_activa()) {
+        return _repo_my_arrepentimientos_leer();
+    }
+
     $ruta = dirname(__DIR__) . '/data/arrepentimientos.json';
 
     if (!is_file($ruta)) {

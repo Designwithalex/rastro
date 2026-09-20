@@ -1058,3 +1058,203 @@ function _repo_my_json_col(mixed $v): ?string
 
     return $j === false ? null : $j;
 }
+
+/* ==========================================================================
+   ARREPENTIMIENTOS
+
+   Son una constancia legal: la Resolución 424/2020 da 10 días corridos para
+   resolver cada uno. Por eso lo único que se actualiza es `estado`, y por
+   eso el alta es un INSERT y no una reescritura de la colección: dos
+   personas arrepintiéndose el mismo día no se pueden pisar.
+   ========================================================================== */
+
+/** Todos los arrepentimientos. El orden lo pone repo_arrepentimientos(). */
+function _repo_my_arrepentimientos_leer(): array
+{
+    $filas = db_q(
+        'SELECT codigo, pedido, nombre, email, detalle, estado, creado, actualizado
+           FROM arrepentimientos
+          ORDER BY creado DESC, id DESC'
+    )->fetchAll();
+
+    return array_map(static function (array $f): array {
+        $a = [
+            'pedido'  => (string) $f['pedido'],
+            'nombre'  => (string) $f['nombre'],
+            'email'   => (string) $f['email'],
+            'detalle' => (string) $f['detalle'],
+            'codigo'  => (string) $f['codigo'],
+            'creado'  => _repo_my_iso($f['creado']),
+            'estado'  => (string) $f['estado'],
+        ];
+
+        // Igual que en pedidos: la clave aparece recién con el primer cambio.
+        if ($f['actualizado'] !== null) {
+            $a['actualizado'] = _repo_my_iso($f['actualizado']);
+        }
+
+        return $a;
+    }, $filas);
+}
+
+/** Da de alta UNO. El código es único en la tabla. */
+function _repo_my_arrepentimiento_insertar(array $a): bool
+{
+    try {
+        db_q(
+            'INSERT INTO arrepentimientos
+                (codigo, pedido, nombre, email, detalle, estado, creado)
+             VALUES (?,?,?,?,?,?,?)',
+            [
+                (string) ($a['codigo'] ?? ''),
+                (string) ($a['pedido'] ?? ''),
+                (string) ($a['nombre'] ?? ''),
+                (string) ($a['email'] ?? ''),
+                (string) ($a['detalle'] ?? ''),
+                (string) ($a['estado'] ?? 'recibido'),
+                date('Y-m-d H:i:s', strtotime((string) ($a['creado'] ?? 'now')) ?: time()),
+            ]
+        );
+
+        return true;
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo guardar el arrepentimiento: ' . $e->getMessage());
+
+        return false;
+    }
+}
+
+/** Mueve el estado de uno. false si ese código no existe. */
+function _repo_my_arrepentimiento_estado(string $codigo, string $estado): bool
+{
+    try {
+        $st = db_q(
+            'UPDATE arrepentimientos SET estado = ?, actualizado = ? WHERE codigo = ?',
+            [$estado, date('Y-m-d H:i:s'), $codigo]
+        );
+
+        // rowCount() da 0 tanto si no existe como si el estado ya era ese.
+        // Se pregunta por la fila para no devolver false en el segundo caso.
+        if ($st->rowCount() > 0) {
+            return true;
+        }
+
+        return (int) db_q(
+            'SELECT COUNT(*) FROM arrepentimientos WHERE codigo = ?',
+            [$codigo]
+        )->fetchColumn() > 0;
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo mover el arrepentimiento: ' . $e->getMessage());
+
+        return false;
+    }
+}
+
+/* ==========================================================================
+   RECUPERACIÓN DE CONTRASEÑA
+
+   Acá no se guarda el token: se guarda su SHA-256. El que viaja por correo
+   no queda escrito en ningún lado, así que llevarse la base no alcanza para
+   entrar a ninguna cuenta.
+   ========================================================================== */
+
+/**
+ * Crea un enlace y deja uno solo vivo por correo.
+ *
+ * Las dos limpiezas de antes siguen: se borran las vencidas —si no, la
+ * tabla crece para siempre— y las de este mismo correo, porque pedir un
+ * enlace nuevo tiene que invalidar el anterior. Una casilla comprometida
+ * hace un mes no puede seguir sirviendo.
+ */
+function _repo_my_recuperacion_crear(string $email, string $hash, int $vence): bool
+{
+    try {
+        return (bool) db_transaccion(static function () use ($email, $hash, $vence): bool {
+            db_q('DELETE FROM recuperaciones WHERE vence <= NOW()');
+            db_q('DELETE FROM recuperaciones WHERE email = ?', [$email]);
+
+            db_q(
+                'INSERT INTO recuperaciones (email, token_hash, vence) VALUES (?,?,?)',
+                [$email, $hash, date('Y-m-d H:i:s', $vence)]
+            );
+
+            return true;
+        });
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo crear la recuperación: ' . $e->getMessage());
+
+        return false;
+    }
+}
+
+/**
+ * A qué correo corresponde un hash, si sigue vivo.
+ *
+ * La búsqueda es por índice y no recorre nada comparando: `token_hash` es
+ * UNIQUE. No hace falta hash_equals porque lo que se compara ya es un
+ * SHA-256, no el secreto: el tiempo de la consulta no dice nada del token.
+ */
+function _repo_my_recuperacion_email(string $hash): ?string
+{
+    $email = db_q(
+        'SELECT email FROM recuperaciones WHERE token_hash = ? AND vence > NOW() LIMIT 1',
+        [$hash]
+    )->fetchColumn();
+
+    return $email === false ? null : (string) $email;
+}
+
+/** Quema un enlace: un token que sirve dos veces sirve para el que lo encuentre. */
+function _repo_my_recuperacion_quemar(string $hash): void
+{
+    try {
+        db_q('DELETE FROM recuperaciones WHERE token_hash = ?', [$hash]);
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo quemar la recuperación: ' . $e->getMessage());
+    }
+}
+
+/* ==========================================================================
+   INTENTOS DE LOGIN
+
+   Contra la fuerza bruta. Se cuenta por IP y no por correo, para que nadie
+   pueda bloquear la cuenta de otro a propósito.
+
+   Lo que se guarda en `ip` no es la IP: es el hash truncado que arma
+   _sesion_clave_ip(). Sirve igual para contar y no deja direcciones en
+   claro en la base.
+   ========================================================================== */
+
+/** Cuántos intentos lleva esta clave desde un momento dado. */
+function _repo_my_intentos_contar(string $clave, int $desde): int
+{
+    return (int) db_q(
+        'SELECT COUNT(*) FROM intentos_login WHERE ip = ? AND momento >= ?',
+        [$clave, date('Y-m-d H:i:s', $desde)]
+    )->fetchColumn();
+}
+
+/**
+ * Anota un intento fallido y barre los vencidos.
+ *
+ * El barrido es de TODA la tabla y no sólo de esta clave, igual que hacía
+ * la versión de archivo: si no, las filas de quien probó una vez y se fue
+ * quedan para siempre. Es un DELETE con índice en un camino que sólo se
+ * recorre cuando alguien falla la contraseña.
+ */
+function _repo_my_intento_anotar(string $clave, int $ventana): void
+{
+    try {
+        db_q(
+            'INSERT INTO intentos_login (email, ip, momento) VALUES (?, ?, NOW())',
+            ['', $clave]
+        );
+
+        db_q(
+            'DELETE FROM intentos_login WHERE momento < ?',
+            [date('Y-m-d H:i:s', time() - $ventana)]
+        );
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo anotar el intento: ' . $e->getMessage());
+    }
+}

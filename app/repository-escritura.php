@@ -570,6 +570,18 @@ function repo_crear_recuperacion(string $email): ?string
 
     $token = bin2hex(random_bytes(32));
 
+    /* Con base, las dos limpiezas de arriba son dos DELETE y van adentro de
+       la misma transacción que el alta: entre "borrá el anterior" y "creá
+       el nuevo" no puede haber una ventana donde el correo se quede sin
+       ningún enlace vivo. */
+    if (db_activa()) {
+        return _repo_my_recuperacion_crear(
+            $email,
+            hash('sha256', $token),
+            $ahora + RECUPERACION_VIGENCIA
+        ) ? $token : null;
+    }
+
     $previas[] = [
         'email' => $email,
         'hash'  => hash('sha256', $token),
@@ -594,6 +606,10 @@ function repo_crear_recuperacion(string $email): ?string
  */
 function repo_email_de_recuperacion(string $token): ?string
 {
+    if ($token !== '' && db_activa()) {
+        return _repo_my_recuperacion_email(hash('sha256', $token));
+    }
+
     $ruta = dirname(__DIR__) . '/data/recuperaciones.json';
 
     if ($token === '' || !is_file($ruta)) {
@@ -627,6 +643,12 @@ function repo_email_de_recuperacion(string $token): ?string
  */
 function repo_quemar_recuperacion(string $token): void
 {
+    if (db_activa()) {
+        _repo_my_recuperacion_quemar(hash('sha256', $token));
+
+        return;
+    }
+
     $ruta = dirname(__DIR__) . '/data/recuperaciones.json';
 
     if (!is_file($ruta)) {
@@ -715,6 +737,13 @@ function repo_save_arrepentimiento(array $datos): ?array
     $datos['creado'] = date('c');
     $datos['estado'] = 'recibido';
 
+    /* Con base, un INSERT: dos personas arrepintiéndose el mismo minuto no
+       se pisan. Es el mismo motivo que en el alta de un pedido, y acá pesa
+       igual: esto es una constancia legal con un plazo de 10 días corridos. */
+    if (db_activa()) {
+        return _repo_my_arrepentimiento_insertar($datos) ? $datos : null;
+    }
+
     $previos[] = $datos;
 
     $json = json_encode(
@@ -737,6 +766,10 @@ function repo_save_arrepentimiento(array $datos): ?array
  */
 function repo_save_arrepentimiento_estado(string $codigo, string $estado): bool
 {
+    if (db_activa()) {
+        return _repo_my_arrepentimiento_estado($codigo, $estado);
+    }
+
     $ruta = dirname(__DIR__) . '/data/arrepentimientos.json';
 
     if (!is_file($ruta)) {
