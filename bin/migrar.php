@@ -263,10 +263,14 @@ db_transaccion(static function () use ($raiz, &$contadores): void {
     $pedidos = leer_json($raiz, 'orders');
     foreach ($pedidos as $o) {
         db_q(
+            /* origen = 'mock' y no el default 'sitio': estos cuatro salen de
+               data/orders.json, que es la maqueta. Los del checkout real
+               entran por repo_order_create() y quedan como 'sitio'. Si se
+               mezclaran, el panel mostraría ventas que nunca pasaron. */
             'INSERT INTO pedidos
                 (codigo, usuario_id, fecha, estado, medio_pago, subtotal, envio,
-                 descuento_aplicado_pct, total)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                 descuento_aplicado_pct, total, origen)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, \'mock\')',
             [
                 $o['codigo'],
                 (int) ($o['usuario_id'] ?? 0) ?: null,

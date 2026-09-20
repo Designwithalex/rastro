@@ -954,6 +954,10 @@ function _repo_pedidos_ruta(): string
  */
 function _repo_pedidos_leer(): array
 {
+    if (db_activa()) {
+        return _repo_my_pedidos_leer();
+    }
+
     $ruta = _repo_pedidos_ruta();
 
     if (!is_file($ruta)) {
@@ -1063,6 +1067,25 @@ function repo_order_create(array $pedido): array
     // vuelve identificando al pedido. Por defecto es el propio código.
     $pedido['referencia'] ??= $pedido['codigo'];
 
+    /* Con base, UN INSERT. Y es el punto de toda la migración.
+
+       Con archivo esto era leer la lista, agregarle uno y reescribirla
+       entera. Dos personas comprando en el mismo segundo leen la misma
+       lista, cada una le suma el suyo, y la que escribe segunda pisa a la
+       primera: un pedido cobrado que no existe en ningún lado. El LOCK_EX
+       de `_repo_pedidos_guardar()` no lo evitaba, porque serializa las
+       escrituras y no el ciclo leer-modificar-escribir.
+
+       Insertando una fila las dos compras entran. Y si por lo que sea se
+       repitiera un código, la clave única lo rechaza en vez de pisarlo. */
+    if (db_activa()) {
+        if (!_repo_my_pedido_insertar($pedido)) {
+            return ['ok' => false, 'pedido' => null, 'error' => 'No se pudo guardar el pedido.'];
+        }
+
+        return ['ok' => true, 'pedido' => $pedido, 'error' => null];
+    }
+
     $pedidos[] = $pedido;
 
     if (!_repo_pedidos_guardar($pedidos)) {
@@ -1097,6 +1120,18 @@ function repo_order_update(string $codigo, array $cambios): ?array
         }
 
         $pedidos[$i]['actualizado'] = date('c');
+
+        /* Con base, un UPDATE de esa fila. Mismo motivo que en el alta: el
+           webhook de Mercado Pago y el visitante que vuelve de pagar
+           escriben casi juntos, y reescribir la colección entera hace que
+           el segundo borre el pedido que el primero acaba de crear. */
+        if (db_activa()) {
+            if (!_repo_my_pedido_actualizar($codigo, $pedidos[$i])) {
+                return null;
+            }
+
+            return $pedidos[$i];
+        }
 
         if (!_repo_pedidos_guardar($pedidos)) {
             return null;

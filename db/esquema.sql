@@ -247,10 +247,53 @@ CREATE TABLE pedidos (
     descuento_aplicado_pct DECIMAL(5,2) NOT NULL DEFAULT 0,
     total                  INT NOT NULL DEFAULT 0,
 
+    /* --- Lo que distingue una venta de un ejemplo -----------------
+       Hasta la migración esto eran DOS archivos: data/orders.json con
+       los cuatro pedidos de la maqueta y data/pedidos.json con las
+       compras de verdad. repo_all_orders() los leía por separado y le
+       ponía `origen` a cada uno para que el panel los distinga.
+
+       Acá son una sola tabla y esta columna es esa distinción. Tiene
+       que sobrevivir: un pedido 'mock' no se le cobra a nadie. */
+    origen                 VARCHAR(10)  NOT NULL DEFAULT 'sitio',
+
+    -- Fecha con hora. `fecha` es sólo el día y varias compras del mismo
+    -- día quedaban desempatadas por el orden del archivo, que no
+    -- significa nada. Los del mock no tienen y por eso admite NULL.
+    creado                 DATETIME         NULL,
+
+    /* Lo que viaja a Mercado Pago y lo único que vuelve identificando
+       al pedido. Por defecto es el mismo código, pero se separa porque
+       es el dato por el que busca el webhook —y por eso va indexado—. */
+    referencia             VARCHAR(64)      NULL,
+
+    /* --- Los tres bloques del checkout ---------------------------
+       comprador y entrega son una FOTO del momento de la compra, con
+       el mismo criterio que precio_unitario: si la persona cambia su
+       dirección en marzo, el pedido de enero se entregó en la vieja.
+       Normalizarlos invitaría a "corregirlos" después.
+
+       pago lo escribe el webhook por partes y su contenido depende del
+       proveedor. Es JSON porque su forma la manda Mercado Pago, no
+       nosotros, y no se consulta por campo: se lee entero. */
+    comprador              JSON             NULL,
+    entrega                JSON             NULL,
+    pago                   JSON             NULL,
+
+    -- La marca que deja repo_order_update() en cada cambio de estado. Es
+    -- lo que permite reconstruir cuándo contestó Mercado Pago si alguien
+    -- reclama un pago.
+    actualizado            DATETIME         NULL,
+
     PRIMARY KEY (id),
     UNIQUE KEY uq_pedidos_codigo (codigo),
     KEY ix_pedidos_usuario (usuario_id, fecha),
     KEY ix_pedidos_estado (estado, fecha),
+    KEY ix_pedidos_origen (origen, fecha),
+
+    -- Por acá entra el webhook de Mercado Pago, que es lo más caliente
+    -- de la tabla: llega sin cookie y sólo con este dato.
+    KEY ix_pedidos_referencia (referencia),
     -- ON DELETE SET NULL y no CASCADE: borrar un usuario no puede
     -- borrar la facturación.
     CONSTRAINT fk_pedidos_usuario FOREIGN KEY (usuario_id)

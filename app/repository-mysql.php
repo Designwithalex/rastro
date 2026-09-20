@@ -407,11 +407,16 @@ function _repo_my_orders(): array
         ];
     }
 
+    /* Sólo los de la maqueta. Los del checkout real viven en la misma
+       tabla con origen = 'sitio' y se leen por _repo_my_pedidos_leer(),
+       porque antes de la migración eran otro archivo y el panel los
+       distingue. */
     $filas = db_q(
-        'SELECT id, codigo, usuario_id, fecha, estado, medio_pago,
+        "SELECT id, codigo, usuario_id, fecha, estado, medio_pago,
                 subtotal, envio, descuento_aplicado_pct, total
            FROM pedidos
-          ORDER BY id'
+          WHERE origen = 'mock'
+          ORDER BY id"
     )->fetchAll();
 
     return array_map(static fn (array $f): array => [
@@ -759,16 +764,16 @@ function _repo_my_guardar_orders(array $datos): void
         }
 
         db_q(
-            'INSERT INTO pedidos
+            "INSERT INTO pedidos
                 (codigo, usuario_id, fecha, estado, medio_pago,
-                 subtotal, envio, descuento_aplicado_pct, total)
-             VALUES (?,?,?,?,?,?,?,?,?)
+                 subtotal, envio, descuento_aplicado_pct, total, origen)
+             VALUES (?,?,?,?,?,?,?,?,?,'mock')
              ON DUPLICATE KEY UPDATE
                 usuario_id = VALUES(usuario_id), fecha = VALUES(fecha),
                 estado = VALUES(estado), medio_pago = VALUES(medio_pago),
                 subtotal = VALUES(subtotal), envio = VALUES(envio),
                 descuento_aplicado_pct = VALUES(descuento_aplicado_pct),
-                total = VALUES(total)',
+                total = VALUES(total)",
             [
                 $codigo,
                 ($o['usuario_id'] ?? null) ?: null,
@@ -805,5 +810,251 @@ function _repo_my_guardar_orders(array $datos): void
         }
     }
 
-    _repo_my_borrar_sobrantes('pedidos', 'codigo', $codigos);
+    /* El borrado de sobrantes va acotado a los 'mock' A PROPÓSITO, y es lo
+       más peligroso de este archivo: `$datos` es la colección de la maqueta,
+       así que un DELETE ... NOT IN sin el filtro de origen borraría todas
+       las ventas reales la primera vez que alguien toque un pedido de
+       ejemplo en el panel. */
+    if ($codigos === []) {
+        db_q("DELETE FROM pedidos WHERE origen = 'mock'");
+
+        return;
+    }
+
+    $marcas = implode(', ', array_fill(0, count($codigos), '?'));
+
+    db_q("DELETE FROM pedidos WHERE origen = 'mock' AND codigo NOT IN ($marcas)", $codigos);
+}
+
+/* ==========================================================================
+   PEDIDOS DEL SITIO
+
+   Los que crea el checkout, que antes vivían en data/pedidos.json y no
+   pasaban por `_repo_json()`: tienen su propio par de funciones porque el
+   webhook de Mercado Pago escribe sin sesión y sin caché.
+
+   ACÁ ESTÁ EL MOTIVO DE TODA LA MIGRACIÓN.
+
+   Con archivos, crear un pedido era: leer la lista entera, agregarle uno,
+   y reescribirla. Si dos personas compran en el mismo segundo, las dos leen
+   la misma lista, cada una le suma el suyo, y la que escribe segunda pisa a
+   la primera. Un pedido cobrado que no existe en ningún lado.
+
+   El LOCK_EX que tenía `_repo_pedidos_guardar()` no alcanzaba: serializa las
+   escrituras, no el ciclo leer-modificar-escribir.
+
+   Por eso estas funciones NO reescriben la colección. Insertan una fila y
+   actualizan una fila. Dos compras simultáneas son dos INSERT y entran las
+   dos, que es lo que hace una base de datos y un archivo no.
+   ========================================================================== */
+
+/** Decodifica una columna JSON a array, tolerando NULL y basura. */
+function _repo_my_json(mixed $v): ?array
+{
+    if ($v === null || $v === '') {
+        return null;
+    }
+
+    $d = json_decode((string) $v, true);
+
+    return is_array($d) ? $d : null;
+}
+
+/**
+ * Los pedidos que hizo el sitio, en el orden en que entraron.
+ *
+ * Reemplaza a `_repo_pedidos_leer()`. Devuelve la misma forma que tenía
+ * data/pedidos.json, incluidos los tres bloques anidados del checkout.
+ */
+function _repo_my_pedidos_leer(): array
+{
+    $items = [];
+
+    foreach (db_q("SELECT i.pedido_id, i.producto_id, i.nombre, i.sku,
+                          i.cantidad, i.precio_unitario
+                     FROM pedido_items i
+                     JOIN pedidos p ON p.id = i.pedido_id
+                    WHERE p.origen = 'sitio'
+                    ORDER BY i.pedido_id, i.id") as $f) {
+        $items[(int) $f['pedido_id']][] = [
+            'producto_id'     => (int) $f['producto_id'],
+            'nombre'          => (string) $f['nombre'],
+            'sku'             => (string) $f['sku'],
+            'cantidad'        => (int) $f['cantidad'],
+            'precio_unitario' => (int) $f['precio_unitario'],
+        ];
+    }
+
+    $filas = db_q(
+        "SELECT id, codigo, usuario_id, fecha, creado, referencia, estado, medio_pago,
+                subtotal, envio, descuento_aplicado_pct, total,
+                comprador, entrega, pago, actualizado
+           FROM pedidos
+          WHERE origen = 'sitio'
+          ORDER BY id"
+    )->fetchAll();
+
+    return array_map(static function (array $f) use ($items): array {
+        $p = [
+            'codigo'                 => (string) $f['codigo'],
+            'usuario_id'             => (int) $f['usuario_id'],
+            'fecha'                  => (string) $f['fecha'],
+            'estado'                 => (string) $f['estado'],
+            'medio_pago'             => (string) $f['medio_pago'],
+            'items'                  => $items[(int) $f['id']] ?? [],
+            'subtotal'               => (int) $f['subtotal'],
+            'envio'                  => (int) $f['envio'],
+            'descuento_aplicado_pct' => _repo_my_num($f['descuento_aplicado_pct']),
+            'total'                  => (int) $f['total'],
+            'comprador'              => _repo_my_json($f['comprador']),
+            'entrega'                => _repo_my_json($f['entrega']),
+            'pago'                   => _repo_my_json($f['pago']),
+            'creado'                 => _repo_my_iso($f['creado']),
+            'referencia'             => (string) $f['referencia'],
+        ];
+
+        /* `actualizado` sólo aparece después del primer cambio de estado.
+           Un pedido recién creado no tenía esa clave en el archivo, así
+           que tampoco la tiene acá: hay código que pregunta por su
+           existencia para saber si el webhook ya contestó. */
+        if ($f['actualizado'] !== null) {
+            $p['actualizado'] = _repo_my_iso($f['actualizado']);
+        }
+
+        return $p;
+    }, $filas);
+}
+
+/**
+ * DATETIME de MySQL -> la cadena ISO-8601 que escribía date('c').
+ *
+ * El archivo guardaba "2026-09-20T14:03:11-03:00" y la columna guarda
+ * "2026-09-20 14:03:11". Sin esta vuelta, un `substr($p['creado'], 0, 10)`
+ * sigue andando pero un `strtotime()` comparado contra otro ISO no.
+ */
+function _repo_my_iso(mixed $v): string
+{
+    if ($v === null || $v === '') {
+        return '';
+    }
+
+    $t = strtotime((string) $v);
+
+    return $t === false ? (string) $v : date('c', $t);
+}
+
+/**
+ * Inserta UN pedido. Devuelve false si no pudo.
+ *
+ * Una fila, no una colección: es la diferencia entre perder una compra
+ * simultánea y no perderla. El código es UNIQUE en la tabla, así que dos
+ * pedidos con el mismo código fallan en vez de pisarse.
+ */
+function _repo_my_pedido_insertar(array $p): bool
+{
+    try {
+        return (bool) db_transaccion(static function () use ($p): bool {
+            db_q(
+                "INSERT INTO pedidos
+                    (codigo, usuario_id, fecha, creado, referencia, estado, medio_pago,
+                     subtotal, envio, descuento_aplicado_pct, total,
+                     comprador, entrega, pago, origen)
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'sitio')",
+                [
+                    (string) ($p['codigo'] ?? ''),
+                    ($p['usuario_id'] ?? null) ?: null,
+                    (string) ($p['fecha'] ?? date('Y-m-d')),
+                    // date('c') trae zona horaria y DATETIME no la guarda.
+                    date('Y-m-d H:i:s', strtotime((string) ($p['creado'] ?? 'now')) ?: time()),
+                    (string) ($p['referencia'] ?? $p['codigo'] ?? ''),
+                    (string) ($p['estado'] ?? 'pendiente_pago'),
+                    (string) ($p['medio_pago'] ?? ''),
+                    (int) ($p['subtotal'] ?? 0),
+                    (int) ($p['envio'] ?? 0),
+                    $p['descuento_aplicado_pct'] ?? 0,
+                    (int) ($p['total'] ?? 0),
+                    _repo_my_json_col($p['comprador'] ?? null),
+                    _repo_my_json_col($p['entrega'] ?? null),
+                    _repo_my_json_col($p['pago'] ?? null),
+                ]
+            );
+
+            $id = (int) db()->lastInsertId();
+
+            foreach ((array) ($p['items'] ?? []) as $it) {
+                db_q(
+                    'INSERT INTO pedido_items
+                        (pedido_id, producto_id, nombre, sku, cantidad, precio_unitario)
+                     VALUES (?,?,?,?,?,?)',
+                    [
+                        $id,
+                        ($it['producto_id'] ?? null) ?: null,
+                        (string) ($it['nombre'] ?? ''),
+                        (string) ($it['sku'] ?? ''),
+                        (int) ($it['cantidad'] ?? 0),
+                        (int) ($it['precio_unitario'] ?? 0),
+                    ]
+                );
+            }
+
+            return true;
+        });
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo insertar el pedido: ' . $e->getMessage());
+
+        return false;
+    }
+}
+
+/**
+ * Actualiza las claves de primer nivel de UN pedido, por código.
+ *
+ * Los items no se tocan: lo que cambia después de creado un pedido es su
+ * estado y su bloque `pago`, nunca lo que se compró.
+ */
+function _repo_my_pedido_actualizar(string $codigo, array $pedido): bool
+{
+    try {
+        db_q(
+            'UPDATE pedidos
+                SET estado = ?, medio_pago = ?, referencia = ?,
+                    subtotal = ?, envio = ?, descuento_aplicado_pct = ?, total = ?,
+                    comprador = ?, entrega = ?, pago = ?, actualizado = ?
+              WHERE codigo = ?',
+            [
+                (string) ($pedido['estado'] ?? ''),
+                (string) ($pedido['medio_pago'] ?? ''),
+                (string) ($pedido['referencia'] ?? $codigo),
+                (int) ($pedido['subtotal'] ?? 0),
+                (int) ($pedido['envio'] ?? 0),
+                $pedido['descuento_aplicado_pct'] ?? 0,
+                (int) ($pedido['total'] ?? 0),
+                _repo_my_json_col($pedido['comprador'] ?? null),
+                _repo_my_json_col($pedido['entrega'] ?? null),
+                _repo_my_json_col($pedido['pago'] ?? null),
+                isset($pedido['actualizado'])
+                    ? date('Y-m-d H:i:s', strtotime((string) $pedido['actualizado']) ?: time())
+                    : null,
+                $codigo,
+            ]
+        );
+
+        return true;
+    } catch (Throwable $e) {
+        error_log('repository-mysql: no se pudo actualizar el pedido ' . $codigo . ': ' . $e->getMessage());
+
+        return false;
+    }
+}
+
+/** Array -> columna JSON. null se guarda como NULL, no como "null". */
+function _repo_my_json_col(mixed $v): ?string
+{
+    if (!is_array($v)) {
+        return null;
+    }
+
+    $j = json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    return $j === false ? null : $j;
 }
