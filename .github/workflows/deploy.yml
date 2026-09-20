@@ -70,6 +70,12 @@ jobs:
           #   Ojo al agregar un data/*.json nuevo: no llega solo, hay que
           #   subirlo a mano igual que la primera vez.
           #
+          # db/  — el esquema y las migraciones. El sitio no los necesita
+          #   para correr: los lee un humano desde su máquina cuando monta
+          #   la base. Sincronizarlos los dejaría en
+          #   rastrofitness.com/db/esquema.sql, que es la lista completa de
+          #   tablas y columnas servida a quien la pida. Ver docs/MYSQL.md.
+          #
           # assets/img/subidas/ SÍ se sincroniza, pero sólo su .htaccess:
           # las imágenes que sube el cliente no están en el repo y la acción
           # no borra lo que nunca subió.
@@ -81,6 +87,7 @@ jobs:
             **/docs/**
             **/design/**
             **/bin/**
+            **/db/**
             **/*.md
             **/app/config.php
             **/data/**
