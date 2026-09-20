@@ -72,7 +72,9 @@ mandar los mails y conciliar los pagos que no notifican. Todo en
 
 - **PHP 8+** únicamente como capa de vistas y router. Sin lógica de negocio pesada.
 - **HTML + CSS + JS vanilla.** Sin frameworks, sin build step, sin npm.
-- **Datos MOCK en JSON** dentro de `data/`.
+- **Datos en MySQL** (MariaDB en Hostinger). Los JSON de `data/` quedaron como
+  semilla: son de donde salieron los datos el día de la migración, y el sitio
+  vuelve a leerlos si se vacían las credenciales. Ver [`docs/MYSQL.md`](docs/MYSQL.md).
 - Hosting **compartido Hostinger**. Deploy por **FTP con GitHub Actions**.
 - Sitio provisorio (ya provisionado, hoy con la página por defecto):
   `https://rastrofitness.com/`
@@ -98,7 +100,7 @@ views/             layout, partials y páginas            [privada]
 data/              datos JSON — los escribe el panel     [privada]
 assets/            css, js, img, fonts                   [pública]
   img/subidas/               lo que sube el cliente, + .htaccess propio
-docs/              HANDOFF, DATA-CONTRACT, DEPLOY, MYSQL
+docs/              HANDOFF, DATA-CONTRACT, DEPLOY, MYSQL, CORREO
 db/                esquema.sql + migraciones/            [no se despliega]
 design/            links y exports de Figma
 ```

@@ -13,6 +13,23 @@
  * "10.00" son fallas, aunque el sitio parezca andar. Andan hasta que una
  * vista compara con === o un json_encode escribe otra cosa.
  *
+ * ---------------------------------------------------------------------
+ * ESTO TIENE FECHA DE VENCIMIENTO, Y NO ES UN DEFECTO
+ *
+ * Compara contra los `data/*.json`, que son la SEMILLA: la foto de los
+ * datos el día que se migró. Sirve mientras la base siga siendo esa foto.
+ *
+ * Apenas el cliente cargue un producto o cambie un precio desde el panel,
+ * la base y los archivos dejan de coincidir y esta comprobación va a
+ * marcar diferencias que son correctas: los datos nuevos están en MySQL y
+ * el archivo quedó viejo, que es exactamente lo que tiene que pasar.
+ *
+ * O sea: si falla DESPUÉS de que alguien usó el panel, leé las diferencias
+ * antes de asustarte. Lo que prueba es la migración, no el estado del
+ * sitio. Las otras tres suites de `bin/verificar.php` no tienen este
+ * vencimiento y sirven siempre.
+ * ---------------------------------------------------------------------
+ *
  * No se despliega: bin/ está excluido del workflow de deploy.
  */
 

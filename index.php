@@ -122,6 +122,9 @@ if (RASTRO_RUTA === '/arrepentimiento'
     || RASTRO_RUTA === '/registro'
     || str_starts_with(RASTRO_RUTA, '/admin')
     || str_starts_with(RASTRO_RUTA, '/recuperar')) {
+    // smtp.php antes que correo.php: correo_enviar() lo consulta en su
+    // última línea. Cargarlo no abre ninguna conexión.
+    require __DIR__ . '/app/smtp.php';
     require __DIR__ . '/app/correo.php';
 }
 

@@ -4,18 +4,18 @@
  *
  *   php bin/verificar.php
  *
- * Es lo que hay que correr antes de tocar producción, y lo que contesta
- * la única pregunta que importa: ¿el sitio leyendo de MySQL se comporta
- * igual que leyendo los archivos?
+ * Es lo que hay que correr antes de tocar producción.
  *
- *   paridad      las nueve entidades devuelven lo mismo que su JSON,
- *                campo por campo y con tipos estrictos
- *   escritura    guardar y volver a leer no deforma nada
+ *   escritura    guardar y volver a leer no deforma nada, y el panel da de
+ *                alta, edita y borra un producto sin perder nada
  *   pedidos      el alta no pierde compras simultáneas y el webhook
  *                actualiza sin romper
  *   formularios  arrepentimientos, recuperación de clave e intentos
+ *   correo       el cliente SMTP, contra un servidor de mentira que habla
+ *                TLS de verdad. No toca la base ni manda nada afuera.
  *
- * Las dos últimas escriben en la base y borran lo suyo al terminar.
+ * `escritura`, `pedidos` y `formularios` escriben en la base y borran lo
+ * suyo al terminar.
  *
  * Sale con 0 si las cuatro pasan. No se despliega: bin/ está excluido
  * del workflow de deploy.
@@ -28,11 +28,26 @@ if (PHP_SAPI !== 'cli') {
     exit("Este script se corre por línea de comandos.\n");
 }
 
+/* `verificar-paridad.php` NO está acá, y es a propósito.
+
+   Esa suite compara la base contra los data/*.json, que son la semilla: la
+   foto del día que se migró. Ya cumplió su función y no se puede volver a
+   correr como control: en cuanto alguien carga un producto o se registra un
+   cliente, la base y los archivos dejan de coincidir, y marcaría como falla
+   un dato nuevo que está perfectamente bien.
+
+   Un control que se pone en rojo por funcionar es un control que la gente
+   aprende a ignorar. Se corre a mano, y sólo al migrar:
+
+       php bin/verificar-paridad.php
+
+   Las cuatro de abajo sí valen siempre: no comparan contra la semilla, sino
+   que ejercitan el comportamiento. */
 $suites = [
-    'paridad'     => 'verificar-paridad.php',
     'escritura'   => 'verificar-escritura.php',
     'pedidos'     => 'verificar-pedidos.php',
     'formularios' => 'verificar-formularios.php',
+    'correo'      => 'verificar-correo.php',
 ];
 
 $php    = PHP_BINARY;
