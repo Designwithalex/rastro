@@ -42,11 +42,6 @@
   background: none;
 }
 
-.auth__olvide {
-  align-self: flex-end;
-  color: var(--color-text-secondary);
-}
-
 .auth__alterna {
   color: var(--color-text-secondary);
 }

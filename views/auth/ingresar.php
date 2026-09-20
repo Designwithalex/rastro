@@ -132,12 +132,6 @@ require RASTRO_VIEWS . '/layout/head.php';
                            autocomplete="current-password" required>
                 </p>
 
-                <?php /* TODO(backend): esta ruta todavía no existe. Se agrega al
-                         router junto con el envío del mail de recuperación. */ ?>
-                <p class="auth__olvide">
-                    <span class="t-mono-label-sm">Olvidé mi contraseña</span>
-                </p>
-
                 <button class="boton boton--acento formulario__enviar" type="submit">
                     <span class="t-mono-label">Ingresar</span>
                     <span class="boton__flecha" aria-hidden="true">→</span>

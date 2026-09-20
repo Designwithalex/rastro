@@ -57,10 +57,24 @@ $pasos = [
 /* Las tres cifras de la barra son datos del negocio que el cliente todavía
    no pasó. Se dibujan como hueco visible, igual que en /nosotros: una celda
    escondida no la reclama nadie (PENDIENTES #50). */
+/* Las tres cifras salen de la configuración, que se edita en
+   /admin/configuracion. Estaban escritas acá con `null` fijo, así que la
+   página mostraba [ DATO ] y no había forma de completarlas desde ningún
+   lado: ni el cliente ni nadie.
+
+   Un valor vacío sigue dibujándose como [ DATO ] visible, que es la regla
+   del proyecto para un hueco declarado: en la revisión se ve qué falta en
+   vez de leerse como si estuviera resuelto. */
+$cifra_o_hueco = static function (mixed $v): ?string {
+    $v = trim((string) ($v ?? ''));
+
+    return $v === '' ? null : $v;
+};
+
 $cifras_mayorista = [
-    ['rotulo' => 'Salas equipadas', 'valor' => null],
-    ['rotulo' => 'Entrega típica',  'valor' => null],
-    ['rotulo' => 'Pedido mínimo',   'valor' => null],
+    ['rotulo' => 'Salas equipadas', 'valor' => $cifra_o_hueco($settings['may_salas_equipadas'] ?? null)],
+    ['rotulo' => 'Entrega típica',  'valor' => $cifra_o_hueco($settings['may_entrega_tipica'] ?? null)],
+    ['rotulo' => 'Pedido mínimo',   'valor' => $cifra_o_hueco($settings['may_pedido_minimo'] ?? null)],
 ];
 
 $campos = [

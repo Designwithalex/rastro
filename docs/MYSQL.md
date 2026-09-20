@@ -67,23 +67,32 @@ login.
 php bin/verificar.php
 ```
 
-Corre las cuatro suites y contesta la única pregunta que importa: ¿el sitio
-leyendo de MySQL se comporta igual que leyendo los archivos?
-
 | suite | qué comprueba |
 |---|---|
-| `paridad` | las nueve entidades devuelven lo mismo que su JSON, campo por campo y con tipos estrictos |
-| `escritura` | guardar y volver a leer no deforma nada |
+| `escritura` | guardar y volver a leer no deforma nada, y el panel da de alta, edita y borra un producto sin perder nada |
 | `pedidos` | el alta no pierde compras simultáneas; el webhook actualiza sin romper |
 | `formularios` | arrepentimientos, recuperación de clave, intentos de login |
+| `correo` | el cliente SMTP, contra un servidor de mentira que habla TLS de verdad |
 
-Las dos últimas escriben en la base y borran lo suyo al terminar.
+Las tres primeras escriben en la base y borran lo suyo al terminar. `correo`
+no toca la base ni manda nada afuera.
 
-`bin/verificar-paridad.php` lleva una lista de **diferencias toleradas**: cuatro
-casos donde MySQL y el JSON no coinciden y se comprobó, leyendo todos los
-consumidores del dato, que ningún código puede notarlo. Cada una dice por qué
-y cita el archivo y la línea. Todo lo que no esté en esa lista sigue siendo
-una falla.
+### La suite que no está en esa lista
+
+`php bin/verificar-paridad.php` se corre **a mano y sólo al migrar**. Compara
+la base contra los `data/*.json`, que son la semilla: la foto del día que se
+migró. Ya cumplió su función.
+
+No se puede dejar como control permanente porque en cuanto alguien carga un
+producto o se registra un cliente, la base y los archivos dejan de coincidir
+—que es justamente lo que tiene que pasar— y marcaría como falla un dato
+nuevo que está perfectamente bien. Un control que se pone en rojo por
+funcionar es un control que la gente aprende a ignorar.
+
+Lleva además una lista de **diferencias toleradas**: cuatro casos donde MySQL
+y el JSON no coinciden y se comprobó, leyendo todos los consumidores del
+dato, que ningún código puede notarlo. Cada una dice por qué y cita el
+archivo y la línea.
 
 ---
 

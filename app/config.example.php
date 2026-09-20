@@ -115,4 +115,46 @@ return [
     // (ngrok, cloudflared) contra una máquina de escritorio, porque ahí la
     // URL pública no es la del sitio.
     'mp_notification_url' => '',
+
+    /* ------------------------------------------------------------------
+       CORREO SALIENTE
+
+       El sitio manda tres mails: el enlace para cambiar la contraseña, la
+       constancia de un arrepentimiento y el aviso a Rastro de que llegó uno.
+
+       Vacío `smtp_host`, sale por `mail()` del servidor. Eso ENTREGA el
+       mensaje pero casi nunca llega: `mail()` manda desde
+       no-reply@rastrofitness.com y el servidor del hosting no figura en el
+       SPF del dominio, así que Gmail lo manda a spam o lo rechaza. Fue por
+       esto que el enlace de recuperación no llegaba.
+
+       Con estos cuatro valores el mail sale de una casilla real y
+       autenticada, cuyo proveedor SÍ está autorizado a mandar por el
+       dominio. Los datos salen de hPanel, en Correos -> Cuentas de correo.
+
+       Después de cargarlos, probar desde el panel:
+       /admin/configuracion -> "Probar el envío de correo". Si falla, ahora
+       dice el motivo exacto.
+       ------------------------------------------------------------------ */
+
+    // Servidor SMTP. En Hostinger es smtp.hostinger.com.
+    'smtp_host' => '',
+
+    // 587 con STARTTLS (lo normal) o 465 con TLS directo.
+    'smtp_port' => 587,
+
+    // La casilla completa, que además es de donde sale el mail.
+    'smtp_user' => '',
+
+    'smtp_pass' => '',
+
+    /* Vacío deduce por el puerto, que es lo que hay que querer. Sólo se
+       completa con 'tls' para forzar TLS directo en un puerto raro. */
+    'smtp_seguridad' => '',
+
+    /* Ruta a un certificado de autoridad propio. Vacío en cualquier
+       proveedor normal: el certificado del servidor SIEMPRE se verifica y
+       esto no lo desactiva, sólo suma una autoridad a las de confianza.
+       Hace falta únicamente contra un servidor de correo interno. */
+    'smtp_ca' => '',
 ];

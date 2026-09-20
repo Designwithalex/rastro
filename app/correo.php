@@ -40,11 +40,18 @@ declare(strict_types=1);
  * @param string $cuerpo   Texto plano.
  * @param string $responder Dirección para Reply-To. Opcional.
  */
-function correo_enviar(string $para, string $asunto, string $cuerpo, string $responder = ''): bool
-{
-    $para = trim($para);
+function correo_enviar(
+    string $para,
+    string $asunto,
+    string $cuerpo,
+    string $responder = '',
+    ?string &$error = null
+): bool {
+    $error = null;
+    $para  = trim($para);
 
     if ($para === '' || !filter_var($para, FILTER_VALIDATE_EMAIL)) {
+        $error = 'el destinatario no es una dirección válida';
         error_log('correo: destinatario inválido: ' . $para);
 
         return false;
@@ -79,9 +86,18 @@ function correo_enviar(string $para, string $asunto, string $cuerpo, string $res
     // Las líneas de un mail se cortan a 70: más largo, algunos servidores lo parten mal.
     $cuerpo = wordwrap(str_replace("\r\n", "\n", $cuerpo), 70, "\n", false);
 
+    /* Con SMTP configurado el mail sale de una casilla real y autenticada, y
+       por eso pasa las verificaciones de Gmail. Sin configurar, `mail()`:
+       entrega al servidor del hosting, que manda desde un dominio que nadie
+       lo autorizó a usar. Ver app/smtp.php. */
+    if (smtp_activo()) {
+        return smtp_enviar($para, $asunto_mime, $cuerpo, $cabeceras, $remitente, $error);
+    }
+
     $ok = @mail($para, $asunto_mime, $cuerpo, implode("\r\n", $cabeceras), '-f' . $remitente);
 
     if (!$ok) {
+        $error = 'mail() del servidor rechazó el envío';
         error_log('correo: mail() falló al enviar a ' . $para . ' · asunto: ' . $asunto);
     }
 
@@ -97,6 +113,17 @@ function correo_enviar(string $para, string $asunto, string $cuerpo, string $res
  */
 function correo_remitente(): string
 {
+    /* Con SMTP, el remitente es la casilla con la que nos autenticamos y no
+       un no-reply@ inventado. La mayoría de los proveedores —Hostinger entre
+       ellos— rechazan un MAIL FROM que no coincida con el usuario que
+       inició sesión, y los que lo aceptan suelen marcarlo como sospechoso.
+       Mandar como quien realmente sos es lo que hace que el mail llegue. */
+    $usuario = trim((string) config('smtp_user', ''));
+
+    if ($usuario !== '' && filter_var($usuario, FILTER_VALIDATE_EMAIL)) {
+        return $usuario;
+    }
+
     $host = (string) parse_url((string) config('base_url', ''), PHP_URL_HOST);
     $host = preg_replace('/^www\./i', '', $host);
 
