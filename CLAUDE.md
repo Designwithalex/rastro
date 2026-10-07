@@ -148,8 +148,10 @@ repo_settings(): array    // % descuento, WhatsApp, envíos, redes
 repo_login(string $email, string $password): ?array
 repo_register(array $data): array
 repo_user(int $id): ?array
-repo_orders(int $userId): array
-repo_order(string $code): ?array
+repo_orders(int $userId): array      // mock + checkout, por usuario_id
+repo_order(string $code): ?array     // sin control de dueño: no usar en vistas públicas
+repo_user_order(string $code, int $userId): ?array    // 07/10/2026
+repo_guest_order(string $code, string $email): ?array // 07/10/2026
 
 // Carrito (hoy vive en localStorage; esto resuelve los ids)
 repo_cart_items(array $ids): array

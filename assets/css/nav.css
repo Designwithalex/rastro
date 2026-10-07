@@ -571,15 +571,127 @@
   }
 }
 
-/* El "Salir" de la cabecera es un <form> para que sea un POST, pero tiene
-   que verse exactamente igual que los enlaces de al lado: el visitante no
-   tiene por qué notar la diferencia de mecanismo. */
-.cabecera__salir {
-  display: inline-flex;
+
+/* ============================================================
+   Menú de la cuenta
+
+   El nombre de quien entró abre una lista corta: Mis pedidos, Mis
+   datos y Cerrar sesión. Cuelga del borde derecho del nombre y no
+   sale a sangre como el mega-menú: son tres enlaces, no un catálogo.
+
+   Canto vivo y filete fuerte, como el buscador: es una pieza que
+   flota sobre la página y tiene que leerse separada de ella.
+   ============================================================ */
+
+.cuenta-menu {
+  position: relative;
+  display: none;
+}
+
+.cuenta-menu__disparador {
+  gap: var(--espaciado-8);
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* El nombre no puede empujar al carrito fuera de la barra. */
+.cuenta-menu__nombre {
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cuenta-menu__chevron {
+  display: flex;
+  transition: transform 0.2s ease;
+}
+
+.cuenta-menu__chevron .icono {
+  width: 16px;
+  height: 16px;
+}
+
+.cuenta-menu__disparador[aria-expanded="true"] {
+  color: var(--color-text-primary);
+}
+
+.cuenta-menu__disparador[aria-expanded="true"] .cuenta-menu__chevron {
+  transform: rotate(180deg);
+}
+
+.cuenta-menu__panel {
+  position: absolute;
+  top: calc(100% + var(--espaciado-8));
+  right: 0;
+  z-index: 2;
+  min-width: 240px;
+  background-color: var(--color-bg-surface);
+  border: var(--hairline) solid var(--color-border-strong);
+}
+
+.cuenta-menu__panel[hidden] {
+  display: none;
+}
+
+/* El correo dice con qué cuenta se entró. Es un dato, no un enlace. */
+.cuenta-menu__correo {
+  padding: var(--espaciado-12) var(--espaciado-16);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+  border-bottom: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cuenta-menu__lista li + li {
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.cuenta-menu__salir {
   margin: 0;
 }
 
-.cabecera__salir button {
+/* Enlace y botón se ven iguales: el "Cerrar sesión" es un POST, pero quien
+   lo usa no tiene por qué notar la diferencia de mecanismo. */
+.cuenta-menu__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding-inline: var(--espaciado-16);
+  color: var(--color-text-secondary);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cuenta-menu__item:hover,
+.cuenta-menu__item:focus-visible {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-elevated);
+  border-left-color: var(--color-accent-base);
+}
+
+@media (min-width: 1280px) {
+  .cuenta-menu {
+    display: block;
+  }
+}
+
+/* En el cajón, "Cerrar sesión" es un <form> que tiene que verse igual que
+   los enlaces de al lado. */
+.cajon__salir {
+  margin: 0;
+}
+
+.cajon__salir button {
   background: none;
   border: 0;
   padding: 0;

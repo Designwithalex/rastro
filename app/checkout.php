@@ -276,8 +276,9 @@ function checkout_totales(array $lineas, string $medio, array $settings): array
  * repo_register(): así las vistas de checkout y de registro pintan los
  * errores igual.
  *
- * TODO(backend): cuando exista sesión, estos campos vienen precargados del
- * usuario logueado y sólo se piden los que falten.
+ * Con sesión abierta los campos llegan precargados de la cuenta
+ * (checkout_datos_de_usuario()), pero se validan igual: la persona puede
+ * haberlos cambiado, y lo que manda es lo que vino en el POST.
  *
  * @return array{ok:bool, datos:array, errores:array<string,string>}
  */
@@ -338,6 +339,32 @@ function checkout_validar_comprador(array $post): array
     return ['ok' => $errores === [], 'datos' => $datos, 'errores' => $errores];
 }
 
+/**
+ * Los datos de la cuenta, con los nombres de campo del checkout.
+ *
+ * El DNI no está: la cuenta no lo guarda. La localidad se llama `ciudad`
+ * en la cuenta y `localidad` acá; este es el único lugar que lo traduce.
+ */
+function checkout_datos_de_usuario(array $usuario): array
+{
+    $direccion = is_array($usuario['direccion'] ?? null) ? $usuario['direccion'] : [];
+
+    $provincia = (string) ($direccion['provincia'] ?? '');
+
+    return [
+        'nombre'        => (string) ($usuario['nombre'] ?? ''),
+        'apellido'      => (string) ($usuario['apellido'] ?? ''),
+        'email'         => (string) ($usuario['email'] ?? ''),
+        'telefono'      => (string) ($usuario['telefono'] ?? ''),
+        'calle'         => (string) ($direccion['calle'] ?? ''),
+        'localidad'     => (string) ($direccion['ciudad'] ?? ''),
+        // Una provincia que no está en la lista dejaría el <select> en un
+        // valor que no se ve. Mejor vacío, y que la persona la elija.
+        'provincia'     => in_array($provincia, provincias(), true) ? $provincia : '',
+        'codigo_postal' => (string) ($direccion['codigo_postal'] ?? ''),
+    ];
+}
+
 /* ==========================================================================
    Armado del pedido
    ========================================================================== */
@@ -350,11 +377,13 @@ function checkout_validar_comprador(array $post): array
  * el panel de administración. Lo nuevo va en `comprador`, `entrega` y `pago`,
  * que son bloques aparte y no rompen a nadie que ya lea un pedido viejo.
  */
-function checkout_armar_pedido(array $lineas, array $totales, array $comprador, string $medio): array
+function checkout_armar_pedido(array $lineas, array $totales, array $comprador, string $medio, int $usuario_id = 0): array
 {
     return [
         'codigo'      => null, // lo pone el repository
-        'usuario_id'  => 0,    // TODO(backend): el id del usuario logueado
+        // 0 es una compra sin cuenta. Con sesión, el id es lo que hace que
+        // el pedido aparezca en "Mis pedidos" (repo_orders()).
+        'usuario_id'  => max(0, $usuario_id),
         'fecha'       => date('Y-m-d'),
         'estado'      => 'pendiente_pago',
         'medio_pago'  => $medio,

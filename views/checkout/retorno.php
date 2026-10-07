@@ -241,6 +241,15 @@ require RASTRO_VIEWS . '/layout/head.php';
                     </a>
                 <?php endif; ?>
 
+                <?php /* El detalle completo —con dirección— está en /pedido/{codigo}.
+                         Quien acaba de comprar desde este navegador lo abre directo:
+                         el checkout lo dejó desbloqueado en la sesión. Desde otro
+                         navegador, le pide el correo. */ ?>
+                <a class="boton boton--fantasma" href="<?= e(url('/pedido/' . rawurlencode((string) $pedido['codigo']))) ?>">
+                    <span class="t-mono-label">Ver mi pedido</span>
+                    <span class="boton__flecha" aria-hidden="true">→</span>
+                </a>
+
                 <?php if ($whatsapp !== null): ?>
                     <a class="boton boton--fantasma" href="<?= e($whatsapp) ?>"
                        rel="noopener" target="_blank">

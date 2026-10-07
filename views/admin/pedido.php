@@ -208,7 +208,13 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                         <dt>Dice Mercado Pago</dt>
                         <dd><?= e((string) ($pago['estado'] ?? '—')) ?></dd>
                     </div>
-                    <?php if (!empty($pago['detalle'])): ?>
+                    <?php /* El detalle es el MOTIVO de un rechazo o de una demora.
+                             En un pago aprobado Mercado Pago manda `accredited`, que
+                             mp_motivo_rechazo() no conoce y traducía con su texto por
+                             defecto: "El pago no se pudo completar", al lado de un
+                             "approved". Aprobado no tiene motivo que mostrar. */ ?>
+                    <?php if (!empty($pago['detalle'])
+                              && !in_array((string) ($pago['estado'] ?? ''), ['approved', 'authorized'], true)): ?>
                         <div>
                             <dt>Detalle</dt>
                             <dd><?= e(mp_motivo_rechazo((string) $pago['detalle'])) ?></dd>

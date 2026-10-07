@@ -30,7 +30,6 @@
  * TODO(backend):
  *   · Token CSRF en cuanto exista sesión. Hoy hay una comprobación de origen
  *     en checkout_mismo_origen(), que frena el caso simple y nada más.
- *   · Precargar los datos del usuario logueado en vez de pedirlos siempre.
  *   · Reservar stock al crear el pedido y descontarlo cuando el pago se
  *     aprueba. Hoy el stock se lee para validar y no se toca.
  */
@@ -61,6 +60,15 @@ $datos = [
     'documento' => '', 'calle' => '', 'localidad' => '', 'provincia' => '',
     'codigo_postal' => '', 'notas' => '',
 ];
+
+/* Con la sesión abierta, el formulario arranca con los datos de la cuenta.
+   Sólo en el GET: si el POST volvió con errores, se muestra lo que la
+   persona escribió, aunque sea distinto de lo guardado. */
+$usuario = sesion_usuario();
+
+if ($usuario !== null && !$enviado) {
+    $datos = checkout_datos_de_usuario($usuario) + $datos;
+}
 
 /* El pago online sólo se ofrece si hay credenciales cargadas. Sin token, el
    botón llevaría a una pantalla de error de Mercado Pago y la persona se
@@ -99,7 +107,7 @@ if ($enviado) {
         $falla = 'No quedó nada para comprar en el carrito. Revisá el catálogo y volvé a intentar.';
     } elseif ($errores === []) {
         $totales = checkout_totales($lineas, $medio, $settings);
-        $pedido  = checkout_armar_pedido($lineas, $totales, $datos, $medio);
+        $pedido  = checkout_armar_pedido($lineas, $totales, $datos, $medio, (int) ($usuario['id'] ?? 0));
 
         $alta = repo_order_create($pedido);
 
@@ -111,6 +119,12 @@ if ($enviado) {
             repo_log_pago('pedido.alta_fallida', ['error' => $alta['error']]);
         } else {
             $pedido = $alta['pedido'];
+
+            /* Quien acaba de hacer el pedido puede verlo sin cuenta y sin
+               volver a escribir el correo: al volver de Mercado Pago, el
+               botón "Ver mi pedido" abre directo. Va antes de cualquier
+               redirección porque escribe una cookie. */
+            sesion_desbloquear_pedido((string) $pedido['codigo']);
 
             if ($medio === 'transferencia') {
                 // La transferencia no pasa por ninguna pasarela: el pedido
@@ -190,15 +204,7 @@ $config_checkout = [
 
 $whatsapp = whatsapp_link($settings, 'Hola Rastro, quiero coordinar el pago de un pedido por transferencia.');
 
-/* Las provincias van en el HTML y no en un JSON: no las edita el panel, no
-   cambian y son 24. Un data/provincias.json sería una tabla de más. */
-$provincias = [
-    'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
-    'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
-    'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
-    'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
-    'Tierra del Fuego', 'Tucumán',
-];
+$provincias = provincias();
 
 /** Imprime el mensaje de error de un campo, si lo hay. */
 $error_de = static function (string $campo) use ($errores): string {
@@ -325,6 +331,22 @@ require RASTRO_VIEWS . '/layout/head.php';
                     <legend class="formulario__leyenda t-mono-label">
                         <span class="indice">02</span> Tus datos
                     </legend>
+
+                    <?php /* Con sesión, se dice con qué cuenta se compra: el
+                             pedido va a quedar en sus pedidos. Sin sesión, se
+                             ofrece entrar, que completa todo esto solo. */ ?>
+                    <?php if ($usuario !== null): ?>
+                        <p class="checkout__cuenta t-mono-texto-sm">
+                            Comprás con tu cuenta. El pedido va a quedar en
+                            <a href="<?= e(url('/cuenta')) ?>">Mis pedidos</a>.
+                        </p>
+                    <?php else: ?>
+                        <p class="checkout__cuenta t-mono-texto-sm">
+                            ¿Ya tenés cuenta?
+                            <a href="<?= e(url('/ingresar') . '?volver=' . rawurlencode('/checkout')) ?>">Ingresá</a>
+                            y completamos tus datos.
+                        </p>
+                    <?php endif; ?>
 
                     <div class="formulario__fila">
                         <p class="formulario__campo">

@@ -161,25 +161,50 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                 </form>
             </div>
 
-            <?php /* Con sesión abierta el enlace lleva a /cuenta y saluda por
-                     el nombre; sin sesión, a /ingresar. `sesion_usuario()`
-                     resuelve una sola vez por request y no arranca ninguna
-                     sesión si el visitante no trae la cookie, así que esto
-                     no le cuesta nada a quien pasa por la home sin cuenta. */ ?>
+            <?php /* Con sesión abierta, el nombre abre un menú con las tres
+                     cosas que se hacen con una cuenta: pedidos, datos y salir.
+                     Sin sesión, "Cuenta" lleva a /ingresar.
+
+                     Es un disclosure —botón con aria-expanded que muestra una
+                     lista de enlaces— y no un role="menu". Un menú ARIA promete
+                     flechas, typeahead y un foco que se mueve solo; tres enlaces
+                     no necesitan nada de eso, y prometerlo sin cumplirlo es peor
+                     que no prometerlo. Lo maneja assets/js/nav.js; sin JS se abre
+                     con hover y foco (sin-js.css).
+
+                     `sesion_usuario()` resuelve una sola vez por request y no
+                     arranca ninguna sesión si el visitante no trae la cookie, así
+                     que esto no le cuesta nada a quien pasa por la home sin cuenta. */ ?>
             <?php $layout_usuario = sesion_usuario(); ?>
             <?php if ($layout_usuario !== null): ?>
-                <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/cuenta'))) ?>"
-                   href="<?= e(url('/cuenta')) ?>"
-                   <?= es_ruta_exacta('/cuenta') ? 'aria-current="page"' : '' ?>>
-                    <?= e((string) ($layout_usuario['nombre'] ?? 'Mi cuenta')) ?>
-                </a>
+                <div class="cuenta-menu" data-cuenta-menu>
+                    <button class="<?= e(trim('cabecera__cuenta cuenta-menu__disparador t-mono-label ' . activo('/cuenta'))) ?>"
+                            type="button" aria-expanded="false" aria-controls="cuenta-menu-panel"
+                            data-cuenta-menu-disparador>
+                        <span class="cuenta-menu__nombre"><?= e((string) ($layout_usuario['nombre'] ?? 'Mi cuenta')) ?></span>
+                        <span class="cuenta-menu__chevron"><?= icono('chevron') ?></span>
+                    </button>
 
-                <?php /* Salir es un POST porque un GET que cierra sesión lo
-                         dispara cualquier cosa que precargue enlaces. */ ?>
-                <form class="cabecera__salir" method="post" action="<?= e(url('/salir')) ?>">
-                    <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
-                    <button class="cabecera__cuenta t-mono-label" type="submit">Cerrar sesión</button>
-                </form>
+                    <div class="cuenta-menu__panel" id="cuenta-menu-panel" data-cuenta-menu-panel hidden>
+                        <p class="cuenta-menu__correo t-mono-texto-sm"><?= e((string) ($layout_usuario['email'] ?? '')) ?></p>
+                        <ul class="cuenta-menu__lista">
+                            <li>
+                                <a class="cuenta-menu__item t-mono-label" href="<?= e(url('/cuenta') . '?seccion=pedidos') ?>">Mis pedidos</a>
+                            </li>
+                            <li>
+                                <a class="cuenta-menu__item t-mono-label" href="<?= e(url('/cuenta') . '?seccion=datos') ?>">Mis datos</a>
+                            </li>
+                            <li>
+                                <?php /* Salir es un POST porque un GET que cierra sesión
+                                         lo dispara cualquier cosa que precargue enlaces. */ ?>
+                                <form class="cuenta-menu__salir" method="post" action="<?= e(url('/salir')) ?>">
+                                    <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
+                                    <button class="cuenta-menu__item t-mono-label" type="submit">Cerrar sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             <?php else: ?>
                 <a class="<?= e(trim('cabecera__cuenta t-mono-label ' . activo('/ingresar'))) ?>"
                    href="<?= e(url('/ingresar')) ?>"

@@ -838,29 +838,101 @@ function repo_user(int $id): ?array
  *
  * Los items vienen tal como se guardaron: nombre, SKU y precio unitario del
  * día de la compra. No se enriquecen contra el catálogo actual a propósito.
+ *
+ * Lee los DOS orígenes: el mock y los que crea el checkout. Hasta el
+ * 07/10/2026 leía sólo el mock, y una compra real hecha con la sesión
+ * abierta no aparecía en "Mis pedidos".
+ *
+ * Se filtra por `usuario_id` y NO por el correo del comprador. El registro
+ * no verifica la casilla: si contara el correo, cualquiera que se registre
+ * con el mail de otro vería las compras que ese otro hizo sin cuenta, con
+ * su dirección y su teléfono. Las compras sin cuenta se consultan con el
+ * código más el correo, en /pedido (repo_guest_order()).
  */
 function repo_orders(int $userId): array
 {
+    if ($userId <= 0) {
+        return [];
+    }
+
     $pedidos = array_values(array_filter(
-        _repo_json('orders'),
+        array_merge(_repo_pedidos_leer(), _repo_json('orders')),
         static fn (array $o): bool => (int) ($o['usuario_id'] ?? 0) === $userId
     ));
 
-    usort($pedidos, static fn ($a, $b) => strcmp((string) ($b['fecha'] ?? ''), (string) ($a['fecha'] ?? '')));
+    usort($pedidos, static function (array $a, array $b): int {
+        return [(string) ($b['fecha'] ?? ''), (string) ($b['creado'] ?? '')]
+           <=> [(string) ($a['fecha'] ?? ''), (string) ($a['creado'] ?? '')];
+    });
 
     return $pedidos;
 }
 
 /**
+ * Un pedido por su código, SÓLO si es de ese usuario. Si no, null.
+ *
+ * Es la lectura que resuelve el TODO de seguridad de repo_order(): la
+ * pantalla del pedido nunca pregunta "dame RF-2026-XXXX", pregunta "dame
+ * RF-2026-XXXX de este usuario". Un código ajeno da lo mismo que uno que
+ * no existe, así que no sirve para averiguar cuáles existen.
+ */
+function repo_user_order(string $code, int $userId): ?array
+{
+    if ($code === '' || $userId <= 0) {
+        return null;
+    }
+
+    $pedido = repo_order_local($code) ?? repo_order($code);
+
+    if ($pedido === null || (int) ($pedido['usuario_id'] ?? 0) !== $userId) {
+        return null;
+    }
+
+    return $pedido;
+}
+
+/**
+ * Un pedido del checkout por su código, SÓLO si el correo coincide con el
+ * del comprador. Es la puerta de quien compró sin cuenta.
+ *
+ * Hacen falta las dos cosas. El código solo no alcanza: es corto y viaja
+ * por WhatsApp. El correo solo, tampoco: es público. Juntos son algo que
+ * tiene quien compró y nadie más, y la vista además frena por IP después
+ * de ocho intentos fallidos.
+ *
+ * Sólo mira los pedidos que creó el sitio. Los del mock tienen códigos
+ * adivinables (RF-año-ddmm) y no tienen comprador.
+ */
+function repo_guest_order(string $code, string $email): ?array
+{
+    $email = _repo_normalizar($email);
+
+    if ($code === '' || $email === '') {
+        return null;
+    }
+
+    $pedido = repo_order_local($code);
+
+    if ($pedido === null) {
+        return null;
+    }
+
+    $comprador = (string) ($pedido['comprador']['email'] ?? '');
+
+    if ($comprador === '' || !hash_equals(_repo_normalizar($comprador), $email)) {
+        return null;
+    }
+
+    return $pedido;
+}
+
+/**
  * Un pedido por su código (RF-2026-0418).
  *
- * TODO(backend): esta función NO valida quién pide el pedido. Hoy da igual
- * porque no hay sesión y la vista no está escrita, pero el código es
- * adivinable (RF-año-ddmm) y devuelve nombre, dirección y total de una
- * compra. Antes de exponerla en /cuenta hay que exigir sesión y comparar
- * usuario_id contra el usuario logueado, o recibir el id del dueño como
- * segundo argumento y filtrar acá. Si no, cualquiera lee los pedidos de
- * cualquiera probando códigos.
+ * OJO: esta función NO valida quién pide el pedido, y el código del mock es
+ * adivinable (RF-año-ddmm). Ninguna pantalla pública la llama directo: la
+ * del pedido usa repo_user_order() —con el id de la sesión— o
+ * repo_guest_order() —con el correo del comprador—, que sí filtran.
  */
 function repo_order(string $code): ?array
 {

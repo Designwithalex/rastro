@@ -98,8 +98,8 @@ define('RASTRO_RUTA', $camino);
    sin forzar no arranca nada si el visitante no trae la cookie, así que quien
    nunca se identificó no paga un archivo de sesión (app/sesion.php).
 
-   Las pantallas que además ESCRIBEN —registro, y el arrepentimiento que deja
-   constancia— necesitan el lado de escritura del repository. */
+   Las pantallas que además ESCRIBEN —registro, Mis datos, y el
+   arrepentimiento que deja constancia— necesitan el lado de escritura del repository. */
 require __DIR__ . '/app/sesion.php';
 
 /* Se abre ACÁ, antes de que la vista imprima un solo byte. Una sesión de PHP
@@ -111,7 +111,8 @@ require __DIR__ . '/app/sesion.php';
    la razón por la que esto se puede permitir en todas las rutas. */
 sesion_abrir();
 
-if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento'], true)
+/* /cuenta guarda los datos que edita el cliente en "Mis datos". */
+if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento', '/cuenta'], true)
     || str_starts_with(RASTRO_RUTA, '/recuperar')) {
     require __DIR__ . '/app/repository-escritura.php';
 }

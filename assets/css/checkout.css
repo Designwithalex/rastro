@@ -143,6 +143,17 @@
   justify-content: center;
 }
 
+/* "Comprás con tu cuenta" / "¿Ya tenés cuenta? Ingresá". */
+.checkout__cuenta {
+  color: var(--color-text-secondary);
+}
+
+.checkout__cuenta a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .checkout__legal {
   color: var(--color-text-secondary);
 }

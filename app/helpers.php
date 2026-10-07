@@ -375,6 +375,27 @@ function estados_pedido(): array
 }
 
 /**
+ * Las 24 provincias, en el orden del desplegable.
+ *
+ * Viven acá y no en un JSON porque no las edita el panel y no cambian. Las
+ * usan el checkout y "Mis datos": si cada uno tuviera su lista, una
+ * dirección guardada en la cuenta podría no coincidir con ninguna opción
+ * del checkout y el autocompletado dejaría la provincia en blanco.
+ *
+ * @return list<string>
+ */
+function provincias(): array
+{
+    return [
+        'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
+        'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
+        'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
+        'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
+        'Tierra del Fuego', 'Tucumán',
+    ];
+}
+
+/**
  * Ruta que se está mostrando, normalizada y sin barra final.
  * "/" se mantiene como "/".
  */
