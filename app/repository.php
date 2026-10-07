@@ -438,7 +438,8 @@ function repo_clients(): array
 
 /**
  * Banners activos, ordenados. La vista elige por `posicion`
- * (hero | mayorista | franja).
+ * (hero_fondo | hero | mayorista | franja). Los de `franja` son el texto
+ * de la barra bordeaux de arriba (layout/marquee.php).
  */
 function repo_banners(): array
 {

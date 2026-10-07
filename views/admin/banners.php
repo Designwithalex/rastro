@@ -58,10 +58,13 @@ $posiciones = [
     ],
     'franja' => [
         'titulo' => 'Barra de texto',
-        'texto'  => 'La línea que corre arriba de todo. No lleva imagen.',
+        // No lleva enlace: la franja es decorativa (aria-hidden) y un enlace
+        // adentro recibiría el foco sin anunciarse. Ver layout/marquee.php.
+        'texto'  => 'La franja bordeaux que corre arriba de todo. Si hay varias activas, '
+                  . 'se alternan en el orden indicado. Sin ninguna activa, dice "Equipamiento profesional".',
         'foto'   => '',
         'imagen' => false,
-        'enlace' => true,
+        'enlace' => false,
         'alt'    => false,
     ],
 ];
