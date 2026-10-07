@@ -187,7 +187,10 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                     $activo = ($banner['activo'] ?? false) === true;
                     ?>
                     <li class="panel-ficha<?= $activo ? '' : ' panel-ficha--apagada' ?>">
-                        <form class="panel-ficha__formulario" method="post" enctype="multipart/form-data"
+                        <?php /* Sin imagen no hay primera columna: sin el modificador,
+                                 los campos caían en el hueco de 120 px de la miniatura. */ ?>
+                        <form class="panel-ficha__formulario<?= $regla['imagen'] ? '' : ' panel-ficha__formulario--sin-marca' ?>"
+                              method="post" enctype="multipart/form-data"
                               action="<?= e(url('/admin/banners')) ?>">
                             <input type="hidden" name="csrf" value="<?= e(panel_csrf()) ?>">
                             <input type="hidden" name="accion" value="guardar">
