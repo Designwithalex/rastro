@@ -1,12 +1,13 @@
 /* ============================================================
    nav.js — Rastro Fitness
-   Tres piezas de navegación, sin dependencias:
+   Cuatro piezas de navegación, sin dependencias:
 
      1. el mega-menú de PRODUCTOS en escritorio,
      2. el cajón de celular,
-     3. el buscador plegable de la barra de celular.
+     3. el buscador plegable de la barra de celular,
+     4. el menú de la cuenta, que abre el nombre de quien entró.
 
-   Las tres comparten una idea: el marcado ya está completo y en el
+   Las cuatro comparten una idea: el marcado ya está completo y en el
    orden correcto cuando llega el JavaScript. Este archivo no escribe
    HTML, solo prende y apaga estados. Si no corre, la página sigue
    teniendo un menú (ver assets/css/sin-js.css).
@@ -575,12 +576,85 @@
     });
   }
 
+  /* ==========================================================
+     4. Menú de la cuenta
+
+     Un disclosure, no un diálogo ni un role="menu": el botón abre una
+     lista de tres enlaces y Tab recorre la lista en orden. Se cierra con
+     Esc (devolviendo el foco al nombre), tocando afuera o cuando el foco
+     se va del bloque.
+     ========================================================== */
+
+  function iniciarCuentaMenu() {
+    var contenedor = doc.querySelector('[data-cuenta-menu]');
+
+    if (!contenedor) {
+      return;
+    }
+
+    var disparador = contenedor.querySelector('[data-cuenta-menu-disparador]');
+    var panel = contenedor.querySelector('[data-cuenta-menu-panel]');
+
+    if (!disparador || !panel) {
+      return;
+    }
+
+    function abierto() {
+      return disparador.getAttribute('aria-expanded') === 'true';
+    }
+
+    function abrir() {
+      panel.hidden = false;
+      disparador.setAttribute('aria-expanded', 'true');
+    }
+
+    function cerrar(devolverFoco) {
+      if (!abierto()) {
+        return;
+      }
+
+      panel.hidden = true;
+      disparador.setAttribute('aria-expanded', 'false');
+
+      if (devolverFoco) {
+        disparador.focus();
+      }
+    }
+
+    disparador.addEventListener('click', function () {
+      if (abierto()) {
+        cerrar(false);
+      } else {
+        abrir();
+      }
+    });
+
+    contenedor.addEventListener('keydown', function (evento) {
+      if (evento.key === 'Escape' || evento.key === 'Esc') {
+        cerrar(true);
+      }
+    });
+
+    contenedor.addEventListener('focusout', function (evento) {
+      if (evento.relatedTarget && !contenedor.contains(evento.relatedTarget)) {
+        cerrar(false);
+      }
+    });
+
+    doc.addEventListener('click', function (evento) {
+      if (!contenedor.contains(evento.target)) {
+        cerrar(false);
+      }
+    });
+  }
+
   /* ========================================================== */
 
   function iniciar() {
     iniciarMega();
     iniciarCajon();
     iniciarBusqueda();
+    iniciarCuentaMenu();
   }
 
   if (doc.readyState === 'loading') {

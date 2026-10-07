@@ -39,12 +39,20 @@ $layout_columnas = [
     [
         'letra'   => 'C',
         'titulo'  => 'Tu cuenta',
-        'enlaces' => [
-            ['texto' => 'Ingresar',      'ruta' => '/ingresar'],
-            ['texto' => 'Crear cuenta',  'ruta' => '/registro'],
-            ['texto' => 'Mis pedidos',   'ruta' => '/cuenta'],
-            ['texto' => 'Carrito',       'ruta' => '/carrito'],
-        ],
+        // Con sesión no tiene sentido ofrecer "Ingresar" y "Crear cuenta".
+        // "Consultar un pedido" es la puerta de quien compró sin cuenta.
+        'enlaces' => sesion_usuario() !== null
+            ? [
+                ['texto' => 'Mis pedidos',   'ruta' => '/cuenta?seccion=pedidos'],
+                ['texto' => 'Mis datos',     'ruta' => '/cuenta?seccion=datos'],
+                ['texto' => 'Carrito',       'ruta' => '/carrito'],
+            ]
+            : [
+                ['texto' => 'Ingresar',            'ruta' => '/ingresar'],
+                ['texto' => 'Crear cuenta',        'ruta' => '/registro'],
+                ['texto' => 'Consultar un pedido', 'ruta' => '/pedido'],
+                ['texto' => 'Carrito',             'ruta' => '/carrito'],
+            ],
     ],
 ];
 ?>

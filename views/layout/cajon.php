@@ -43,8 +43,14 @@ $cajon_productos_abierto = es_ruta_activa('/catalogo') || es_ruta_activa('/produ
    dice layout.css—, sólo que el cajón nunca lo había recibido. */
 $cajon_usuario = sesion_usuario();
 
+/* Con sesión, las mismas tres opciones que el menú del nombre en la
+   cabecera de escritorio: el cajón ES la cabecera en el celular, y lo que
+   en una se puede hacer en la otra también. */
 $cajon_secundario = $cajon_usuario !== null
-    ? [['texto' => 'Mis pedidos', 'ruta' => '/cuenta']]
+    ? [
+        ['texto' => 'Mis pedidos', 'ruta' => '/cuenta?seccion=pedidos'],
+        ['texto' => 'Mis datos',   'ruta' => '/cuenta?seccion=datos'],
+    ]
     : [
         ['texto' => 'Ingresar',     'ruta' => '/ingresar'],
         ['texto' => 'Crear cuenta', 'ruta' => '/registro'],
@@ -150,9 +156,16 @@ $cajon_secundario = $cajon_usuario !== null
                     </li>
                 <?php endforeach; ?>
 
-                <?php /* Acá no va un "Cerrar sesión": sería un tercer lugar para
-                         lo mismo. Desde el celular se llega por "Mis pedidos",
-                         que lleva a /cuenta, y ahí está el botón de verdad. */ ?>
+                <?php if ($cajon_usuario !== null): ?>
+                    <li>
+                        <?php /* POST, igual que en la cabecera: un GET que cierra
+                                 sesión lo dispara cualquier precarga de enlaces. */ ?>
+                        <form class="cajon__salir" method="post" action="<?= e(url('/salir')) ?>">
+                            <input type="hidden" name="csrf" value="<?= e(sesion_csrf()) ?>">
+                            <button class="cajon__enlace-secundario t-body-sm" type="submit">Cerrar sesión</button>
+                        </form>
+                    </li>
+                <?php endif; ?>
             </ul>
 
             <div class="cajon__regla">

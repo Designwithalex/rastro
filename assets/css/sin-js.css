@@ -68,3 +68,11 @@
     display: block;
   }
 }
+
+/* --- Menú de la cuenta ---------------------------------------
+   Sin JS el botón del nombre no abre nada. El panel se muestra al pasar
+   el mouse o al llegar con Tab, que con tres enlaces alcanza. */
+.cuenta-menu:hover .cuenta-menu__panel[hidden],
+.cuenta-menu:focus-within .cuenta-menu__panel[hidden] {
+  display: block;
+}
