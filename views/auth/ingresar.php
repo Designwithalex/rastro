@@ -37,8 +37,18 @@ $estilos     = ['componentes', 'catalogo', 'cuenta'];
 /* Quien ya entró no tiene nada que hacer acá. Sin esto, volver atrás
    después de ingresar muestra el formulario otra vez y parece que la
    sesión se perdió. */
+/* ?volver= lo usa el checkout: "¿Ya tenés cuenta? Ingresá" tiene que
+   devolver al checkout y no a /cuenta. Se anota como destino y lo valida
+   sesion_destino(), que sólo acepta rutas del propio sitio. */
+$volver = param('volver');
+
+if ($volver !== '') {
+    sesion_abrir(true);
+    $_SESSION['cliente_destino'] = $volver;
+}
+
 if (sesion_hay_usuario()) {
-    header('Location: ' . url('/cuenta'), true, 303);
+    header('Location: ' . url(sesion_destino()), true, 303);
 
     exit;
 }
@@ -145,6 +155,13 @@ require RASTRO_VIEWS . '/layout/head.php';
             <p class="auth__alterna t-mono-texto">
                 ¿No tenés cuenta?
                 <a class="auth__enlace t-mono-label" href="<?= e(url('/registro')) ?>">Crear una</a>
+            </p>
+
+            <?php /* Quien compró sin cuenta llega acá buscando su pedido.
+                     No necesita crear una: le alcanza con el código y el correo. */ ?>
+            <p class="auth__alterna t-mono-texto">
+                ¿Compraste sin cuenta?
+                <a class="auth__enlace t-mono-label" href="<?= e(url('/pedido')) ?>">Consultá tu pedido</a>
             </p>
 
             <?php
