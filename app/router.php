@@ -51,6 +51,14 @@ function router_tabla(): array
         '#^/ingresar$#'                => ['auth/ingresar',          []],
         '#^/registro$#'                => ['auth/registro',          []],
         '#^/cuenta$#'                  => ['cuenta/index',           []],
+
+        /* El detalle de un pedido es UNA pantalla para los dos casos: quien
+           tiene cuenta y quien compró sin cuenta. Lo que cambia es cómo
+           demuestra que es suyo —la sesión o el código más el correo—, y
+           eso lo decide la vista. /pedido sin código es el formulario de
+           consulta. */
+        '#^/pedido$#'                  => ['pedido/consulta',        []],
+        '#^/pedido/([A-Za-z0-9-]+)$#'  => ['pedido/detalle',         ['codigo']],
         '#^/salir$#'                   => ['auth/salir',            []],
         '#^/recuperar$#'               => ['auth/recuperar',        []],
         '#^/recuperar/([a-f0-9]{64})$#' => ['auth/restablecer',      ['token']],

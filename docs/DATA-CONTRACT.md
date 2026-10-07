@@ -283,7 +283,14 @@ Un usuario por id, sin hash.
 
 ### `repo_orders(int $userId): array`
 
-Pedidos de un usuario, del más nuevo al más viejo.
+Pedidos de un usuario, del más nuevo al más viejo. Desde el 07/10/2026 lee
+**las dos** fuentes: el mock y los pedidos que crea el checkout (que guardan el
+`usuario_id` de quien compró con la sesión abierta; `0` es una compra sin
+cuenta).
+
+Filtra por `usuario_id`, **nunca por el correo del comprador**: el registro no
+verifica la casilla, y contar el correo dejaría que cualquiera que se registre
+con el mail de otro vea las compras que ese otro hizo sin cuenta.
 
 Los items vienen **tal como se guardaron**: nombre, SKU y `precio_unitario`
 del día de la compra. **No se enriquecen contra el catálogo actual y no se
@@ -294,11 +301,21 @@ pedido guarda además su propio `descuento_aplicado_pct`.
 
 Un pedido por su código (`RF-2026-0418`).
 
-> ⚠️ **Esta función no valida quién pide el pedido, y el código es adivinable**
-> (`RF-año-ddmm`). Devuelve nombre, dirección y total de una compra. **Por eso
-> la pantalla de detalle de pedido no está construida.** Antes de exponerla
-> hay que exigir sesión y comparar `usuario_id` contra el usuario logueado, o
-> recibir el id del dueño como segundo argumento y filtrar acá.
+> ⚠️ **Esta función no valida quién pide el pedido, y el código del mock es
+> adivinable** (`RF-año-ddmm`). Ninguna pantalla pública la llama directo: el
+> detalle (`/pedido/{codigo}`) usa una de las dos de abajo.
+
+### `repo_user_order(string $code, int $userId): ?array`
+
+Un pedido (del checkout o del mock) **sólo si es de ese usuario**. Un código
+ajeno devuelve lo mismo que uno inexistente: `null`.
+
+### `repo_guest_order(string $code, string $email): ?array`
+
+Un pedido del checkout **sólo si el correo coincide** con el del comprador (sin
+distinguir mayúsculas). Es la puerta de quien compró sin cuenta, en `/pedido`.
+Hacen falta los dos datos; la vista además frena por IP después de ocho
+intentos fallidos.
 
 ### Estados de pedido
 

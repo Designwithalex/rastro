@@ -177,7 +177,7 @@
 
 /* "Cerrar sesión" es un <form> para que sea un POST, pero tiene que verse
    exactamente igual que los enlaces de arriba: el visitante no tiene por qué
-   notar la diferencia de mecanismo. Mismo criterio que .cabecera__salir. */
+   notar la diferencia de mecanismo. Mismo criterio que .cuenta-menu__item. */
 .cuenta__salir {
   margin: 0;
 }
@@ -304,6 +304,97 @@
   color: var(--color-text-disabled);
 }
 
+/* --- El código de cada pedido lleva al detalle --------------- */
+.cuenta__pedido {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.cuenta__pedido:hover {
+  text-decoration-color: currentColor;
+}
+
+/* --- Mis datos ---------------------------------------------- */
+.cuenta__formulario {
+  max-width: 760px;
+}
+
+.cuenta__guardar {
+  align-self: flex-start;
+}
+
+/* ============================================================
+   Detalle de un pedido  (/pedido/{codigo})
+
+   Dos columnas en escritorio, como el checkout: a la izquierda lo
+   que se compró y cuánto salió, a la derecha los datos del pedido.
+   ============================================================ */
+
+.pedido {
+  grid-template-columns: 1fr;
+}
+
+.pedido__volver {
+  padding-top: var(--espaciado-24);
+}
+
+.pedido__principal,
+.pedido__lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-16);
+  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-40);
+}
+
+.pedido__lateral {
+  background-color: var(--color-bg-surface);
+}
+
+.pedido__titulo {
+  color: var(--color-text-secondary);
+}
+
+.pedido__sku {
+  display: block;
+  margin-top: var(--espaciado-4);
+  color: var(--color-text-secondary);
+}
+
+.pedido__totales {
+  margin-top: var(--espaciado-8);
+}
+
+.pedido__datos {
+  display: flex;
+  flex-direction: column;
+}
+
+.pedido__dato {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--espaciado-16);
+  align-items: baseline;
+  padding-block: var(--espaciado-12);
+  border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+.pedido__dato dt {
+  color: var(--color-text-secondary);
+}
+
+.pedido__dato dd {
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.pedido__contacto {
+  justify-content: space-between;
+  width: 100%;
+}
+
 /* ============================================================
    Escritorio
    ============================================================ */
@@ -361,5 +452,15 @@
 
   .cuenta__panel {
     padding: var(--espaciado-40) var(--margen-desktop) var(--espaciado-80);
+  }
+
+  .pedido {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    align-items: stretch;
+  }
+
+  .pedido__principal,
+  .pedido__lateral {
+    padding: var(--espaciado-40);
   }
 }

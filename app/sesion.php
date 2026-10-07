@@ -236,6 +236,51 @@ function sesion_destino(string $defecto = '/cuenta'): string
 }
 
 /* ==========================================================================
+   Pedidos que este navegador puede ver sin cuenta
+   ========================================================================== */
+
+/** Cuántos códigos se recuerdan. Alcanza y sobra para quien compra seguido. */
+const SESION_MAX_PEDIDOS = 20;
+
+/**
+ * Anota que este navegador demostró ser quien hizo un pedido.
+ *
+ * Pasa en dos lugares: al crear el pedido en el checkout —quien lo acaba
+ * de hacer obviamente puede verlo— y al consultarlo en /pedido con el
+ * código y el correo. Después de eso /pedido/{codigo} se abre directo,
+ * sin volver a pedir nada, mientras dure la sesión.
+ *
+ * Fuerza la sesión: quien compra sin cuenta no trae cookie, y sin cookie
+ * no hay dónde anotarlo. Tiene que llamarse antes de imprimir HTML.
+ */
+function sesion_desbloquear_pedido(string $codigo): void
+{
+    if ($codigo === '') {
+        return;
+    }
+
+    sesion_abrir(true);
+
+    $codigos = array_values(array_filter(
+        (array) ($_SESSION['cliente_pedidos'] ?? []),
+        static fn ($c): bool => is_string($c) && $c !== $codigo
+    ));
+
+    $codigos[] = $codigo;
+
+    $_SESSION['cliente_pedidos'] = array_slice($codigos, -SESION_MAX_PEDIDOS);
+}
+
+/** ¿Este navegador ya demostró que el pedido es suyo? */
+function sesion_pedido_desbloqueado(string $codigo): bool
+{
+    sesion_abrir();
+
+    return $codigo !== ''
+        && in_array($codigo, (array) ($_SESSION['cliente_pedidos'] ?? []), true);
+}
+
+/* ==========================================================================
    CSRF
    ========================================================================== */
 
