@@ -111,6 +111,18 @@ require __DIR__ . '/app/sesion.php';
    la razón por la que esto se puede permitir en todas las rutas. */
 sesion_abrir();
 
+/* Ninguna página HTML se guarda en caché, ni en el navegador ni en el CDN.
+   Cambian según quién mira: con sesión la cabecera dice el nombre y sin
+   sesión dice "Cuenta". Con la hora de caché que el .htaccess le daba a
+   todo, quien entraba a la home antes de ingresar seguía viendo "Cuenta"
+   después, porque el navegador ni le preguntaba al servidor. `no-cache`
+   permite guardarla pero obliga a revalidar en cada visita; `private` la
+   saca del CDN. Los estáticos siguen con su caché larga (llevan ?v=).
+
+   El panel lo pisa más abajo con `no-store`, que es más estricto. */
+header('Cache-Control: private, no-cache, must-revalidate');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+
 /* /cuenta guarda los datos que edita el cliente en "Mis datos". */
 if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento', '/cuenta'], true)
     || str_starts_with(RASTRO_RUTA, '/recuperar')) {
