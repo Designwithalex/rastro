@@ -96,7 +96,7 @@ app/               config, router, repository, helpers   [privada]
   mercadopago.php            la API de Mercado Pago
   checkout.php               armado y validación del pedido
 views/             layout, partials y páginas            [privada]
-  admin/                     las 9 pantallas del panel
+  admin/                     las pantallas del panel (+ Administradores, 07/10/2026)
 data/              datos JSON — los escribe el panel     [privada]
 assets/            css, js, img, fonts                   [pública]
   img/subidas/               lo que sube el cliente, + .htaccess propio

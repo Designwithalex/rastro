@@ -57,7 +57,7 @@ app/               config, router, repository, helpers   [privada]
   repository-escritura.php   escritura — sólo el panel
   panel.php                  sesión, CSRF, subidas — sólo /admin
 views/             layout, partials y las 12 páginas     [privada]
-  admin/                     las 9 pantallas del panel
+  admin/                     las pantallas del panel (+ Administradores, 07/10/2026)
 data/              datos JSON — los escribe el panel     [privada]
 assets/            css, js, img, fonts                   [pública]
   img/subidas/               lo que sube el cliente, + .htaccess propio

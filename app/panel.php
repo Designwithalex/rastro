@@ -27,8 +27,8 @@
  * compartido "todavía nadie sabe la URL" no es una medida de seguridad.
  *
  * Además de ese admin de arranque, `panel_ingresar()` acepta cualquier
- * usuario de `data/users.json` con `rol: "admin"`. Eso es lo que va a usar
- * el backend cuando haya usuarios de verdad; hoy no hay ninguno cargado.
+ * usuario registrado con `rol: "admin"`. Ese rol se da y se quita desde la
+ * sección Administradores del panel (views/admin/administradores.php).
  * ---------------------------------------------------------------------
  */
 
@@ -98,7 +98,33 @@ function panel_usuario(): ?array
 
     $usuario = $_SESSION['panel_usuario'] ?? null;
 
-    return is_array($usuario) ? $usuario : null;
+    if (!is_array($usuario)) {
+        return null;
+    }
+
+    /* Los administradores que salen de la base se revalidan en cada pedido.
+       Sin esto, quitarle el acceso a alguien desde "Administradores" no le
+       cerraba la sesión que ya tenía abierta: seguía editando hasta dos
+       horas más. El de config.php no se revalida: sale de un archivo que
+       sólo se cambia con acceso al servidor. */
+    if (($usuario['origen'] ?? '') === 'users') {
+        static $vigente = null;
+
+        if ($vigente === null) {
+            $actual  = repo_user((int) ($usuario['id'] ?? 0));
+            $vigente = $actual !== null
+                && ($actual['rol'] ?? '') === 'admin'
+                && ($actual['activo'] ?? true) === true;
+        }
+
+        if (!$vigente) {
+            unset($_SESSION['panel_usuario']);
+
+            return null;
+        }
+    }
+
+    return $usuario;
 }
 
 /**
@@ -481,7 +507,7 @@ function panel_pesar(int $bytes): string
    Presentación
    ========================================================================== */
 
-/** Las nueve secciones del panel, en el orden en que van en la barra. */
+/** Las secciones del panel, en el orden en que van en la barra. */
 function panel_secciones(): array
 {
     return [
@@ -494,6 +520,7 @@ function panel_secciones(): array
         ['ruta' => '/admin/banners',       'titulo' => 'Banners',       'exacta' => false],
         ['ruta' => '/admin/arrepentimientos', 'titulo' => 'Arrepentimientos', 'exacta' => false],
         ['ruta' => '/admin/nosotros',      'titulo' => 'Nosotros',      'exacta' => false],
+        ['ruta' => '/admin/administradores', 'titulo' => 'Administradores', 'exacta' => false],
         ['ruta' => '/admin/configuracion', 'titulo' => 'Configuración', 'exacta' => false],
     ];
 }
