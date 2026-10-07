@@ -923,6 +923,12 @@ textarea.campo-panel__control {
   align-items: start;
 }
 
+/* Las fichas sin imagen (la barra de texto) no tienen miniatura: campos y
+   botón ocupan todo el ancho. */
+.panel-ficha__formulario--sin-marca {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .panel-ficha__marca {
   display: grid;
   place-items: center;
