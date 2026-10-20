@@ -66,7 +66,10 @@ require RASTRO_VIEWS . '/layout/head.php';
         </p>
     <?php endif; ?>
 
-    <?php /* ===== Encabezado + declaración + barra de datos ============ */ ?>
+    <?php /* ===== Encabezado + declaración + barra de datos ============
+             La banda de afuera lleva la foto de fondo a todo el ancho; el
+             encabezado sigue en el contenedor. La foto la pone el CSS. */ ?>
+    <div class="nosotros__portada">
     <header class="nosotros__encabezado contenedor">
         <p class="indice-seccion t-mono-label">
             <span class="indice"><?= e($indice()) ?></span>
@@ -87,6 +90,7 @@ require RASTRO_VIEWS . '/layout/head.php';
         require RASTRO_VIEWS . '/partials/cifras.php';
         ?>
     </header>
+    </div>
 
     <?php /* ===== Los fundadores ======================================= */ ?>
     <section class="nosotros__seccion contenedor" aria-labelledby="nosotros-fundadores">
@@ -334,73 +338,77 @@ require RASTRO_VIEWS . '/layout/head.php';
         </section>
     <?php endif; ?>
 
-    <?php /* ===== Dónde estamos + contacto =============================
+    <?php /* ===== Contacto =============================================
              Ancla del ítem 04 CONTACTO del menú: no hay página de contacto
-             aparte. Y va una foto del depósito, no un mapa: un mapa dice
-             "hay un pin", una foto del galpón dice "hay stock". */ ?>
+             aparte. Desde el 20/10/2026, con el armado que pidió Ape: los
+             datos en el panel bordeaux a la izquierda, como el de la
+             cotización de /mayoristas, y una foto de ellos a la derecha.
+             La foto se carga en /admin/nosotros; mientras no esté, va la
+             del depósito. */ ?>
     <section class="nosotros__seccion contenedor" id="contacto" aria-labelledby="nosotros-contacto">
         <p class="indice-seccion t-mono-label">
             <span class="indice"><?= e($indice()) ?></span>
             <?= e($nosotros['donde_estamos']['titulo'] ?? '') ?>
         </p>
 
-        <h2 class="nosotros__subtitulo t-display-l" id="nosotros-contacto">
-            <?= e($nosotros['donde_estamos']['texto'] ?? '') ?>
-        </h2>
+        <?php $contacto_foto = (string) ($nosotros['donde_estamos']['foto'] ?? ''); ?>
+        <div class="<?= $contacto_foto !== '' ? 'contacto contacto--con-foto reticula' : 'contacto reticula' ?>">
+            <div class="contacto__panel">
+                <h2 class="contacto__titulo t-display-m" id="nosotros-contacto">
+                    <?= e($nosotros['donde_estamos']['texto'] ?? '') ?>
+                </h2>
 
-        <div class="deposito">
-            <?php if (($nosotros['donde_estamos']['foto'] ?? null) !== null): ?>
-                <?php
-                $deposito_foto    = (string) $nosotros['donde_estamos']['foto'];
-                $deposito_webp    = imagen_webp($deposito_foto);
-                $deposito_medidas = imagen_medidas($deposito_foto);
-                ?>
-                <picture class="deposito__foto">
-                    <?php if ($deposito_webp !== null): ?>
-                        <source srcset="<?= e($deposito_webp) ?>" type="image/webp">
-                    <?php endif; ?>
-                    <img src="<?= e(asset($deposito_foto)) ?>"
-                         alt="<?= e($nosotros['donde_estamos']['foto_alt'] ?? '') ?>"
-                         <?php if ($deposito_medidas !== null): ?>width="<?= e((string) $deposito_medidas['ancho']) ?>" height="<?= e((string) $deposito_medidas['alto']) ?>"<?php endif; ?>
-                         loading="lazy" decoding="async">
-                </picture>
-            <?php endif; ?>
-
-            <dl class="deposito__datos reticula reticula--celdas">
-                <div class="deposito__fila">
-                    <dt class="t-mono-label">Depósito</dt>
-                    <dd class="t-body-sm">
-                        <?php if (($nosotros['donde_estamos']['direccion'] ?? null) !== null): ?>
-                            <?= e($nosotros['donde_estamos']['direccion']) ?>
-                        <?php else: ?>
-                            <span class="dato-pendiente t-mono-label indice">Dirección</span>
-                        <?php endif; ?>
-                    </dd>
-                </div>
-                <div class="deposito__fila">
-                    <dt class="t-mono-label">Horario</dt>
-                    <dd class="t-body-sm"><?= e($nosotros_settings['horario'] ?? '') ?></dd>
-                </div>
-                <?php if ($nosotros_whatsapp !== null): ?>
-                    <div class="deposito__fila">
-                        <dt class="t-mono-label">WhatsApp</dt>
-                        <dd class="t-body-sm">
-                            <a class="deposito__enlace" href="<?= e($nosotros_whatsapp) ?>" rel="noopener" target="_blank">
-                                <?= e($nosotros_settings['whatsapp'] ?? '') ?>
-                                <span class="visualmente-oculto">(abre WhatsApp en una pestaña nueva)</span>
+                <dl class="contacto__datos">
+                    <div class="contacto__fila">
+                        <dt class="t-mono-label-sm">Depósito</dt>
+                        <dd class="t-mono-texto">
+                            <?php if (($nosotros['donde_estamos']['direccion'] ?? '') !== '' && $nosotros['donde_estamos']['direccion'] !== null): ?>
+                                <?= e($nosotros['donde_estamos']['direccion']) ?>
+                            <?php else: ?>
+                                <span class="contacto__pendiente">[ Dirección ]</span>
+                            <?php endif; ?>
+                        </dd>
+                    </div>
+                    <div class="contacto__fila">
+                        <dt class="t-mono-label-sm">Horario</dt>
+                        <dd class="t-mono-texto"><?= e($nosotros_settings['horario'] ?? '') ?></dd>
+                    </div>
+                    <div class="contacto__fila">
+                        <dt class="t-mono-label-sm">Correo</dt>
+                        <dd class="t-mono-texto">
+                            <a class="contacto__enlace" href="mailto:<?= e($nosotros_settings['email'] ?? '') ?>">
+                                <?= e($nosotros_settings['email'] ?? '') ?>
                             </a>
                         </dd>
                     </div>
-                <?php endif; ?>
-                <div class="deposito__fila">
-                    <dt class="t-mono-label">Correo</dt>
-                    <dd class="t-body-sm">
-                        <a class="deposito__enlace" href="mailto:<?= e($nosotros_settings['email'] ?? '') ?>">
-                            <?= e($nosotros_settings['email'] ?? '') ?>
+                </dl>
+
+                <?php if ($nosotros_whatsapp !== null): ?>
+                    <p class="contacto__wsp">
+                        <span class="t-mono-label-sm">¿Preferís escribir?</span>
+                        <a class="contacto__wsp-enlace t-mono-label" href="<?= e($nosotros_whatsapp) ?>" rel="noopener" target="_blank">
+                            WhatsApp <?= e($nosotros_settings['whatsapp'] ?? '') ?>
+                            <span class="visualmente-oculto">(abre WhatsApp en una pestaña nueva)</span>
                         </a>
-                    </dd>
-                </div>
-            </dl>
+                    </p>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($contacto_foto !== ''): ?>
+                <?php
+                $contacto_webp    = imagen_webp($contacto_foto);
+                $contacto_medidas = imagen_medidas($contacto_foto);
+                ?>
+                <picture class="contacto__foto">
+                    <?php if ($contacto_webp !== null): ?>
+                        <source srcset="<?= e($contacto_webp) ?>" type="image/webp">
+                    <?php endif; ?>
+                    <img src="<?= e(asset($contacto_foto)) ?>"
+                         alt="<?= e($nosotros['donde_estamos']['foto_alt'] ?? '') ?>"
+                         <?php if ($contacto_medidas !== null): ?>width="<?= e((string) $contacto_medidas['ancho']) ?>" height="<?= e((string) $contacto_medidas['alto']) ?>"<?php endif; ?>
+                         loading="lazy" decoding="async">
+                </picture>
+            <?php endif; ?>
         </div>
     </section>
 

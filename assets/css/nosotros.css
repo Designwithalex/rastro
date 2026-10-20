@@ -141,6 +141,35 @@
   color: var(--color-accent-text);
 }
 
+/* La portada lleva foto de fondo: a pedido de Ape, la página arrancaba
+   "seca", un titular sobre negro liso. La foto va en duotono como toda
+   foto de ambiente (CLAUDE.md §5.6) y bajo un degradé que deja el texto
+   sobre negro casi pleno a la izquierda. */
+.nosotros__portada {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.nosotros__portada::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: url("../img/ambiente/ambiente-barra-en-rack.webp") 70% 35% / cover no-repeat;
+  filter: grayscale(1) contrast(1.1) brightness(0.5);
+}
+
+.nosotros__portada::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, transparent 55%, var(--color-bg-base) 100%),
+    linear-gradient(90deg, var(--color-bg-base) 15%, rgba(11, 11, 11, 0.7) 55%, rgba(94, 10, 10, 0.55) 100%);
+}
+
 .nosotros__encabezado {
   padding-block: var(--espaciado-48) var(--espaciado-32);
 }
@@ -158,6 +187,21 @@
 .nosotros__seccion {
   padding-block: var(--espaciado-48);
   border-top: var(--hairline) solid var(--color-border-subtle);
+}
+
+/* Bandas alternadas, para que cada sección no "aparezca de la nada" sobre
+   el mismo negro que la anterior (Ape, 15/10/2026). La sección sigue en
+   el contenedor; el fondo se estira al ancho de la pantalla con una sombra
+   recortada, que a diferencia de un pseudo con 100vw no genera
+   desborde horizontal (base.css no lo esconde, a propósito). */
+.nosotros__seccion:nth-of-type(odd) {
+  background-color: var(--color-bg-surface);
+  box-shadow: 0 0 0 100vmax var(--color-bg-surface);
+  clip-path: inset(0 -100vmax);
+}
+
+.nosotros__seccion:nth-of-type(odd) .reticula--celdas > * {
+  background-color: var(--color-bg-base);
 }
 
 /* La cabecera es sticky: sin esto, el enlace 04 CONTACTO deja el título de
@@ -362,20 +406,16 @@
 .credenciales__item {
   display: grid;
   place-items: center;
-  min-height: 96px;
+  min-height: 128px;
   padding: var(--espaciado-16);
 }
 
+/* En color y sin transparencia, igual que en la portada (Ape, 15/10/2026). */
 .credenciales__logo {
   width: auto;
-  max-height: 40px;
+  max-width: 80%;
+  max-height: 64px;
   object-fit: contain;
-  opacity: 0.6;
-  transition: opacity 0.15s ease;
-}
-
-.credenciales__item:hover .credenciales__logo {
-  opacity: 1;
 }
 
 .credenciales__nombre {
@@ -419,78 +459,109 @@
   }
 }
 
-/* --- Dónde estamos ------------------------------------------- */
+/* --- Contacto -----------------------------------------------
+   El panel bordeaux con los datos a la izquierda, como el de la
+   cotización de /mayoristas, y la foto de ellos a la derecha. */
 
-.deposito {
-  display: grid;
-  gap: var(--espaciado-32);
+.contacto {
+  grid-template-columns: 1fr;
 }
 
-/* Duotono bordeaux: las fotos de ambiente no van a color (CLAUDE.md §5.6).
-   La foto se pasa a gris y el velo de acento en modo `color` le devuelve un
-   solo tono. Producto sobre blanco es la otra mitad de esa regla y no pasa
-   por acá. */
-.deposito__foto {
+.contacto__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-32);
+  padding: var(--espaciado-32) var(--margen-mobile) var(--espaciado-40);
+  background-color: var(--color-accent-base);
+  color: var(--color-accent-on);
+}
+
+.contacto__titulo {
+  max-width: 22ch;
+}
+
+.contacto__datos {
+  display: grid;
+}
+
+.contacto__fila {
+  display: grid;
+  gap: var(--espaciado-4);
+  padding-block: var(--espaciado-12);
+  border-top: var(--hairline) solid rgba(255, 255, 255, 0.25);
+}
+
+.contacto__fila dt {
+  opacity: 0.7;
+}
+
+.contacto__pendiente {
+  opacity: 0.7;
+}
+
+.contacto__enlace {
+  border-bottom: var(--hairline) solid currentColor;
+}
+
+.contacto__wsp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+  margin-top: auto;
+  padding-top: var(--espaciado-16);
+  border-top: var(--hairline) solid currentColor;
+}
+
+.contacto__wsp-enlace {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Duotono bordeaux, como toda foto de ambiente (CLAUDE.md §5.6). Más
+   suave que en el bento: acá puede haber caras. */
+.contacto__foto {
   position: relative;
   overflow: hidden;
+  min-height: 280px;
   background-color: var(--color-bg-surface-alt);
 }
 
-.deposito__foto img {
+.contacto__foto img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  max-height: 420px;
   object-fit: cover;
   filter: grayscale(1) contrast(1.05);
 }
 
-.deposito__foto::after {
+.contacto__foto::after {
   content: "";
   position: absolute;
   inset: 0;
   background-color: var(--color-accent-base);
   mix-blend-mode: color;
+  opacity: 0.6;
   pointer-events: none;
 }
 
-/* align-self y no align-content: con align-content las filas se apilaban
-   arriba pero la caja seguía estirándose al alto de la foto, y abajo de la
-   última fila quedaban 175 px de retícula pintada a la vista. */
-.deposito__datos {
-  grid-template-columns: 1fr;
-  align-self: start;
-}
-
-.deposito__fila {
-  display: grid;
-  gap: var(--espaciado-4);
-  padding: var(--espaciado-16) var(--espaciado-20);
-}
-
-.deposito__fila dt {
-  color: var(--color-text-secondary);
-}
-
-.deposito__enlace {
-  color: var(--color-text-primary);
-  border-bottom: var(--hairline) solid var(--color-border-strong);
-  transition: border-color 0.15s ease;
-}
-
-.deposito__enlace:hover {
-  border-color: var(--color-accent-text);
-}
-
 @media (min-width: 900px) {
-  .deposito {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
-    gap: var(--espaciado-24);
+  .contacto--con-foto {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   }
 
-  .deposito__fila {
-    grid-template-columns: 120px minmax(0, 1fr);
+  .contacto__panel {
+    padding: var(--espaciado-48) var(--espaciado-40);
+  }
+
+  .contacto__fila {
+    grid-template-columns: 110px minmax(0, 1fr);
     gap: var(--espaciado-16);
     align-items: baseline;
+  }
+
+  .contacto__foto {
+    min-height: 520px;
   }
 }
 

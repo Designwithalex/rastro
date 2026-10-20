@@ -90,6 +90,24 @@ if (panel_es_post()) {
         ];
     }
 
+    /* La foto del bloque de contacto. Sin archivo nuevo queda la que
+       estaba; con la casilla tildada vuelve a la del depósito. */
+    $foto_contacto = (string) (repo_nosotros()['donde_estamos']['foto'] ?? '');
+
+    if (panel_booleano('donde_foto_quitar')) {
+        $foto_contacto = 'img/ambiente/ambiente-disco-fundicion-galpon.jpg';
+    }
+
+    if (($_FILES['donde_foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $subida = panel_subir_imagen('donde_foto', 'contacto');
+
+        if (($subida['error'] ?? '') !== '') {
+            panel_ir_con_aviso('/admin/nosotros', 'error', $subida['error']);
+        }
+
+        $foto_contacto = (string) $subida['ruta'];
+    }
+
     $guardado = repo_save_nosotros([
         'provisorio' => panel_booleano('provisorio'),
 
@@ -134,6 +152,8 @@ if (panel_es_post()) {
             'titulo'    => panel_texto('donde_titulo'),
             'texto'     => panel_texto('donde_texto'),
             'direccion' => panel_texto('donde_direccion'),
+            'foto'      => $foto_contacto,
+            'foto_alt'  => panel_texto('donde_foto_alt'),
         ],
 
         'cierre' => [
@@ -171,7 +191,8 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
     </p>
 <?php endif; ?>
 
-<form class="panel-formulario" method="post" action="<?= e(url('/admin/nosotros')) ?>">
+<form class="panel-formulario" method="post" enctype="multipart/form-data"
+      action="<?= e(url('/admin/nosotros')) ?>">
     <input type="hidden" name="csrf" value="<?= e(panel_csrf()) ?>">
 
     <fieldset class="panel-grupo">
@@ -358,6 +379,31 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
             <input class="campo-panel__control" type="text" id="donde_direccion" name="donde_direccion"
                    value="<?= e((string) ($n['donde_estamos']['direccion'] ?? '')) ?>">
             <p class="campo-panel__ayuda">Vacía, la página no promete una dirección que no existe.</p>
+        </div>
+
+        <div class="campo-panel">
+            <label class="campo-panel__rotulo" for="donde_foto">Foto del bloque de contacto</label>
+            <?php if (($n['donde_estamos']['foto'] ?? '') !== ''): ?>
+                <img class="panel-ficha__foto" src="<?= e(asset((string) $n['donde_estamos']['foto'])) ?>"
+                     alt="" loading="lazy" decoding="async">
+            <?php endif; ?>
+            <input class="campo-panel__control" type="file" id="donde_foto" name="donde_foto"
+                   accept="image/jpeg,image/png,image/webp">
+            <p class="campo-panel__ayuda">
+                Va a la derecha de los datos de contacto. La idea es una foto de ustedes;
+                mientras no haya, va la del depósito. Vertical o cuadrada.
+            </p>
+            <label class="campo-panel__casilla">
+                <input type="checkbox" name="donde_foto_quitar" value="1">
+                Volver a la foto del depósito
+            </label>
+        </div>
+
+        <div class="campo-panel">
+            <label class="campo-panel__rotulo" for="donde_foto_alt">Qué se ve en la foto</label>
+            <input class="campo-panel__control" type="text" id="donde_foto_alt" name="donde_foto_alt"
+                   value="<?= e((string) ($n['donde_estamos']['foto_alt'] ?? '')) ?>">
+            <p class="campo-panel__ayuda">Para lectores de pantalla y buscadores. Ej.: «Santino y Juan Pedro en el depósito».</p>
         </div>
     </fieldset>
 
