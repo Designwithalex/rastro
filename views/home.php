@@ -323,7 +323,8 @@ $mayorista_publicos = [
         <ul class="bento reticula">
             <?php foreach ($categorias_bento as $i => $categoria): ?>
                 <?php
-                $cat_foto = $i === 0 ? 'img/ambiente/ambiente-discos-en-gimnasio.jpg' : null;
+                // La carga el cliente desde /admin/categorias (repo_categories()).
+                $cat_foto = ($categoria['imagen'] ?? '') !== '' ? (string) $categoria['imagen'] : null;
                 ?>
                 <li class="bento__celda bento__celda--<?= e((string) ($i + 1)) ?><?= $cat_foto ? ' bento__celda--foto' : '' ?>">
                     <?php if ($cat_foto !== null): ?>

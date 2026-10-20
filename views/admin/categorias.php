@@ -6,6 +6,9 @@
  * su propio formulario. Son seis registros de cuatro campos: mandar a otra
  * pantalla para cambiar un nombre sería tres clics para editar una palabra.
  *
+ * El ícono y la foto de fondo se suben como archivo. Hasta el 20/10/2026 el
+ * ícono era una ruta escrita a mano y la foto no se podía cambiar.
+ *
  * `productos_count` no se edita: lo recalcula el repository en cada alta y
  * cada baja de producto. Un contador que se escribe a mano miente el primer
  * día (`repo_recount_categories()`).
@@ -54,14 +57,42 @@ if (panel_es_post()) {
         }
     }
 
+    $pictograma = panel_texto('pictograma');
+
+    if (($_FILES['archivo_picto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $subida = panel_subir_imagen('archivo_picto', 'categoria-icono-' . $nombre);
+
+        if (($subida['error'] ?? '') !== '') {
+            panel_ir_con_aviso('/admin/categorias', 'error', $subida['error']);
+        }
+
+        $pictograma = (string) $subida['ruta'];
+    }
+
+    $foto = panel_booleano('quitar_foto') ? '' : panel_texto('foto');
+
+    if (($_FILES['archivo_foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $subida = panel_subir_imagen('archivo_foto', 'categoria-' . $nombre);
+
+        if (($subida['error'] ?? '') !== '') {
+            panel_ir_con_aviso('/admin/categorias', 'error', $subida['error']);
+        }
+
+        $foto = (string) $subida['ruta'];
+    }
+
     $guardada = repo_save_category([
         'id'          => $id,
         'slug'        => $slug,
         'nombre'      => $nombre,
         'descripcion' => panel_texto('descripcion'),
-        'pictograma'  => panel_texto('pictograma'),
+        'pictograma'  => $pictograma,
         'orden'       => panel_entero('orden', 99) ?? 99,
     ]);
+
+    if ($guardada !== null && $foto !== (repo_category($slug)['imagen'] ?? '')) {
+        repo_save_category_photo($slug, $foto);
+    }
 
     panel_ir_con_aviso(
         '/admin/categorias',
@@ -90,15 +121,18 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
             $cat_id    = (int) ($categoria['id'] ?? 0);
             $cuenta    = (int) ($categoria['productos_count'] ?? 0);
             $picto     = (string) ($categoria['pictograma'] ?? '');
+            $foto      = (string) ($categoria['imagen'] ?? '');
             ?>
             <li class="panel-ficha">
-                <form class="panel-ficha__formulario" method="post" action="<?= e(url('/admin/categorias')) ?>">
+                <form class="panel-ficha__formulario" method="post" enctype="multipart/form-data"
+                      action="<?= e(url('/admin/categorias')) ?>">
                     <input type="hidden" name="csrf" value="<?= e(panel_csrf()) ?>">
                     <input type="hidden" name="accion" value="guardar">
                     <input type="hidden" name="id" value="<?= e((string) $cat_id) ?>">
                     <input type="hidden" name="slug" value="<?= e((string) ($categoria['slug'] ?? '')) ?>">
 
-                    <div class="panel-ficha__marca">
+                    <?php /* Fondo negro: los íconos son blancos, como van en la portada. */ ?>
+                    <div class="panel-ficha__marca panel-ficha__marca--oscura">
                         <?php if ($picto !== ''): ?>
                             <img src="<?= e(asset($picto)) ?>" alt="" width="32" height="32"
                                  loading="lazy" decoding="async">
@@ -132,14 +166,39 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                         </div>
 
                         <div class="campo-panel">
-                            <label class="campo-panel__rotulo" for="picto-<?= e((string) $cat_id) ?>">Pictograma</label>
-                            <input class="campo-panel__control campo-panel__control--mono" type="text"
-                                   id="picto-<?= e((string) $cat_id) ?>" name="pictograma"
-                                   value="<?= e($picto) ?>">
+                            <label class="campo-panel__rotulo" for="picto-<?= e((string) $cat_id) ?>">Cambiar el ícono</label>
+                            <input class="campo-panel__control" type="file"
+                                   id="picto-<?= e((string) $cat_id) ?>" name="archivo_picto"
+                                   accept="image/png,image/webp">
+                            <input type="hidden" name="pictograma" value="<?= e($picto) ?>">
                             <p class="campo-panel__ayuda">
-                                Ruta relativa a <code>assets/</code>, de los íconos en
-                                <code>img/iconos/</code>.
+                                PNG blanco con fondo transparente, cuadrado. En la portada va chico,
+                                al lado del número.
                             </p>
+                        </div>
+
+                        <div class="campo-panel">
+                            <label class="campo-panel__rotulo" for="foto-<?= e((string) $cat_id) ?>">
+                                <?= $foto !== '' ? 'Cambiar la foto de fondo' : 'Foto de fondo' ?>
+                            </label>
+                            <?php if ($foto !== ''): ?>
+                                <img class="panel-ficha__foto" src="<?= e(asset($foto)) ?>" alt=""
+                                     loading="lazy" decoding="async">
+                            <?php endif; ?>
+                            <input class="campo-panel__control" type="file"
+                                   id="foto-<?= e((string) $cat_id) ?>" name="archivo_foto"
+                                   accept="image/jpeg,image/png,image/webp">
+                            <input type="hidden" name="foto" value="<?= e($foto) ?>">
+                            <p class="campo-panel__ayuda">
+                                Va atrás de la categoría en la portada, en duotono bordeaux: el
+                                color lo pone el sitio, así que sirve cualquier foto. Apaisada.
+                            </p>
+                            <?php if ($foto !== ''): ?>
+                                <label class="campo-panel__casilla">
+                                    <input type="checkbox" name="quitar_foto" value="1">
+                                    Quitar la foto
+                                </label>
+                            <?php endif; ?>
                         </div>
 
                         <p class="panel-ficha__dato">
@@ -179,7 +238,8 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
 <section class="panel-alta" aria-labelledby="alta-titulo">
     <h2 class="panel-seccion__titulo" id="alta-titulo">Categoría nueva</h2>
 
-    <form class="panel-alta__formulario" method="post" action="<?= e(url('/admin/categorias')) ?>">
+    <form class="panel-alta__formulario" method="post" enctype="multipart/form-data"
+          action="<?= e(url('/admin/categorias')) ?>">
         <input type="hidden" name="csrf" value="<?= e(panel_csrf()) ?>">
         <input type="hidden" name="accion" value="guardar">
         <input type="hidden" name="id" value="0">
@@ -203,9 +263,15 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
         </div>
 
         <div class="campo-panel">
-            <label class="campo-panel__rotulo" for="nueva-picto">Pictograma</label>
-            <input class="campo-panel__control campo-panel__control--mono" type="text"
-                   id="nueva-picto" name="pictograma" placeholder="img/iconos/icono-disco-blanco.png">
+            <label class="campo-panel__rotulo" for="nueva-picto">Ícono</label>
+            <input class="campo-panel__control" type="file" id="nueva-picto" name="archivo_picto"
+                   accept="image/png,image/webp">
+        </div>
+
+        <div class="campo-panel">
+            <label class="campo-panel__rotulo" for="nueva-foto">Foto de fondo</label>
+            <input class="campo-panel__control" type="file" id="nueva-foto" name="archivo_foto"
+                   accept="image/jpeg,image/png,image/webp">
         </div>
 
         <button class="panel-boton panel-boton--acento" type="submit">Crear categoría</button>

@@ -943,6 +943,21 @@ textarea.campo-panel__control {
   height: auto;
 }
 
+.panel-ficha__marca--oscura {
+  background-color: #0B0B0B;
+}
+
+/* La foto de fondo de una categoría, para ver cuál está cargada. */
+.panel-ficha__foto {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  margin-bottom: var(--espaciado-8);
+  filter: grayscale(1);
+}
+
 .panel-ficha__marca--logo img {
   max-height: 56px;
   object-fit: contain;

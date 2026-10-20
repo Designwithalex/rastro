@@ -346,6 +346,30 @@ function repo_related_products(string $slug, int $limit = 4): array
 }
 
 /**
+ * Las fotos de fondo del bento de categorías, por slug.
+ *
+ * Viven en settings (`categorias_fotos`, un JSON) y no en una columna de
+ * `categorias`: la columna pide una migración en la base de producción y
+ * el cliente necesitaba cargarlas desde el panel ya. Si algún día se migra,
+ * cambian esta función y `repo_save_category_photo()`, y ninguna vista.
+ *
+ * Hasta que el panel guarde la primera, Discos sigue con la foto que tuvo
+ * desde el diseño.
+ */
+function _repo_categorias_fotos(): array
+{
+    $crudo = repo_settings()['categorias_fotos'] ?? '';
+
+    if ($crudo === '' || $crudo === null) {
+        return ['discos' => 'img/ambiente/ambiente-discos-en-gimnasio.jpg'];
+    }
+
+    $fotos = is_array($crudo) ? $crudo : json_decode((string) $crudo, true);
+
+    return is_array($fotos) ? array_filter($fotos, 'is_string') : [];
+}
+
+/**
  * Categorías del catálogo, ordenadas.
  *
  * `productos_count` se recalcula sobre los productos activos en vez de leerse
@@ -364,8 +388,11 @@ function repo_categories(): array
         }
     }
 
+    $fotos = _repo_categorias_fotos();
+
     foreach ($categorias as &$categoria) {
         $categoria['productos_count'] = $conteo[$categoria['slug'] ?? ''] ?? 0;
+        $categoria['imagen']          = $fotos[$categoria['slug'] ?? ''] ?? '';
     }
     unset($categoria);
 

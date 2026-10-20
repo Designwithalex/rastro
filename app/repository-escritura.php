@@ -269,6 +269,26 @@ function repo_save_category(array $datos): ?array
 }
 
 /**
+ * Cambia la foto de fondo de una categoría, o la quita con ''.
+ *
+ * Por qué vive en settings y no en la categoría: `_repo_categorias_fotos()`.
+ */
+function repo_save_category_photo(string $slug, string $ruta): bool
+{
+    $fotos = _repo_categorias_fotos();
+
+    if ($ruta === '') {
+        unset($fotos[$slug]);
+    } else {
+        $fotos[$slug] = $ruta;
+    }
+
+    return repo_save_settings([
+        'categorias_fotos' => json_encode($fotos, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+    ]) !== null;
+}
+
+/**
  * Borra una categoría, pero sólo si está vacía.
  *
  * Devuelve el motivo cuando no puede: la vista necesita decir "tiene 6
