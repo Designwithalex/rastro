@@ -264,7 +264,10 @@
   color: var(--color-text-primary);
 }
 
+/* Si el campo queda angosto, la ayuda termina en "…" y no cortada a
+   mitad de palabra. */
 .buscador__campo::placeholder {
+  text-overflow: ellipsis;
   color: var(--color-text-secondary);
 }
 

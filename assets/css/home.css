@@ -670,20 +670,19 @@
   padding: var(--espaciado-20);
 }
 
-/* Monocromo plata al 60%, color al hover: así una franja de logos de
-   ocho marcas distintas no se convierte en ocho colores peleando entre
-   sí sobre negro (PENDIENTES #25). */
+/* En color y a tamaño de escudo, siempre. Hasta el 20/10/2026 iban en
+   monocromo plata al 60% y tomaban color al hover; Ape pidió que el
+   color esté siempre: son escudos de clubes y se reconocen por el color. */
 .logos__imagen {
-  max-height: 48px;
+  max-height: 64px;
+  max-width: 80%;
   width: auto;
-  filter: grayscale(1) brightness(1.6);
-  opacity: 0.6;
-  transition: filter 0.2s ease, opacity 0.2s ease;
+  object-fit: contain;
+  transition: transform 0.2s ease;
 }
 
 .logos__celda:hover .logos__imagen {
-  filter: none;
-  opacity: 1;
+  transform: scale(1.06);
 }
 
 /* Sin archivo de logo se escribe el nombre. No es un estado de error:
@@ -700,7 +699,11 @@
 
 @media (min-width: 1040px) {
   .logos__celda {
-    min-height: 128px;
+    min-height: 160px;
+  }
+
+  .logos__imagen {
+    max-height: 88px;
   }
 
   .logos--4 { grid-template-columns: repeat(4, 1fr); }

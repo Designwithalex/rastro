@@ -155,7 +155,7 @@ $layout_en_catalogo = es_ruta_activa('/catalogo') || es_ruta_activa('/producto')
                       method="get" action="<?= e(url('/catalogo')) ?>">
                     <label class="visualmente-oculto" for="buscador-q">Buscar en el catálogo</label>
                     <input class="buscador__campo t-mono-texto" type="search" id="buscador-q" name="q"
-                           value="<?= e($layout_busqueda) ?>" placeholder="Buscar por nombre o código"
+                           value="<?= e($layout_busqueda) ?>" placeholder="Buscar productos"
                            autocomplete="off" enterkeyhint="search">
                     <button class="buscador__boton t-mono-label-sm" type="submit">Buscar</button>
                 </form>
