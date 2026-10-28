@@ -635,6 +635,7 @@ function panel_secciones(): array
         ['ruta' => '/admin/arrepentimientos', 'titulo' => 'Arrepentimientos', 'exacta' => false],
         ['ruta' => '/admin/nosotros',      'titulo' => 'Nosotros',      'exacta' => false],
         ['ruta' => '/admin/administradores', 'titulo' => 'Administradores', 'exacta' => false],
+        ['ruta' => '/admin/legales',       'titulo' => 'Legales',       'exacta' => false],
         ['ruta' => '/admin/configuracion', 'titulo' => 'Configuración', 'exacta' => false],
     ];
 }

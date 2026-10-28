@@ -745,6 +745,32 @@ function repo_settings(): array
     return _repo_json('settings');
 }
 
+/**
+ * Los bloques de Términos y condiciones.
+ *
+ * Viven en settings como `terminos_bloques` (JSON) desde que el cliente
+ * pidió poder editarlos (22/10). Mientras no se guarden desde el panel,
+ * salen los de terminos_por_defecto(). Los textos guardados pasan por
+ * interpolar(): un "{descuento}" escrito en el panel se lee como el
+ * porcentaje vigente.
+ *
+ * @return list<array{titulo:string, texto:?string}>
+ */
+function repo_terminos(): array
+{
+    $settings  = repo_settings();
+    $guardados = json_decode((string) ($settings['terminos_bloques'] ?? ''), true);
+
+    if (!is_array($guardados) || $guardados === []) {
+        return terminos_por_defecto($settings);
+    }
+
+    return array_map(static fn (array $b): array => [
+        'titulo' => (string) ($b['titulo'] ?? ''),
+        'texto'  => interpolar((string) ($b['texto'] ?? ''), $settings),
+    ], array_values(array_filter($guardados, 'is_array')));
+}
+
 /* ==========================================================================
    Cuenta — mock. Todo este bloque lo conecta el backend dev.
    ========================================================================== */

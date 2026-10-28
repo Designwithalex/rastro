@@ -45,13 +45,13 @@ $publicos = [
     ['titulo' => 'Hoteles y resorts',   'texto' => 'Gimnasios de huéspedes: equipamiento compacto y de bajo mantenimiento.'],
     ['titulo' => 'Desarrolladoras',     'texto' => 'Amenities de edificios en pozo, con entrega coordinada a la obra.'],
     ['titulo' => 'Barrios cerrados',    'texto' => 'SUM y salas comunes, con instalación por administración.'],
-    ['titulo' => 'Empresas con gym',    'texto' => 'Espacios de bienestar para empleados, con factura A.'],
+    ['titulo' => 'Empresas con gym',    'texto' => 'Espacios de bienestar para empleados, con factura.'],
 ];
 
 $pasos = [
     ['titulo' => 'Nos contás el espacio',   'texto' => 'Metros cuadrados, cuánta gente entrena y qué presupuesto manejás. Con eso alcanza para empezar.'],
     ['titulo' => 'Armamos la propuesta',    'texto' => 'Te mandamos el listado con cantidades, precios y plazo de entrega. Si algo no cierra, lo ajustamos.'],
-    ['titulo' => 'Entregamos y montamos',   'texto' => 'Coordinamos el envío a la obra o al local. Los racks y las jaulas se montan en el lugar.'],
+    ['titulo' => 'Coordinamos la entrega',  'texto' => 'Cotizamos el envío a la obra o al local y lo coordinamos con vos.'],
 ];
 
 /* Las tres cifras de la barra son datos del negocio que el cliente todavía
@@ -127,7 +127,6 @@ $campos = [
             <figure class="may-hero__foto">
                 <img src="<?= e(asset('img/ambiente/ambiente-disco-fundicion-galpon.jpg')) ?>" alt=""
                      loading="lazy" decoding="async">
-                <figcaption class="may-hero__pie t-mono-label-sm">Fig. 01 · Depósito propio</figcaption>
             </figure>
 
             <dl class="may-cifras reticula reticula--superficie">
@@ -224,7 +223,7 @@ $campos = [
                     <li class="t-mono-texto">Listado con cantidades y precios</li>
                     <li class="t-mono-texto">Plazo de entrega por escrito</li>
                     <li class="t-mono-texto">Alternativas por rango de presupuesto</li>
-                    <li class="t-mono-texto">Factura A o B</li>
+                    <li class="t-mono-texto">Factura C</li>
                 </ul>
 
                 <?php if ($whatsapp !== null): ?>

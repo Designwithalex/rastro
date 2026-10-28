@@ -38,7 +38,7 @@ $nosotros_whatsapp = whatsapp_link($nosotros_settings, 'Hola Rastro, quiero hace
 
 $titulo      = 'Nosotros';
 $descripcion = 'Quiénes somos, cómo trabajamos y dónde estamos. Vendedores oficiales de '
-             . 'equipamiento de gimnasio con depósito propio.';
+             . 'equipamiento de gimnasio.';
 $clase_body  = 'pagina-nosotros';
 $estilos     = ['nosotros'];
 

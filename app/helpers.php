@@ -747,3 +747,112 @@ function imagen_miniatura(string $ruta): ?string
 
     return is_file($absoluta) ? asset($miniatura) : null;
 }
+
+/**
+ * Los bloques de Términos y condiciones tal como estaban escritos en la
+ * vista hasta el 28/10, con el de envíos corregido (sin transporte propio,
+ * sin envío gratis a todo el país y sin retiro en depósito).
+ *
+ * Son el punto de partida: el panel los muestra para editar y, una vez
+ * guardados, mandan los de la base (repo_terminos()).
+ *
+ * @return list<array{titulo:string, texto:?string, pendiente?:string}>
+ */
+function terminos_por_defecto(array $settings): array
+{
+    return [
+    [
+        'titulo' => 'Quiénes somos',
+        'texto'  => $settings['razon_social'] . ', CUIT ' . $settings['cuit'] . '. '
+                  . 'Venta de equipamiento de gimnasio, minorista y mayorista, en todo el país. '
+                  . 'Contacto: ' . ($settings['email'] ?? '') . ' · WhatsApp ' . ($settings['whatsapp'] ?? '') . '.',
+    ],
+    [
+        'titulo' => 'Precios y medios de pago',
+        'texto'  => 'Los precios publicados están expresados en pesos argentinos e incluyen IVA, '
+                  . 'y corresponden al pago con Mercado Pago. Pagando por transferencia bancaria '
+                  . 'o en efectivo se aplica un ' . descuento_global($settings) . '% de descuento '
+                  . 'sobre el precio publicado. Los precios pueden cambiar sin aviso previo; el que '
+                  . 'vale es el del momento de confirmar la compra.',
+    ],
+    [
+        'titulo' => 'Envíos',
+        'texto'  => 'Hacemos envíos a todo el país. El costo depende del peso, del tamaño y del '
+                  . 'código postal de destino, y se muestra antes de pagar. Los productos grandes '
+                  . '—racks, jaulas, bancos— y los envíos fuera de nuestra zona se cotizan aparte: '
+                  . 'registramos el pedido y te escribimos con el costo antes de despacharlo.',
+    ],
+    [
+        'titulo' => 'Cambios y devoluciones',
+        'texto'  => 'Si el producto llegó fallado, roto o no es el que pediste, escribinos dentro '
+                  . 'de los 10 días corridos de recibirlo y lo cambiamos o te devolvemos el dinero, '
+                  . 'a tu elección. El flete de ida y de vuelta lo pagamos nosotros: es lo que '
+                  . 'corresponde cuando el problema es nuestro.
+
+                  Si simplemente cambiaste de idea, el camino es el botón de arrepentimiento, que '
+                  . 'tiene su propia sección más abajo y también es sin costo para vos.
+
+                  Fuera de esos dos casos, un cambio por otro producto lo coordinamos por WhatsApp '
+                  . 'según el estado en el que esté la mercadería. El equipamiento de gimnasio se '
+                  . 'marca con el uso y un disco que ya se levantó no vuelve a ser nuevo, así que '
+                  . 'lo vemos caso por caso y te lo decimos de frente antes de que lo despaches.',
+        'pendiente' => 'BORRADOR escrito por Chichalabs el 11/09/2026 sobre los mínimos de la Ley '
+                     . '24.240. Falta que el cliente confirme si quiere ofrecer un cambio por '
+                     . 'arrepentimiento más allá de los 10 días de ley, y que lo revise quien le '
+                     . 'lleva lo legal (PENDIENTES #10).',
+    ],
+    [
+        'titulo' => 'Garantía',
+        'texto'  => 'Todo el equipamiento que vendemos tiene 12 meses de garantía por defecto de '
+                  . 'fabricación, contados desde la entrega. Es más que los 6 meses que exige la '
+                  . 'Ley 24.240 para bienes muebles no consumibles.
+
+                  La garantía cubre fallas de fabricación: una soldadura que cede, un buje que se '
+                  . 'afloja, un recubrimiento que se desprende sin motivo. No cubre el desgaste '
+                  . 'normal de uso ni los golpes. En un gimnasio eso pasa todos los días y no es '
+                  . 'una falla: un disco que se marca contra el piso está trabajando, no fallando.
+
+                  Para usarla necesitás la factura y una foto o un video de lo que pasó. Nos '
+                  . 'escribís, lo miramos, y si corresponde reparamos, reemplazamos la pieza o '
+                  . 'cambiamos el producto, en ese orden. El traslado durante el período de '
+                  . 'garantía corre por nuestra cuenta.',
+        'pendiente' => 'BORRADOR escrito por Chichalabs el 11/09/2026. Los 12 meses salen del copy '
+                     . 'que ya estaba en la ficha de producto y en /nosotros: hay que confirmar que '
+                     . 'sea el plazo real y no un número de diseño (PENDIENTES #33). Si el fabricante '
+                     . 'da otro plazo para alguna línea, va acá.',
+    ],
+    [
+        'titulo' => 'Datos personales',
+        'texto'  => 'Para venderte necesitamos algunos datos tuyos y te contamos exactamente cuáles.
+
+                  Cuando comprás: nombre, apellido, correo, teléfono, documento y la dirección de '
+                  . 'entrega. Los usamos para armar el pedido, despacharlo y facturarlo. Si creás '
+                  . 'una cuenta guardamos además tu correo y tu contraseña, que no se guarda tal '
+                  . 'cual sino cifrada: nadie de Rastro puede leerla, ni nosotros.
+
+                  Con quién los compartimos: con Mercado Pago cuando pagás por ahí, porque el pago '
+                  . 'lo procesa esa plataforma y no nosotros —los datos de tu tarjeta nunca pasan '
+                  . 'por este sitio ni los podemos ver—, y con el transporte que lleva el paquete, '
+                  . 'que necesita tu dirección y tu teléfono. Con nadie más. No vendemos ni cedemos '
+                  . 'datos a terceros para publicidad.
+
+                  Podés pedirnos en cualquier momento que te digamos qué datos tuyos tenemos, que '
+                  . 'los corrijamos o que los borremos, escribiéndonos al correo de contacto. Es un '
+                  . 'derecho que te da la Ley 25.326 y ejercerlo es gratis.
+
+                  La Agencia de Acceso a la Información Pública es el organismo de control de esa '
+                  . 'ley y atiende las denuncias de quien considere que sus datos fueron mal '
+                  . 'tratados.',
+        'pendiente' => 'BORRADOR escrito por Chichalabs el 11/09/2026 a partir de los datos que el '
+                     . 'sitio DE VERDAD recolecta hoy (checkout, registro y Mercado Pago). Falta: '
+                     . 'cuánto tiempo se conservan los datos y quién es el responsable inscripto '
+                     . 'ante la AAIP. Lo tiene que revisar quien le lleva lo legal al cliente.',
+    ],
+    [
+        'titulo' => 'Botón de arrepentimiento',
+        'texto'  => 'Si comprás a distancia podés arrepentirte dentro de los 10 días corridos de '
+                  . 'recibido el producto, sin costo y sin tener que explicar por qué. El trámite '
+                  . 'está en la página del botón de arrepentimiento.',
+    ],
+];
+}

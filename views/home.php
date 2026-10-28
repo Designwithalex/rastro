@@ -89,11 +89,13 @@ $whatsapp = whatsapp_link(
    en la home y se ve en el catálogo y en el mega-menú (PENDIENTES #60). */
 $categorias_bento = array_slice($categorias, 0, 5);
 
-/* Copy de diseño, todavía sin panel que lo edite. */
+/* Copy de diseño, todavía sin panel que lo edite. Corregido el 28/10 a
+   pedido del cliente: no tienen transporte propio, no importan directo y
+   son monotributistas (Factura C). */
 $garantias = [
-    ['titulo' => 'Envío nacional',      'texto' => 'Transporte propio y encomienda a todo el país.', 'icono' => 'img/iconos/icono-envio-blanco.png'],
-    ['titulo' => 'Importación directa', 'texto' => 'Traemos el contenedor. Sin intermediarios.',     'icono' => 'img/iconos/icono-contenedor-blanco.png'],
-    ['titulo' => 'Factura A o B',       'texto' => 'Comprobante y garantía por escrito.',            'icono' => 'img/iconos/icono-documento-blanco.png'],
+    ['titulo' => 'Envíos al país',      'texto' => 'Cotizamos por peso y código postal.',            'icono' => 'img/iconos/icono-envio-blanco.png'],
+    ['titulo' => 'Vendedores oficiales', 'texto' => 'Marcas originales, con garantía.',              'icono' => 'img/iconos/icono-contenedor-blanco.png'],
+    ['titulo' => 'Factura C',           'texto' => 'Comprobante y garantía por escrito.',            'icono' => 'img/iconos/icono-documento-blanco.png'],
     ['titulo' => 'Asesoramiento',       'texto' => 'Armamos el equipamiento según tu espacio.',      'icono' => 'img/iconos/icono-pregunta-blanco.png'],
 ];
 
@@ -492,7 +494,6 @@ $mayorista_publicos = [
         <div class="mayoristas-franja__foto">
             <img src="<?= e(asset('img/ambiente/ambiente-disco-fundicion-galpon.jpg')) ?>" alt=""
                  loading="lazy" decoding="async">
-            <p class="mayoristas-franja__pie t-mono-label-sm">Fig. 02 · Depósito propio</p>
         </div>
 
         <div class="mayoristas-franja__panel">

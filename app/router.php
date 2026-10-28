@@ -97,6 +97,7 @@ function router_tabla(): array
         '#^/admin/nosotros$#'               => ['admin/nosotros',      []],
         '#^/admin/administradores$#'        => ['admin/administradores', []],
         '#^/admin/configuracion$#'          => ['admin/configuracion', []],
+        '#^/admin/legales$#'                => ['admin/legales',       []],
     ];
 }
 
