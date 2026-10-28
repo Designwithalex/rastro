@@ -56,15 +56,14 @@ foreach (repo_products([], 1, 9999)['items'] as $p) {
         'url'           => url('/producto/' . ($p['slug'] ?? '')),
         'publicado'     => $precio['publicado'],
         'transferencia' => $precio['con_descuento'],
+        'aCotizar'      => envio_producto_a_cotizar($p),
     ];
 }
 
-/* Lo que el JS necesita para formatear y para los totales. El costo de
-   envío es 0 hasta que el cliente pase la tabla real (PENDIENTES #8): se
-   muestra "a coordinar", no un número inventado. */
+/* Lo que el JS necesita para formatear y para los totales. El envío
+   depende del código postal, que se pide en el checkout (app/envio.php). */
 $config_carrito = [
-    'envioGratisDesde' => (int) ($settings['envio_gratis_desde'] ?? 0),
-    'costoEnvio'       => 0,
+    'envio'            => envio_config_js($settings),
     'descuentoPct'     => descuento_global($settings),
     'urlCatalogo'      => url('/catalogo'),
 ];

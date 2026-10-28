@@ -54,6 +54,7 @@ require __DIR__ . '/app/router.php';
    mp_config() lee $config, que existe en el ámbito global desde acá arriba. */
 require __DIR__ . '/app/mercadopago.php';
 require __DIR__ . '/app/checkout.php';
+require __DIR__ . '/app/envio.php';
 
 /* --- Base del sitio ------------------------------------------------------
    Si el proyecto queda colgado de un subdirectorio, todos los enlaces se
@@ -131,8 +132,13 @@ if (in_array(RASTRO_RUTA, ['/registro', '/arrepentimiento', '/cuenta'], true)
 
 /* El arrepentimiento avisa por mail, y el panel tiene una prueba de envío
    en Configuración: los dos necesitan el mismo archivo. */
+/* El checkout, el retorno y el webhook avisan cada pedido a Rastro, y el
+   formulario de mayoristas llega por mail (pedido del 22/10). */
 if (RASTRO_RUTA === '/arrepentimiento'
     || RASTRO_RUTA === '/registro'
+    || RASTRO_RUTA === '/mayoristas'
+    || str_starts_with(RASTRO_RUTA, '/checkout')
+    || str_starts_with(RASTRO_RUTA, '/webhooks')
     || str_starts_with(RASTRO_RUTA, '/admin')
     || str_starts_with(RASTRO_RUTA, '/recuperar')) {
     // smtp.php antes que correo.php: correo_enviar() lo consulta en su

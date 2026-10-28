@@ -102,7 +102,8 @@
           imagen: ficha.imagen,
           url: ficha.url,
           precioPublicado: ficha.publicado,
-          precioTransferencia: ficha.transferencia
+          precioTransferencia: ficha.transferencia,
+          aCotizar: Boolean(ficha.aCotizar)
         };
       })
       .filter(Boolean);
@@ -159,9 +160,10 @@
       return;
     }
 
+    var campoCp = raiz.querySelector('#codigo_postal');
     var totales = global.Carrito.calcularTotales(datos, {
-      envioGratisDesde: CONFIG.envioGratisDesde,
-      costoEnvio: 0
+      envio: CONFIG.envio,
+      cp: campoCp ? campoCp.value : ''
     });
 
     var transferencia = medio === 'transferencia';
@@ -179,10 +181,10 @@
     texto(raiz.querySelector('[data-checkout-resumen-subtotal]'),
       moneda(transferencia ? totales.subtotalTransferencia : totales.subtotal));
 
-    // El envío es "a coordinar" mientras no exista la tabla real
-    // (PENDIENTES #8). No se inventa un número.
+    // "A cotizar" con productos pesados o fuera de la zona; la tarifa
+    // fija se suma al total y viaja en el mismo pago.
     texto(raiz.querySelector('[data-checkout-resumen-envio]'),
-      totales.envioGratis ? 'Bonificado' : 'A coordinar');
+      totales.envioTexto || moneda(totales.envio));
 
     ver(raiz.querySelector('[data-checkout-fila-ahorro]'), transferencia);
     texto(raiz.querySelector('[data-checkout-resumen-ahorro]'), '-' + moneda(totales.ahorro));
@@ -200,6 +202,14 @@
 
   raiz.addEventListener('change', function (evento) {
     if (evento.target.hasAttribute('data-checkout-medio')) {
+      pintar();
+    }
+  });
+
+  // El costo de envío depende del código postal: se recalcula mientras
+  // se escribe.
+  raiz.addEventListener('input', function (evento) {
+    if (evento.target.id === 'codigo_postal') {
       pintar();
     }
   });

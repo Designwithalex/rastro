@@ -137,6 +137,25 @@ $textos = [
     ],
 ];
 
+/* Con alias o CVU cargados en el panel, la transferencia se hace sin
+   escribirle a nadie: se muestran los datos y el código va en el concepto
+   (pedido del 22/10). Sin datos, se sigue pidiendo por WhatsApp. */
+$datos_transferencia = array_filter([
+    'Alias'   => trim((string) ($settings['transferencia_alias'] ?? '')),
+    'CVU'     => trim((string) ($settings['transferencia_cvu'] ?? '')),
+    'Titular' => trim((string) ($settings['transferencia_titular'] ?? '')),
+    'Banco'   => trim((string) ($settings['transferencia_banco'] ?? '')),
+], static fn (string $v): bool => $v !== '');
+
+if (isset($datos_transferencia['Alias']) || isset($datos_transferencia['CVU'])) {
+    $textos['transferencia']['bajada'] = 'Transferí el total a estos datos y poné el código del pedido en el concepto. '
+        . 'El pedido queda «Esperando transferencia» hasta que confirmemos el pago. El descuento ya está aplicado.';
+} else {
+    $datos_transferencia = [];
+}
+
+$envio_a_cotizar = ($pedido['entrega']['envio_modo'] ?? '') === 'a_cotizar';
+
 $texto = $textos[$situacion];
 
 $titulo      = $texto['titulo'];
@@ -190,6 +209,28 @@ require RASTRO_VIEWS . '/layout/head.php';
                     <span class="mensaje__marca" aria-hidden="true">!</span>
                     No pudimos confirmar el estado del pago en este momento. El pedido
                     quedó registrado igual: si hubo un cargo, lo vas a ver reflejado.
+                </p>
+            <?php endif; ?>
+
+            <?php if ($situacion === 'transferencia' && $datos_transferencia !== []): ?>
+                <dl class="retorno__datos retorno__datos--transferencia">
+                    <?php foreach ($datos_transferencia as $rotulo => $valor): ?>
+                        <div class="retorno__dato">
+                            <dt class="t-mono-label-sm"><?= e($rotulo) ?></dt>
+                            <dd class="t-mono-dato"><?= e($valor) ?></dd>
+                        </div>
+                    <?php endforeach; ?>
+                    <div class="retorno__dato">
+                        <dt class="t-mono-label-sm">Concepto</dt>
+                        <dd class="t-mono-dato"><?= e((string) $pedido['codigo']) ?></dd>
+                    </div>
+                </dl>
+            <?php endif; ?>
+
+            <?php if ($envio_a_cotizar): ?>
+                <p class="mensaje mensaje--aviso t-mono-texto" role="status">
+                    <span class="mensaje__marca" aria-hidden="true">!</span>
+                    El envío de este pedido se cotiza aparte. Te escribimos con el costo antes de despacharlo.
                 </p>
             <?php endif; ?>
 
@@ -254,7 +295,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                     <a class="boton boton--fantasma" href="<?= e($whatsapp) ?>"
                        rel="noopener" target="_blank">
                         <span class="t-mono-label">
-                            <?= $situacion === 'transferencia' ? 'Pedir los datos para transferir' : 'Escribirnos por WhatsApp' ?>
+                            <?= $situacion === 'transferencia' && $datos_transferencia === [] ? 'Pedir los datos para transferir' : 'Escribirnos por WhatsApp' ?>
                         </span>
                         <span class="boton__flecha" aria-hidden="true">→</span>
                     </a>

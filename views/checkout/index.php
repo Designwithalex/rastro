@@ -106,7 +106,7 @@ if ($enviado) {
     } elseif ($lineas === []) {
         $falla = 'No quedó nada para comprar en el carrito. Revisá el catálogo y volvé a intentar.';
     } elseif ($errores === []) {
-        $totales = checkout_totales($lineas, $medio, $settings);
+        $totales = checkout_totales($lineas, $medio, $settings, (string) $datos['codigo_postal']);
         $pedido  = checkout_armar_pedido($lineas, $totales, $datos, $medio, (int) ($usuario['id'] ?? 0));
 
         $alta = repo_order_create($pedido);
@@ -129,7 +129,9 @@ if ($enviado) {
             if ($medio === 'transferencia') {
                 // La transferencia no pasa por ninguna pasarela: el pedido
                 // queda anotado y se sigue por WhatsApp.
-                repo_order_update((string) $pedido['codigo'], ['estado' => 'pendiente_transferencia']);
+                $pedido = repo_order_update((string) $pedido['codigo'], ['estado' => 'pendiente_transferencia']) ?? $pedido;
+
+                checkout_avisar_pedido($pedido, 'transferencia');
 
                 header('Location: ' . url('/checkout/retorno?pedido=' . rawurlencode((string) $pedido['codigo']) . '&estado=transferencia'), true, 303);
                 exit;
@@ -193,11 +195,12 @@ foreach (repo_products([], 1, 9999)['items'] as $p) {
         'url'           => url('/producto/' . ($p['slug'] ?? '')),
         'publicado'     => $precio['publicado'],
         'transferencia' => $precio['con_descuento'],
+        'aCotizar'      => envio_producto_a_cotizar($p),
     ];
 }
 
 $config_checkout = [
-    'envioGratisDesde' => (int) ($settings['envio_gratis_desde'] ?? 0),
+    'envio'            => envio_config_js($settings),
     'descuentoPct'     => descuento_global($settings),
     'urlCarrito'       => url('/carrito'),
 ];
@@ -436,8 +439,10 @@ require RASTRO_VIEWS . '/layout/head.php';
                         <p class="formulario__campo formulario__campo--corto">
                             <label class="formulario__etiqueta t-mono-label-sm" for="codigo_postal">Código postal</label>
                             <input class="campo t-mono-texto" type="text" id="codigo_postal" name="codigo_postal"
-                                   autocomplete="postal-code" inputmode="numeric"
-                                   value="<?= e($datos['codigo_postal']) ?>">
+                                   autocomplete="postal-code"
+                                   value="<?= e($datos['codigo_postal']) ?>"
+                                   <?= isset($errores['codigo_postal']) ? 'aria-invalid="true" aria-describedby="error-codigo_postal"' : '' ?>>
+                            <?= $error_de('codigo_postal') ?>
                         </p>
                     </div>
 
@@ -502,7 +507,8 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <p class="checkout__legal t-mono-texto-sm">
                     Al continuar aceptás los
                     <a href="<?= e(url('/terminos')) ?>">términos y condiciones</a>.
-                    El envío se coordina después de confirmar el pedido.
+                    Si el envío figura «a cotizar», registramos el pedido y te escribimos
+                    con el costo antes de despacharlo.
                 </p>
             </form>
         </section>

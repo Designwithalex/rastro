@@ -142,14 +142,53 @@
      ni el almacenamiento. Los dos precios de cada línea vienen ya
      calculados desde PHP.
 
-     lineas:   [{ cantidad, precioPublicado, precioTransferencia }]
-     opciones: { envioGratisDesde, costoEnvio }
+     lineas:   [{ cantidad, precioPublicado, precioTransferencia, aCotizar }]
+     opciones: { envio: { gratisDesde, zonaNombre, zonaRangos, zonaCosto }, cp }
+
+     El envío repite envio_calcular() de app/envio.php para poder
+     mostrarlo antes de enviar el formulario. Lo que se cobra lo decide
+     el servidor: si algo de acá se desacomoda, el pedido igual sale
+     con el número de PHP.
      ---------------------------------------------------------- */
+
+  function cpNumero(cp) {
+    var m = String(cp || '').match(/(\d{4})/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  function calcularEnvio(resumen, config, cp) {
+    var envio = config || {};
+    var gratisDesde = Number(envio.gratisDesde) || 0;
+    var costo = Number(envio.zonaCosto) || 0;
+
+    if (resumen.aCotizar) {
+      return { modo: 'a_cotizar', costo: 0, texto: 'A cotizar' };
+    }
+
+    var n = cpNumero(cp);
+
+    if (n === null) {
+      return { modo: 'sin_cp', costo: 0, texto: 'Según código postal' };
+    }
+
+    var enZona = (envio.zonaRangos || []).some(function (r) {
+      return n >= r[0] && n <= r[1];
+    });
+
+    if (enZona) {
+      if (gratisDesde > 0 && resumen.subtotal >= gratisDesde) {
+        return { modo: 'gratis', costo: 0, texto: 'Gratis' };
+      }
+      if (costo > 0) {
+        return { modo: 'zona', costo: costo, texto: null };
+      }
+    }
+
+    return { modo: 'a_cotizar', costo: 0, texto: 'A cotizar' };
+  }
 
   function calcularTotales(lineas, opciones) {
     var config = opciones || {};
-    var envioGratisDesde = Number(config.envioGratisDesde) || 0;
-    var costoEnvio = Number(config.costoEnvio) || 0;
 
     var resumen = (lineas || []).reduce(function (acumulado, linea) {
       var cantidad = Number(linea.cantidad) || 0;
@@ -163,19 +202,15 @@
       acumulado.unidades += cantidad;
       acumulado.subtotal += publicado * cantidad;
       acumulado.subtotalTransferencia += transferencia * cantidad;
+      acumulado.aCotizar = acumulado.aCotizar || Boolean(linea.aCotizar);
 
       return acumulado;
-    }, { unidades: 0, subtotal: 0, subtotalTransferencia: 0 });
+    }, { unidades: 0, subtotal: 0, subtotalTransferencia: 0, aCotizar: false });
 
-    // TODO(backend): el umbral se compara contra el subtotal PUBLICADO, no
-    // contra el de transferencia. Un carrito de $170.000 publicado que paga
-    // $145.000 por transferencia hoy tiene envío gratis. Nadie definió si
-    // corresponde: está anotado en PENDIENTES #48 y lo decide el cliente.
-    // Si la respuesta es "contra lo que efectivamente paga", el único cambio
-    // es usar resumen.subtotalTransferencia en esta línea y el equivalente
-    // del lado de PHP cuando exista el checkout.
-    var envioGratis = envioGratisDesde > 0 && resumen.subtotal >= envioGratisDesde;
-    var envio = envioGratis ? 0 : costoEnvio;
+    // El umbral de envío gratis se compara contra el subtotal PUBLICADO
+    // (PENDIENTES #48), igual que en app/envio.php.
+    var calculo = calcularEnvio(resumen, config.envio, config.cp);
+    var envio = calculo.costo;
 
     return {
       unidades: resumen.unidades,
@@ -183,8 +218,9 @@
       subtotalTransferencia: resumen.subtotalTransferencia,
       ahorro: resumen.subtotal - resumen.subtotalTransferencia,
       envio: envio,
-      envioGratis: envioGratis,
-      falta_para_envio_gratis: envioGratis ? 0 : Math.max(0, envioGratisDesde - resumen.subtotal),
+      envioGratis: calculo.modo === 'gratis',
+      envioModo: calculo.modo,
+      envioTexto: calculo.texto,
       total: resumen.subtotal + envio,
       totalTransferencia: resumen.subtotalTransferencia + envio
     };

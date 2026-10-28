@@ -223,16 +223,21 @@ function checkout_lineas(mixed $crudo, string $medio): array
 /**
  * Los totales del pedido.
  *
- * El umbral de envío gratis se compara contra el subtotal PUBLICADO, no
- * contra el que se paga. Es la decisión que quedó tomada en PENDIENTES #48 y
- * está replicada en assets/js/carrito.js: si cambia, cambian los dos.
+ * El envío lo decide envio_calcular() (app/envio.php) con el código postal
+ * de entrega: gratis o tarifa fija dentro de la zona, "a cotizar" afuera o
+ * con productos pesados. El umbral de envío gratis se sigue comparando
+ * contra el subtotal PUBLICADO (PENDIENTES #48).
+ *
+ * El costo de envío no lleva el descuento por transferencia: el descuento
+ * es sobre la mercadería.
  *
  * @return array{
  *     unidades:int, subtotal:int, subtotal_publicado:int, envio:int,
- *     envio_gratis:bool, descuento_pct:float, ahorro:int, total:int
+ *     envio_gratis:bool, envio_modo:string, envio_texto:string,
+ *     envio_detalle:string, descuento_pct:float, ahorro:int, total:int
  * }
  */
-function checkout_totales(array $lineas, string $medio, array $settings): array
+function checkout_totales(array $lineas, string $medio, array $settings, string $cp = ''): array
 {
     $descuenta = checkout_medios()[$medio]['descuenta'] ?? false;
 
@@ -246,19 +251,18 @@ function checkout_totales(array $lineas, string $medio, array $settings): array
         $publicado += (int) $linea['precio_publicado'] * (int) $linea['cantidad'];
     }
 
-    $umbral       = (int) ($settings['envio_gratis_desde'] ?? 0);
-    $envio_gratis = $umbral > 0 && $publicado >= $umbral;
-
-    // El costo de envío es 0 hasta que el cliente pase la tabla real
-    // (PENDIENTES #8). No se inventa un número: la vista dice "a coordinar".
-    $envio = 0;
+    $calculo = envio_calcular($lineas, $cp, $settings);
+    $envio   = $calculo['costo'];
 
     return [
         'unidades'           => $unidades,
         'subtotal'           => $subtotal,
         'subtotal_publicado' => $publicado,
         'envio'              => $envio,
-        'envio_gratis'       => $envio_gratis,
+        'envio_gratis'       => $calculo['modo'] === 'gratis',
+        'envio_modo'         => $calculo['modo'],
+        'envio_texto'        => $calculo['texto'],
+        'envio_detalle'      => $calculo['detalle'],
         'descuento_pct'      => $descuenta ? numero_decimal($settings['descuento_transferencia_pct'] ?? 0) : 0.0,
         'ahorro'             => $publicado - $subtotal,
         'total'              => $subtotal + $envio,
@@ -336,6 +340,11 @@ function checkout_validar_comprador(array $post): array
         $errores['provincia'] = 'Elegí la provincia.';
     }
 
+    // Sin código postal no se puede calcular el envío (app/envio.php).
+    if (!preg_match('/\d{4}/', $datos['codigo_postal'])) {
+        $errores['codigo_postal'] = 'Escribí el código postal: con él calculamos el envío.';
+    }
+
     return ['ok' => $errores === [], 'datos' => $datos, 'errores' => $errores];
 }
 
@@ -411,6 +420,11 @@ function checkout_armar_pedido(array $lineas, array $totales, array $comprador, 
             'provincia'     => $comprador['provincia'],
             'codigo_postal' => $comprador['codigo_postal'],
             'notas'         => $comprador['notas'],
+            // Cómo se resolvió el envío al comprar: 'gratis', 'zona' o
+            // 'a_cotizar'. Con 'a_cotizar' el panel lo marca para que
+            // Rastro le escriba al comprador con el costo.
+            'envio_modo'    => $totales['envio_modo'] ?? '',
+            'envio_detalle' => $totales['envio_detalle'] ?? '',
         ],
         'pago' => [
             'proveedor'     => $medio === 'mercado_pago' ? 'mercado_pago' : null,
@@ -606,6 +620,14 @@ function checkout_sincronizar_pago(array $pedido, string $payment_id): array
         ],
     ]);
 
+    /* Aviso a Rastro sólo en el paso a pagado: el retorno y el webhook
+       sincronizan el mismo pago y no tienen que mandar dos mails. */
+    if ($actualizado !== null
+        && ($actualizado['estado'] ?? '') === 'pagado'
+        && ($pedido['estado'] ?? '') !== 'pagado') {
+        checkout_avisar_pedido($actualizado, 'pagado');
+    }
+
     repo_log_pago('pago.sincronizado', [
         'pedido' => $codigo,
         'pago'   => (string) ($pago['id'] ?? $payment_id),
@@ -663,4 +685,107 @@ function checkout_mismo_origen(): bool
     // navegadores con la política de referrer al máximo; la validación de
     // precios del servidor es la que sostiene la seguridad del monto.
     return true;
+}
+
+/* ==========================================================================
+   Aviso a Rastro
+   ========================================================================== */
+
+/**
+ * Le manda a Rastro un mail con el pedido.
+ *
+ * Pedido del cliente (22/10): enterarse de cada pedido pagado y de cada
+ * pedido por transferencia sin tener que entrar al panel a mirar. Va a
+ * `avisos_email` de settings, o al mail de ventas si no hay uno aparte.
+ *
+ * Nunca frena una compra: si el correo falla queda en el log de pagos y el
+ * pedido sigue su camino. El aviso por WhatsApp automático necesita la API
+ * de WhatsApp Business (paga); mientras tanto el mail trae un enlace para
+ * abrirle el chat al comprador.
+ *
+ * @param string $motivo 'pagado' | 'transferencia' | 'a_cotizar'
+ */
+function checkout_avisar_pedido(array $pedido, string $motivo): bool
+{
+    if (!function_exists('correo_enviar')) {
+        return false;
+    }
+
+    $settings = repo_settings();
+    $destino  = trim((string) ($settings['avisos_email'] ?? '')) ?: trim((string) ($settings['email'] ?? ''));
+
+    if ($destino === '') {
+        return false;
+    }
+
+    $codigo    = (string) ($pedido['codigo'] ?? '');
+    $comprador = (array) ($pedido['comprador'] ?? []);
+    $entrega   = (array) ($pedido['entrega'] ?? []);
+    $nombre    = trim(($comprador['nombre'] ?? '') . ' ' . ($comprador['apellido'] ?? ''));
+
+    $titulos = [
+        'pagado'        => 'Pedido pagado',
+        'transferencia' => 'Pedido por transferencia: esperando el pago',
+        'a_cotizar'     => 'Pedido con envío a cotizar',
+    ];
+
+    $lineas = [];
+    foreach ((array) ($pedido['items'] ?? []) as $item) {
+        $lineas[] = sprintf(
+            '  %d × %s (%s) — %s',
+            (int) ($item['cantidad'] ?? 1),
+            (string) ($item['nombre'] ?? ''),
+            (string) ($item['sku'] ?? ''),
+            moneda((int) ($item['precio_unitario'] ?? 0) * (int) ($item['cantidad'] ?? 1))
+        );
+    }
+
+    $telefono = preg_replace('/\D+/', '', (string) ($comprador['telefono'] ?? '')) ?? '';
+    $chat     = $telefono !== ''
+        ? 'https://wa.me/' . (str_starts_with($telefono, '54') ? $telefono : '549' . ltrim($telefono, '0'))
+          . '?text=' . rawurlencode('Hola ' . ($comprador['nombre'] ?? '') . ', te escribimos de Rastro Fitness por tu pedido ' . $codigo . '.')
+        : '';
+
+    $cuerpo = implode("\n", array_filter([
+        ($titulos[$motivo] ?? 'Pedido nuevo') . ' · ' . $codigo,
+        '',
+        'Comprador: ' . $nombre,
+        'Mail: ' . ($comprador['email'] ?? ''),
+        'Teléfono: ' . ($comprador['telefono'] ?? ''),
+        $chat !== '' ? 'Escribirle por WhatsApp: ' . $chat : null,
+        '',
+        'Productos:',
+        implode("\n", $lineas),
+        '',
+        'Subtotal: ' . moneda((int) ($pedido['subtotal'] ?? 0)),
+        'Envío: ' . envio_texto_pedido($pedido),
+        'Total: ' . moneda((int) ($pedido['total'] ?? 0)),
+        'Medio de pago: ' . (checkout_medios()[$pedido['medio_pago'] ?? '']['nombre'] ?? (string) ($pedido['medio_pago'] ?? '')),
+        '',
+        'Entrega: ' . trim(implode(', ', array_filter([
+            $entrega['calle'] ?? '', $entrega['localidad'] ?? '', $entrega['provincia'] ?? '',
+            ($entrega['codigo_postal'] ?? '') !== '' ? 'CP ' . $entrega['codigo_postal'] : '',
+        ]))),
+        ($entrega['notas'] ?? '') !== '' ? 'Notas: ' . $entrega['notas'] : null,
+        ($entrega['envio_modo'] ?? '') === 'a_cotizar' ? "\nEl envío está a cotizar: hay que pasarle el costo al comprador." : null,
+        '',
+        'Ver en el panel: ' . checkout_url_absoluta('/admin/pedidos/' . rawurlencode($codigo)),
+    ], static fn ($l) => $l !== null));
+
+    $error = null;
+    $ok = correo_enviar(
+        $destino,
+        ($titulos[$motivo] ?? 'Pedido nuevo') . ' · ' . $codigo . ' · ' . moneda((int) ($pedido['total'] ?? 0)),
+        $cuerpo,
+        (string) ($comprador['email'] ?? ''),
+        $error
+    );
+
+    repo_log_pago($ok ? 'aviso.enviado' : 'aviso.fallido', [
+        'pedido' => $codigo,
+        'motivo' => $motivo,
+        'error'  => $error,
+    ]);
+
+    return $ok;
 }

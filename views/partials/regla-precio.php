@@ -44,7 +44,7 @@ $regla_settings = repo_settings();
     <p class="regla-precio__celda">
         <span class="regla-precio__rotulo t-mono-label">Envío</span>
         <span class="regla-precio__dato t-mono-texto">
-            Sin cargo desde <?= e(moneda($regla_settings['envio_gratis_desde'] ?? 0)) ?>.
+            <?= e(envio_texto_general($regla_settings)) ?>
         </span>
     </p>
 </div>

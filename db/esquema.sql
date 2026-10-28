@@ -80,6 +80,9 @@ CREATE TABLE productos (
     nuevo               TINYINT(1) NOT NULL DEFAULT 0,
     imagen              VARCHAR(255)     NULL,
     peso_kg             DECIMAL(7,2)     NULL,
+    -- Medidas de la caja, bultos y "se cotiza aparte". Ver app/envio.php
+    -- y db/migraciones/003.
+    envio               JSON             NULL,
     activo              TINYINT(1) NOT NULL DEFAULT 1,
 
     -- Medidas de la foto principal. Existen para poder escribir width y

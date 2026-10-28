@@ -490,7 +490,121 @@ function panel_subir_imagen(string $campo, string $prefijo = 'imagen'): array
 
     @chmod($carpeta . '/' . $nombre, 0664);
 
+    $nombre = panel_a_webp($carpeta, $nombre);
+
     return ['ruta' => PANEL_CARPETA_SUBIDAS . '/' . $nombre];
+}
+
+/**
+ * Pasa una imagen subida a WebP y la achica a 1600 px de lado mayor.
+ *
+ * Lo pidió el cliente el 22/10: un JPG de celular pesa 4 MB y el mismo en
+ * WebP a 1600 px, 200 KB. Se hace al subir para que nadie tenga que
+ * acordarse. Si el servidor no tiene GD con WebP, o la conversión sale
+ * más pesada que el original, queda el archivo como vino: una foto que no
+ * se optimizó es mejor que una foto que no se subió.
+ *
+ * @return string El nombre del archivo final, dentro de $carpeta.
+ */
+function panel_a_webp(string $carpeta, string $nombre): string
+{
+    $ruta = $carpeta . '/' . $nombre;
+    $ext  = strtolower(pathinfo($nombre, PATHINFO_EXTENSION));
+
+    if (!function_exists('imagewebp') || !in_array($ext, ['jpg', 'png', 'webp'], true)) {
+        return $nombre;
+    }
+
+    $origen = match ($ext) {
+        'jpg'   => @imagecreatefromjpeg($ruta),
+        'png'   => @imagecreatefrompng($ruta),
+        'webp'  => @imagecreatefromwebp($ruta),
+    };
+
+    if ($origen === false) {
+        return $nombre;
+    }
+
+    $ancho = imagesx($origen);
+    $alto  = imagesy($origen);
+    $escala = min(1, 1600 / max($ancho, $alto));
+
+    if ($escala < 1) {
+        $nuevo = imagecreatetruecolor((int) round($ancho * $escala), (int) round($alto * $escala));
+        imagealphablending($nuevo, false);
+        imagesavealpha($nuevo, true);
+        imagecopyresampled($nuevo, $origen, 0, 0, 0, 0, imagesx($nuevo), imagesy($nuevo), $ancho, $alto);
+        imagedestroy($origen);
+        $origen = $nuevo;
+    } elseif ($ext === 'webp') {
+        // Ya es WebP y no hay que achicarla: no se recomprime.
+        imagedestroy($origen);
+        return $nombre;
+    }
+
+    imagepalettetotruecolor($origen);
+    imagealphablending($origen, false);
+    imagesavealpha($origen, true);
+
+    $destino_nombre = preg_replace('/\.(jpg|png|webp)$/', '', $nombre) . '.webp';
+    $destino = $carpeta . '/' . $destino_nombre;
+    $temporal = $destino . '.tmp';
+
+    $ok = @imagewebp($origen, $temporal, 82);
+    imagedestroy($origen);
+
+    if (!$ok || !is_file($temporal) || (filesize($temporal) >= filesize($ruta) && $ext === 'webp')) {
+        @unlink($temporal);
+        return $nombre;
+    }
+
+    @unlink($ruta);
+    @rename($temporal, $destino);
+    @chmod($destino, 0664);
+
+    return $destino_nombre;
+}
+
+/**
+ * Varias imágenes de un `<input type="file" multiple name="campo[]">`.
+ *
+ * PHP agrupa los archivos múltiples por propiedad (todos los name, todos
+ * los tmp_name...). Se reparten de a uno y cada uno pasa por
+ * panel_subir_imagen(), con las mismas validaciones.
+ *
+ * @return array{rutas:list<string>, errores:list<string>}
+ */
+function panel_subir_imagenes(string $campo, string $prefijo = 'imagen'): array
+{
+    $rutas   = [];
+    $errores = [];
+    $grupo   = $_FILES[$campo] ?? null;
+
+    if (!is_array($grupo) || !is_array($grupo['name'] ?? null)) {
+        return ['rutas' => [], 'errores' => []];
+    }
+
+    foreach (array_keys($grupo['name']) as $i) {
+        $clave = '__' . $campo . '_' . $i;
+        $_FILES[$clave] = [
+            'name'     => $grupo['name'][$i],
+            'type'     => $grupo['type'][$i],
+            'tmp_name' => $grupo['tmp_name'][$i],
+            'error'    => $grupo['error'][$i],
+            'size'     => $grupo['size'][$i],
+        ];
+
+        $subida = panel_subir_imagen($clave, $prefijo);
+        unset($_FILES[$clave]);
+
+        if (($subida['error'] ?? '') !== '') {
+            $errores[] = (string) $grupo['name'][$i] . ': ' . $subida['error'];
+        } elseif (isset($subida['ruta'])) {
+            $rutas[] = (string) $subida['ruta'];
+        }
+    }
+
+    return ['rutas' => $rutas, 'errores' => $errores];
 }
 
 /** Bytes en algo legible, para los mensajes de error. */

@@ -152,7 +152,7 @@ function _repo_my_products(): array
                 c.slug AS categoria, m.slug AS marca,
                 p.descripcion_corta, p.descripcion,
                 p.precio_lista, p.precio_mayorista, p.descuento_pct,
-                p.stock, p.destacado, p.nuevo, p.imagen, p.peso_kg, p.activo
+                p.stock, p.destacado, p.nuevo, p.imagen, p.peso_kg, p.envio, p.activo
            FROM productos p
            LEFT JOIN categorias c ON c.id = p.categoria_id
            LEFT JOIN marcas     m ON m.id = p.marca_id
@@ -187,6 +187,7 @@ function _repo_my_products(): array
             'imagenes'          => $imagenes[$id] ?? [],
             'especificaciones'  => $especificaciones[$id] ?? [],
             'peso_kg'           => _repo_my_num($f['peso_kg']),
+            'envio'             => json_decode((string) ($f['envio'] ?? ''), true) ?: [],
             'activo'            => _repo_my_bool($f['activo']),
         ];
     }
@@ -295,7 +296,14 @@ function _repo_my_settings(): array
     foreach (db_q('SELECT clave, valor FROM settings ORDER BY clave') as $f) {
         $valor = (string) $f['valor'];
 
-        $salida[(string) $f['clave']] = ctype_digit($valor) ? (int) $valor : $valor;
+        /* El CVU tiene 22 dígitos: pasado a int desborda y se guarda otro
+           número. Sólo vuelven a ser int los que entran cómodos en uno y
+           no empiezan con cero (un CP o un CVU con ceros adelante es
+           texto). */
+        $es_entero = ctype_digit($valor) && strlen($valor) <= 12
+            && ($valor === '0' || $valor[0] !== '0');
+
+        $salida[(string) $f['clave']] = $es_entero ? (int) $valor : $valor;
     }
 
     return $salida;
@@ -585,8 +593,8 @@ function _repo_my_guardar_products(array $datos): void
             'INSERT INTO productos
                 (id, slug, sku, nombre, categoria_id, marca_id, descripcion_corta,
                  descripcion, precio_lista, precio_mayorista, descuento_pct, stock,
-                 destacado, nuevo, imagen, peso_kg, activo)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                 destacado, nuevo, imagen, peso_kg, envio, activo)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
              ON DUPLICATE KEY UPDATE
                 slug = VALUES(slug), sku = VALUES(sku), nombre = VALUES(nombre),
                 categoria_id = VALUES(categoria_id), marca_id = VALUES(marca_id),
@@ -594,7 +602,8 @@ function _repo_my_guardar_products(array $datos): void
                 precio_lista = VALUES(precio_lista), precio_mayorista = VALUES(precio_mayorista),
                 descuento_pct = VALUES(descuento_pct), stock = VALUES(stock),
                 destacado = VALUES(destacado), nuevo = VALUES(nuevo),
-                imagen = VALUES(imagen), peso_kg = VALUES(peso_kg), activo = VALUES(activo)',
+                imagen = VALUES(imagen), peso_kg = VALUES(peso_kg), envio = VALUES(envio),
+                activo = VALUES(activo)',
             [
                 $id,
                 (string) ($p['slug'] ?? ''),
@@ -612,6 +621,7 @@ function _repo_my_guardar_products(array $datos): void
                 _repo_my_param((bool) ($p['nuevo'] ?? false)),
                 (string) ($p['imagen'] ?? ''),
                 $p['peso_kg'] ?? null,
+                empty($p['envio']) ? null : json_encode($p['envio'], JSON_UNESCAPED_UNICODE),
                 _repo_my_param((bool) ($p['activo'] ?? true)),
             ]
         );

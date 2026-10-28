@@ -25,6 +25,20 @@ if ($pedido === null) {
 if (panel_es_post()) {
     panel_exigir_csrf();
 
+    /* Borrar es otra acción del mismo formulario de la pantalla. Pide la
+       casilla tildada: un clic suelto no puede borrar una venta. */
+    if (panel_texto('accion') === 'borrar') {
+        if (!panel_booleano('confirmar_borrado')) {
+            panel_ir_con_aviso('/admin/pedidos/' . $codigo, 'error', 'Tildá la casilla para confirmar que querés borrarlo.');
+        }
+
+        if (repo_delete_order($codigo)) {
+            panel_ir_con_aviso('/admin/pedidos', 'ok', 'Se borró el pedido ' . $codigo . '.');
+        }
+
+        panel_ir_con_aviso('/admin/pedidos/' . $codigo, 'error', 'No se pudo borrar el pedido.');
+    }
+
     $nuevo = panel_texto('estado');
 
     if (!isset($estados[$nuevo])) {
@@ -135,7 +149,7 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                 </div>
                 <div>
                     <dt>Envío</dt>
-                    <dd><?= (int) ($pedido['envio'] ?? 0) === 0 ? 'Sin cargo' : e(moneda($pedido['envio'])) ?></dd>
+                    <dd><?= e(envio_texto_pedido($pedido)) ?></dd>
                 </div>
                 <?php if ((float) ($pedido['descuento_aplicado_pct'] ?? 0) > 0): ?>
                     <div>
@@ -183,6 +197,26 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
 
             <button class="panel-boton panel-boton--acento panel-boton--ancho" type="submit">
                 Cambiar estado
+            </button>
+        </form>
+
+        <form class="panel-grupo" method="post" action="<?= e(url('/admin/pedidos/' . $codigo)) ?>">
+            <h2 class="panel-grupo__titulo">Borrar</h2>
+
+            <input type="hidden" name="csrf" value="<?= e(panel_csrf()) ?>">
+            <input type="hidden" name="accion" value="borrar">
+
+            <p class="campo-panel__ayuda">
+                Para los pedidos de prueba y los de ejemplo. Una venta real no se borra: se cancela.
+            </p>
+
+            <label class="campo-panel__casilla">
+                <input type="checkbox" name="confirmar_borrado" value="1">
+                Sí, borrar <?= e($codigo) ?> para siempre
+            </label>
+
+            <button class="panel-boton panel-boton--ancho" type="submit">
+                Borrar pedido
             </button>
         </form>
 

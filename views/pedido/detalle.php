@@ -146,7 +146,7 @@ require RASTRO_VIEWS . '/layout/head.php';
                 <div class="resumen__fila">
                     <dt class="t-mono-texto">Envío</dt>
                     <dd class="t-mono-texto">
-                        <?= (int) ($pedido['envio'] ?? 0) > 0 ? e(moneda($pedido['envio'])) : 'Sin cargo' ?>
+                        <?= e(envio_texto_pedido($pedido)) ?>
                     </dd>
                 </div>
                 <?php if ((float) ($pedido['descuento_aplicado_pct'] ?? 0) > 0): ?>

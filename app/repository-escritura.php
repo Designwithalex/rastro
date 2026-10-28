@@ -884,3 +884,46 @@ function _repo_ordenar(array $coleccion): array
 
     return array_values($coleccion);
 }
+
+/**
+ * Borra un pedido: los de prueba y los "Ejemplo" de la maqueta.
+ *
+ * Pedido del cliente (22/10): el panel estaba lleno de pedidos de prueba y
+ * de los ejemplos del mock, y no había forma de sacarlos. Un pedido real no
+ * se debería borrar nunca —se cancela—, por eso el panel pide confirmarlo
+ * y lo deja escrito en el log de pagos.
+ */
+function repo_delete_order(string $codigo): bool
+{
+    if ($codigo === '') {
+        return false;
+    }
+
+    if (db_activa()) {
+        // pedido_items se va solo: ON DELETE CASCADE.
+        $borrado = db_q('DELETE FROM pedidos WHERE codigo = ?', [$codigo])->rowCount() > 0;
+    } else {
+        $locales = _repo_pedidos_leer();
+        $quedan  = array_values(array_filter(
+            $locales,
+            static fn (array $p): bool => (string) ($p['codigo'] ?? '') !== $codigo
+        ));
+
+        if (count($quedan) !== count($locales)) {
+            $borrado = _repo_pedidos_guardar($quedan);
+        } else {
+            $mock   = _repo_json('orders');
+            $quedan = array_values(array_filter(
+                $mock,
+                static fn (array $p): bool => (string) ($p['codigo'] ?? '') !== $codigo
+            ));
+            $borrado = count($quedan) !== count($mock) && _repo_escribir_json('orders', $quedan);
+        }
+    }
+
+    if ($borrado) {
+        repo_log_pago('pedido.borrado', ['pedido' => $codigo]);
+    }
+
+    return $borrado;
+}

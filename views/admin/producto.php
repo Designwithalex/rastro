@@ -122,10 +122,24 @@ if (panel_es_post()) {
         $imagen = '';
     }
 
+    /* Datos de envío: medidas de la caja (cm), bultos y si se cotiza
+       aparte. Los usa app/envio.php, y el agregador cuando entre. */
+    $envio_datos = [
+        'alto_cm'   => panel_entero('envio_alto_cm'),
+        'ancho_cm'  => panel_entero('envio_ancho_cm'),
+        'largo_cm'  => panel_entero('envio_largo_cm'),
+        'bultos'    => max(1, panel_entero('envio_bultos', 1) ?? 1),
+        'a_cotizar' => panel_booleano('envio_a_cotizar'),
+    ];
+
     if ($errores === []) {
         /* `imagenes` arranca por la principal: es la que abre la galería de
            la ficha. Las demás se escriben una por línea. */
         $galeria = panel_lineas('imagenes');
+
+        // Las fotos subidas desde la compu se suman al final de la galería.
+        $subidas = panel_subir_imagenes('galeria_nuevas', $nombre !== '' ? $nombre : 'producto');
+        $galeria = array_merge($galeria, $subidas['rutas']);
 
         if ($imagen !== '') {
             array_unshift($galeria, $imagen);
@@ -151,6 +165,7 @@ if (panel_es_post()) {
             'imagen'            => $imagen,
             'imagenes'          => array_values(array_unique($galeria)),
             'especificaciones'  => panel_pares('especificaciones'),
+            'envio'             => $envio_datos,
         ];
 
         $guardado = repo_save_product($datos);
@@ -187,6 +202,7 @@ if (panel_es_post()) {
         'nuevo'             => panel_booleano('nuevo'),
         'activo'            => panel_booleano('activo'),
         'imagen'            => $imagen,
+        'envio'             => $envio_datos,
     ]);
 }
 
@@ -398,8 +414,17 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                     <textarea class="campo-panel__control campo-panel__control--mono" id="imagenes"
                               name="imagenes" rows="4"><?= e(implode("\n", $galeria_extra)) ?></textarea>
                     <p class="campo-panel__ayuda">
-                        Una ruta por línea, relativa a <code>assets/</code>. Ejemplo:
-                        <code>img/productos/disco-alt.jpg</code>. La principal se agrega sola.
+                        Las que ya tiene, una por línea. Para sacar una, borrá su línea.
+                        La principal se agrega sola.
+                    </p>
+                </div>
+
+                <div class="campo-panel">
+                    <label class="campo-panel__rotulo" for="galeria_nuevas">Sumar fotos a la galería</label>
+                    <input class="campo-panel__control" type="file" id="galeria_nuevas"
+                           name="galeria_nuevas[]" accept="image/jpeg,image/png,image/webp" multiple>
+                    <p class="campo-panel__ayuda">
+                        Se pueden elegir varias a la vez. Se pasan solas a WebP y se achican para la web.
                     </p>
                 </div>
             </fieldset>
@@ -481,6 +506,39 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                            id="peso_kg" name="peso_kg"
                            value="<?= $v('peso_kg') === null ? '' : e((string) (int) $v('peso_kg')) ?>">
                 </div>
+            </fieldset>
+
+            <?php $envio_v = envio_producto(['envio' => $v('envio', [])]); ?>
+            <fieldset class="panel-grupo">
+                <legend class="panel-grupo__titulo">Envío</legend>
+
+                <div class="panel-fila">
+                    <?php foreach (['alto_cm' => 'Alto', 'ancho_cm' => 'Ancho', 'largo_cm' => 'Largo'] as $clave => $rotulo): ?>
+                        <div class="campo-panel">
+                            <label class="campo-panel__rotulo" for="envio_<?= e($clave) ?>"><?= e($rotulo) ?> (cm)</label>
+                            <input class="campo-panel__control" type="text" inputmode="numeric"
+                                   id="envio_<?= e($clave) ?>" name="envio_<?= e($clave) ?>"
+                                   value="<?= $envio_v[$clave] === null ? '' : e((string) (int) $envio_v[$clave]) ?>">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="campo-panel">
+                    <label class="campo-panel__rotulo" for="envio_bultos">Bultos</label>
+                    <input class="campo-panel__control" type="text" inputmode="numeric"
+                           id="envio_bultos" name="envio_bultos"
+                           value="<?= e((string) $envio_v['bultos']) ?>">
+                    <p class="campo-panel__ayuda">Medidas de la caja armada. Si viene en varias cajas, el peso se reparte entre los bultos.</p>
+                </div>
+
+                <label class="campo-panel__casilla">
+                    <input type="checkbox" name="envio_a_cotizar" value="1" <?= $envio_v['a_cotizar'] ? 'checked' : '' ?>>
+                    El envío se cotiza aparte
+                </label>
+                <p class="campo-panel__ayuda">
+                    Racks, jaulas, bancos y lo que pase de <?= e((string) (int) envio_config($settings)['cotizar_kg']) ?> kg por bulto
+                    ya se cotizan solos (Configuración → Envíos).
+                </p>
             </fieldset>
 
             <fieldset class="panel-grupo">

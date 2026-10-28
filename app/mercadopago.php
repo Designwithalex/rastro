@@ -659,9 +659,11 @@ function mp_estado_pedido(string $estado_pago): string
     return match ($estado_pago) {
         'approved', 'authorized'   => 'pagado',
         'pending', 'in_process'    => 'pendiente_pago',
-        'in_mediation'             => 'en_disputa',
+        // Un contracargo es una disputa abierta con el banco, no una
+        // devolución que hizo Rastro (pedido del 22/10).
+        'in_mediation', 'charged_back' => 'en_disputa',
         'rejected', 'cancelled'    => 'cancelado',
-        'refunded', 'charged_back' => 'devuelto',
+        'refunded'                 => 'devuelto',
         default                    => 'pendiente_pago',
     };
 }

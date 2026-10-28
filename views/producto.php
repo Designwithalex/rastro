@@ -56,13 +56,8 @@ $whatsapp_producto = whatsapp_link(
 $datos_ficha = [
     [
         'rotulo' => 'Envío',
-        'valor'  => 'A todo el país. Gratis desde ' . moneda($settings['envio_gratis_desde'] ?? 0),
+        'valor'  => envio_texto_producto($producto, $settings),
         'provisorio' => false,
-    ],
-    [
-        'rotulo' => 'Retiro',
-        'valor'  => 'En depósito, sin cargo',
-        'provisorio' => true,
     ],
     [
         'rotulo' => 'Garantía',

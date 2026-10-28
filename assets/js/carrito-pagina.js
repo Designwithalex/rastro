@@ -214,7 +214,8 @@
       lineas.push({
         cantidad: item.cantidad,
         precioPublicado: producto.publicado,
-        precioTransferencia: producto.transferencia
+        precioTransferencia: producto.transferencia,
+        aCotizar: Boolean(producto.aCotizar)
       });
     });
 
@@ -234,10 +235,10 @@
     texto(raiz.querySelector('[data-carrito-resumen-productos]'), conteo);
     texto(raiz.querySelector('[data-carrito-resumen-subtotal]'), moneda(totales.subtotal));
 
-    // Sin tabla de costos de envío no se inventa un número: se dice que
-    // se coordina (PENDIENTES #8).
+    // En el carrito todavía no hay código postal: el envío se calcula en
+    // el checkout. Si hay algo pesado ya se sabe que se cotiza aparte.
     texto(raiz.querySelector('[data-carrito-resumen-envio]'),
-      totales.envioGratis ? 'Gratis' : 'A coordinar');
+      totales.envioModo === 'a_cotizar' ? 'A cotizar' : 'Se calcula al finalizar');
 
     texto(raiz.querySelector('[data-carrito-resumen-ahorro]'), moneda(-totales.ahorro));
     texto(raiz.querySelector('[data-carrito-total]'), moneda(totales.total));

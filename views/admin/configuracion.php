@@ -18,6 +18,17 @@ $errores = [];
 
 $prueba_correo = null;
 
+/* Ajustes de texto que se guardan tal cual. Se suman acá y no a mano en
+   tres lugares (guardar, repintar con errores, dibujar). */
+$ajustes_texto = [
+    'envio_zona_nombre', 'envio_zona_cps', 'envio_cotizar_categorias',
+    'envio_origen_cp', 'envio_origen_localidad',
+    'transferencia_titular', 'transferencia_alias', 'transferencia_cvu', 'transferencia_banco',
+    'avisos_email', 'meta_pixel_id', 'ga_id', 'data_fiscal_url',
+];
+
+$ajustes_enteros = ['envio_zona_costo', 'envio_cotizar_kg'];
+
 if (panel_es_post()) {
     panel_exigir_csrf();
 
@@ -83,6 +94,30 @@ if (panel_es_post()) {
         $errores['email'] = 'Ese mail no tiene forma de mail.';
     }
 
+    $avisos_email = panel_texto('avisos_email');
+
+    if ($avisos_email !== '' && !filter_var($avisos_email, FILTER_VALIDATE_EMAIL)) {
+        $errores['avisos_email'] = 'Ese mail no tiene forma de mail.';
+    }
+
+    $cvu = (string) preg_replace('/\D/', '', panel_texto('transferencia_cvu'));
+
+    if ($cvu !== '' && strlen($cvu) !== 22) {
+        $errores['transferencia_cvu'] = 'El CVU o CBU tiene 22 números.';
+    }
+
+    $data_fiscal = panel_texto('data_fiscal_url');
+
+    if ($data_fiscal !== '' && !preg_match('#^https?://#', $data_fiscal)) {
+        $errores['data_fiscal_url'] = 'Pegá el link completo del QR, empezando por http.';
+    }
+
+    foreach ($ajustes_enteros as $clave) {
+        if ((panel_entero($clave, 0) ?? 0) < 0) {
+            $errores[$clave] = 'No puede ser negativo.';
+        }
+    }
+
     if ($errores === []) {
         $guardado = repo_save_settings([
             'descuento_transferencia_pct' => $descuento,
@@ -103,7 +138,13 @@ if (panel_es_post()) {
             'may_salas_equipadas'         => panel_texto('may_salas_equipadas'),
             'may_entrega_tipica'          => panel_texto('may_entrega_tipica'),
             'may_pedido_minimo'           => panel_texto('may_pedido_minimo'),
-        ]);
+        ]
+        + ['transferencia_cvu' => $cvu]
+        + array_combine($ajustes_texto, array_map('panel_texto', $ajustes_texto))
+        + array_combine($ajustes_enteros, array_map(
+            static fn (string $c): int => panel_entero($c, 0) ?? 0,
+            $ajustes_enteros
+        )));
 
         panel_ir_con_aviso(
             '/admin/configuracion',
@@ -132,8 +173,31 @@ if ($errores !== []) {
         'may_salas_equipadas'         => panel_texto('may_salas_equipadas'),
         'may_entrega_tipica'          => panel_texto('may_entrega_tipica'),
         'may_pedido_minimo'           => panel_texto('may_pedido_minimo'),
-    ]);
+    ]
+    + array_combine($ajustes_texto, array_map('panel_texto', $ajustes_texto)));
 }
+
+$envio_config = envio_config($settings);
+
+/* Un campo de texto del panel con su error. Para los ajustes nuevos, que
+   son todos iguales: rótulo, control y ayuda. */
+$campo = static function (string $clave, string $rotulo, string $ayuda = '', string $placeholder = '', string $tipo = 'text') use ($settings, $errores): void {
+    ?>
+    <div class="campo-panel campo-panel--crece">
+        <label class="campo-panel__rotulo" for="<?= e($clave) ?>"><?= e($rotulo) ?></label>
+        <input class="campo-panel__control<?= isset($errores[$clave]) ? ' es-error' : '' ?>"
+               type="<?= e($tipo) ?>" id="<?= e($clave) ?>" name="<?= e($clave) ?>"
+               placeholder="<?= e($placeholder) ?>"
+               value="<?= e((string) ($settings[$clave] ?? '')) ?>">
+        <?php if ($ayuda !== ''): ?>
+            <p class="campo-panel__ayuda"><?= e($ayuda) ?></p>
+        <?php endif; ?>
+        <?php if (isset($errores[$clave])): ?>
+            <p class="campo-panel__error"><?= e($errores[$clave]) ?></p>
+        <?php endif; ?>
+    </div>
+    <?php
+};
 
 /* El ejemplo se calcula con el mismo helper que el sitio, sobre un precio
    redondo. No es un número inventado para la pantalla: es exactamente la
@@ -189,18 +253,117 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                     Un producto puede tener su propio descuento y pisar este.
                 </p>
 
+            </fieldset>
+
+            <fieldset class="panel-grupo">
+                <legend class="panel-grupo__titulo">Envíos</legend>
+
+                <?php $campo('envio_zona_nombre', 'Nombre de la zona', '', 'CABA y alrededores'); ?>
+
                 <div class="campo-panel">
-                    <label class="campo-panel__rotulo" for="envio_gratis_desde">Envío sin cargo desde</label>
-                    <input class="campo-panel__control<?= isset($errores['envio_gratis_desde']) ? ' es-error' : '' ?>"
-                           type="text" inputmode="numeric" id="envio_gratis_desde" name="envio_gratis_desde"
-                           value="<?= e((string) (int) ($settings['envio_gratis_desde'] ?? 0)) ?>">
+                    <label class="campo-panel__rotulo" for="envio_zona_cps">Códigos postales de la zona</label>
+                    <textarea class="campo-panel__control campo-panel__control--mono" rows="2"
+                              id="envio_zona_cps" name="envio_zona_cps"
+                              placeholder="1000-1499, 1600-1899"><?= e((string) ($settings['envio_zona_cps'] ?? '')) ?></textarea>
                     <p class="campo-panel__ayuda">
-                        En pesos. Hoy: <?= e(moneda($settings['envio_gratis_desde'] ?? 0)) ?>.
+                        Rangos separados por coma. CABA es 1000-1499.
+                        <?php if ($envio_config['zona_rangos'] === []): ?>
+                            <strong>Sin códigos cargados no hay zona: todos los envíos se cotizan.</strong>
+                        <?php else: ?>
+                            Se entiende como
+                            <?= e(implode(', ', array_map(
+                                static fn (array $r): string => $r[0] === $r[1] ? (string) $r[0] : $r[0] . ' a ' . $r[1],
+                                $envio_config['zona_rangos']
+                            ))) ?>.
+                        <?php endif; ?>
                     </p>
-                    <?php if (isset($errores['envio_gratis_desde'])): ?>
-                        <p class="campo-panel__error"><?= e($errores['envio_gratis_desde']) ?></p>
-                    <?php endif; ?>
                 </div>
+
+                <div class="panel-fila">
+                    <div class="campo-panel campo-panel--crece">
+                        <label class="campo-panel__rotulo" for="envio_zona_costo">Tarifa en la zona</label>
+                        <input class="campo-panel__control<?= isset($errores['envio_zona_costo']) ? ' es-error' : '' ?>"
+                               type="text" inputmode="numeric" id="envio_zona_costo" name="envio_zona_costo"
+                               value="<?= e((string) (int) ($settings['envio_zona_costo'] ?? 0)) ?>">
+                        <p class="campo-panel__ayuda">En pesos. Se suma al pago de Mercado Pago. En 0, se cotiza.</p>
+                    </div>
+
+                    <div class="campo-panel campo-panel--crece">
+                        <label class="campo-panel__rotulo" for="envio_gratis_desde">Gratis en la zona desde</label>
+                        <input class="campo-panel__control<?= isset($errores['envio_gratis_desde']) ? ' es-error' : '' ?>"
+                               type="text" inputmode="numeric" id="envio_gratis_desde" name="envio_gratis_desde"
+                               value="<?= e((string) (int) ($settings['envio_gratis_desde'] ?? 0)) ?>">
+                        <p class="campo-panel__ayuda">
+                            En pesos, y sólo dentro de la zona. <strong>En 0 está apagado.</strong>
+                        </p>
+                        <?php if (isset($errores['envio_gratis_desde'])): ?>
+                            <p class="campo-panel__error"><?= e($errores['envio_gratis_desde']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="panel-fila">
+                    <div class="campo-panel">
+                        <label class="campo-panel__rotulo" for="envio_cotizar_kg">Se cotiza desde (kg por bulto)</label>
+                        <input class="campo-panel__control" type="text" inputmode="numeric"
+                               id="envio_cotizar_kg" name="envio_cotizar_kg"
+                               value="<?= e((string) (int) $envio_config['cotizar_kg']) ?>">
+                    </div>
+                    <div class="campo-panel campo-panel--crece">
+                        <label class="campo-panel__rotulo" for="envio_cotizar_categorias">Categorías que siempre se cotizan</label>
+                        <input class="campo-panel__control campo-panel__control--mono" type="text"
+                               id="envio_cotizar_categorias" name="envio_cotizar_categorias"
+                               value="<?= e(implode(', ', $envio_config['cotizar_categorias'])) ?>">
+                    </div>
+                </div>
+                <p class="campo-panel__ayuda">
+                    Racks, jaulas y bancos generan el pedido con envío «a cotizar» y les llega el aviso.
+                    Un producto suelto también se marca desde su ficha en Productos. Fuera de la zona
+                    el envío también figura «a cotizar» hasta que conectemos el agregador.
+                </p>
+
+                <div class="panel-fila">
+                    <?php $campo('envio_origen_cp', 'CP de origen', '', '2930'); ?>
+                    <?php $campo('envio_origen_localidad', 'Localidad de origen', 'Desde dónde sale el envío. El retiro por depósito está apagado.', 'San Pedro, Buenos Aires'); ?>
+                </div>
+            </fieldset>
+
+            <fieldset class="panel-grupo">
+                <legend class="panel-grupo__titulo">Transferencia</legend>
+
+                <div class="panel-fila">
+                    <?php $campo('transferencia_alias', 'Alias', '', 'rastro.fitness.mp'); ?>
+                    <?php $campo('transferencia_cvu', 'CVU o CBU', '', '22 números'); ?>
+                </div>
+                <div class="panel-fila">
+                    <?php $campo('transferencia_titular', 'Titular'); ?>
+                    <?php $campo('transferencia_banco', 'Banco o billetera', '', 'Mercado Pago'); ?>
+                </div>
+                <p class="campo-panel__ayuda">
+                    Se muestran al terminar un pedido por transferencia, con el número de pedido para
+                    el concepto. El pedido queda «Esperando transferencia» hasta que lo marquen como
+                    pagado desde Pedidos.
+                </p>
+            </fieldset>
+
+            <fieldset class="panel-grupo">
+                <legend class="panel-grupo__titulo">Avisos de pedidos</legend>
+
+                <?php $campo('avisos_email', 'Mandar cada pedido a', 'Llega un mail por cada pedido pagado, por cada transferencia y por cada envío a cotizar. Vacío: se usa el mail de ventas.', (string) ($settings['email'] ?? ''), 'email'); ?>
+            </fieldset>
+
+            <fieldset class="panel-grupo">
+                <legend class="panel-grupo__titulo">Medición y legales</legend>
+
+                <div class="panel-fila">
+                    <?php $campo('meta_pixel_id', 'Meta Pixel (ID)', '', '123456789012345'); ?>
+                    <?php $campo('ga_id', 'Google Analytics (ID)', '', 'G-XXXXXXXXXX'); ?>
+                </div>
+                <p class="campo-panel__ayuda">
+                    Con los IDs cargados, el sitio registra las visitas y el evento de compra cuando un pago se aprueba.
+                </p>
+
+                <?php $campo('data_fiscal_url', 'Link del QR de Data Fiscal (ARCA)', 'El que da ARCA al adherir el sitio, del estilo http://qr.afip.gob.ar/?qr=… Con el link cargado, el QR aparece en el pie.', 'http://qr.afip.gob.ar/?qr=', 'url'); ?>
             </fieldset>
 
             <fieldset class="panel-grupo">
@@ -238,6 +401,18 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                     <input class="campo-panel__control<?= isset($errores['email']) ? ' es-error' : '' ?>"
                            type="email" id="email" name="email"
                            value="<?= e((string) ($settings['email'] ?? '')) ?>">
+                    <?php
+                    /* El 22/10 la web decía .com.ar y los avisos salían desde
+                       .com. Se avisa acá en vez de descubrirlo en un reclamo. */
+                    $dominio_ventas = strtolower((string) substr(strrchr((string) ($settings['email'] ?? ''), '@') ?: '', 1));
+                    $dominio_envio  = strtolower((string) substr(strrchr(correo_remitente(), '@') ?: '', 1));
+                    ?>
+                    <?php if ($dominio_ventas !== '' && $dominio_ventas !== $dominio_envio): ?>
+                        <p class="campo-panel__ayuda">
+                            <strong>Ojo: los mails del sitio salen desde <?= e(correo_remitente()) ?>.</strong>
+                            Usen el mismo dominio en los dos para tener un solo mail.
+                        </p>
+                    <?php endif; ?>
                     <?php if (isset($errores['email'])): ?>
                         <p class="campo-panel__error"><?= e($errores['email']) ?></p>
                     <?php endif; ?>
