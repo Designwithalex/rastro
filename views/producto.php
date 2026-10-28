@@ -184,6 +184,28 @@ $datos_ficha = [
                 <?php endif; ?>
             </p>
 
+            <?php $variantes = repo_product_variants($producto); ?>
+            <?php if ($variantes !== []): ?>
+                <?php /* Cada variante es su propio producto (SKU, precio y
+                         stock propios): el selector navega entre fichas, así
+                         el carrito y el checkout no cambian. */ ?>
+                <nav class="variantes" aria-label="Opciones">
+                    <p class="variantes__rotulo t-mono-label-sm">Elegí la opción</p>
+                    <ul class="variantes__lista">
+                        <?php foreach ($variantes as $variante): ?>
+                            <?php $actual = (int) $variante['id'] === (int) $producto['id']; ?>
+                            <li>
+                                <a class="variantes__opcion t-mono-label<?= $actual ? ' es-actual' : '' ?><?= (int) ($variante['stock'] ?? 0) > 0 ? '' : ' es-agotada' ?>"
+                                   href="<?= e(url('/producto/' . $variante['slug'])) ?>"
+                                   <?= $actual ? 'aria-current="page"' : '' ?>>
+                                    <?= e((string) ($variante['variante_nombre'] ?: $variante['nombre'])) ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
+
             <?php
             $precio_producto = $producto;
             $precio_tamano   = 'lg';

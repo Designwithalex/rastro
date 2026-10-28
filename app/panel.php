@@ -627,6 +627,7 @@ function panel_secciones(): array
     return [
         ['ruta' => '/admin',               'titulo' => 'Tablero',       'exacta' => true],
         ['ruta' => '/admin/productos',     'titulo' => 'Productos',     'exacta' => false],
+        ['ruta' => '/admin/importar',      'titulo' => 'Importar',      'exacta' => false],
         ['ruta' => '/admin/pedidos',       'titulo' => 'Pedidos',       'exacta' => false],
         ['ruta' => '/admin/categorias',    'titulo' => 'Categorías',    'exacta' => false],
         ['ruta' => '/admin/marcas',        'titulo' => 'Marcas',        'exacta' => false],

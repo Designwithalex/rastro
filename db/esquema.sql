@@ -83,6 +83,9 @@ CREATE TABLE productos (
     -- Medidas de la caja, bultos y "se cotiza aparte". Ver app/envio.php
     -- y db/migraciones/003.
     envio               JSON             NULL,
+    -- Productos que se muestran como uno con selector (ver migración 003).
+    variante_grupo      VARCHAR(80)      NULL,
+    variante_nombre     VARCHAR(40)      NULL,
     activo              TINYINT(1) NOT NULL DEFAULT 1,
 
     -- Medidas de la foto principal. Existen para poder escribir width y

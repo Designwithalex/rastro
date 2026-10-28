@@ -65,6 +65,8 @@ $filtros = [
     'precio_max' => param_int('precio_max', null, 0),
     'orden'      => param('orden', 'relevancia', $orden_valido),
     'en_stock'   => param_bool('en_stock'),
+    // Las variantes (mancuerna de 2,5 a 40 kg) salen como una sola card.
+    'agrupar'    => true,
 ];
 
 $pagina   = param_int('pagina', 1, 1) ?? 1;

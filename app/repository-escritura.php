@@ -927,3 +927,32 @@ function repo_delete_order(string $codigo): bool
 
     return $borrado;
 }
+
+/**
+ * Guarda muchos productos de una sola escritura.
+ *
+ * La importación por planilla toca cientos de productos. Con
+ * repo_save_product() de a uno, cada alta reescribe el catálogo entero
+ * —en MySQL, cientos de INSERT por producto—; acá se reescribe una vez.
+ *
+ * Cada fila se mezcla con la que ya existe (mismo criterio que
+ * _repo_upsert): lo que no viene en la planilla se conserva.
+ *
+ * @param list<array> $filas Con `id` para actualizar, sin `id` para alta.
+ */
+function repo_save_products(array $filas): bool
+{
+    $productos = _repo_json('products');
+
+    foreach ($filas as $fila) {
+        [$productos] = _repo_upsert($productos, $fila);
+    }
+
+    if (!_repo_escribir_json('products', $productos)) {
+        return false;
+    }
+
+    repo_recount_categories();
+
+    return true;
+}

@@ -166,6 +166,8 @@ if (panel_es_post()) {
             'imagenes'          => array_values(array_unique($galeria)),
             'especificaciones'  => panel_pares('especificaciones'),
             'envio'             => $envio_datos,
+            'variante_grupo'    => slug(panel_texto('variante_grupo')),
+            'variante_nombre'   => panel_texto('variante_nombre'),
         ];
 
         $guardado = repo_save_product($datos);
@@ -203,6 +205,8 @@ if (panel_es_post()) {
         'activo'            => panel_booleano('activo'),
         'imagen'            => $imagen,
         'envio'             => $envio_datos,
+        'variante_grupo'    => panel_texto('variante_grupo'),
+        'variante_nombre'   => panel_texto('variante_nombre'),
     ]);
 }
 
@@ -505,6 +509,28 @@ require RASTRO_VIEWS . '/admin/layout/cabeza.php';
                     <input class="campo-panel__control" type="text" inputmode="numeric"
                            id="peso_kg" name="peso_kg"
                            value="<?= $v('peso_kg') === null ? '' : e((string) (int) $v('peso_kg')) ?>">
+                </div>
+            </fieldset>
+
+            <fieldset class="panel-grupo">
+                <legend class="panel-grupo__titulo">Variante</legend>
+
+                <div class="campo-panel">
+                    <label class="campo-panel__rotulo" for="variante_grupo">Grupo</label>
+                    <input class="campo-panel__control campo-panel__control--mono" type="text"
+                           id="variante_grupo" name="variante_grupo" placeholder="mancuerna-hexagonal"
+                           value="<?= e((string) $v('variante_grupo')) ?>">
+                </div>
+
+                <div class="campo-panel">
+                    <label class="campo-panel__rotulo" for="variante_nombre">Variante</label>
+                    <input class="campo-panel__control" type="text"
+                           id="variante_nombre" name="variante_nombre" placeholder="2,5 kg"
+                           value="<?= e((string) $v('variante_nombre')) ?>">
+                    <p class="campo-panel__ayuda">
+                        Los productos con el mismo grupo se muestran como uno solo en el catálogo,
+                        con un selector en la ficha. Cada uno mantiene su SKU, precio y stock.
+                    </p>
                 </div>
             </fieldset>
 

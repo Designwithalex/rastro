@@ -93,7 +93,17 @@ $card_stock  = ((int) ($card_producto['stock'] ?? 0)) > 0;
         require RASTRO_VIEWS . '/partials/bloque-precio.php';
         ?>
 
-        <?php if ($card_stock): ?>
+        <?php if (!empty($card_producto['variantes_cantidad'])): ?>
+            <?php /* Un grupo de variantes (mancuerna de 2,5 a 40 kg) se
+                     muestra una vez: la elección se hace en la ficha. */ ?>
+            <p class="card__variantes t-mono-label-sm">
+                <?= e((string) $card_producto['variantes_cantidad']) ?> opciones · desde <?= e(moneda((int) $card_producto['precio_desde'])) ?>
+            </p>
+            <a class="boton boton--fantasma card__cta" href="<?= e(url('/producto/' . $card_slug)) ?>">
+                <span class="t-mono-label">Elegir opción</span>
+                <span class="boton__flecha" aria-hidden="true">→</span>
+            </a>
+        <?php elseif ($card_stock): ?>
             <button class="boton boton--fantasma card__cta"
                     type="button"
                     data-agregar="<?= e((string) ($card_producto['id'] ?? 0)) ?>">

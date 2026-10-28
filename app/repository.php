@@ -284,6 +284,44 @@ function repo_products(array $filters = [], int $page = 1, int $perPage = 12): a
         };
     });
 
+    /* `agrupar`: los productos del mismo grupo de variantes salen como uno
+       solo, el primero según el orden pedido, con la cuenta de variantes y
+       el precio más bajo. Es opt-in porque el carrito y el checkout piden
+       el catálogo entero para resolver precios y necesitan todos los ids. */
+    if (!empty($filters['agrupar'])) {
+        $vistos = [];
+        $grupos = [];
+
+        foreach ($productos as $p) {
+            $g = (string) ($p['variante_grupo'] ?? '');
+            if ($g !== '') {
+                $grupos[$g][] = $p;
+            }
+        }
+
+        $productos = array_values(array_filter($productos, static function (array $p) use (&$vistos): bool {
+            $g = (string) ($p['variante_grupo'] ?? '');
+            if ($g === '') {
+                return true;
+            }
+            if (isset($vistos[$g])) {
+                return false;
+            }
+            return $vistos[$g] = true;
+        }));
+
+        foreach ($productos as $i => $p) {
+            $g = (string) ($p['variante_grupo'] ?? '');
+            if ($g !== '' && count($grupos[$g]) > 1) {
+                $productos[$i]['variantes_cantidad'] = count($grupos[$g]);
+                $productos[$i]['precio_desde'] = min(array_map(
+                    static fn (array $v): int => (int) ($v['precio_lista'] ?? 0),
+                    $grupos[$g]
+                ));
+            }
+        }
+    }
+
     $total   = count($productos);
     $perPage = max(1, $perPage);
     $paginas = max(1, (int) ceil($total / $perPage));
@@ -743,6 +781,40 @@ function repo_nosotros(): array
 function repo_settings(): array
 {
     return _repo_json('settings');
+}
+
+/**
+ * Las variantes de un producto: los activos de su mismo grupo, incluido él,
+ * ordenados por el número de la variante ("2,5 kg" < "10 kg").
+ *
+ * @return list<array> Vacío si el producto no tiene grupo o está solo.
+ */
+function repo_product_variants(array $producto): array
+{
+    $grupo = (string) ($producto['variante_grupo'] ?? '');
+
+    if ($grupo === '') {
+        return [];
+    }
+
+    $variantes = array_values(array_filter(
+        _repo_json('products'),
+        static fn (array $p): bool => ($p['activo'] ?? false) === true
+            && (string) ($p['variante_grupo'] ?? '') === $grupo
+    ));
+
+    if (count($variantes) < 2) {
+        return [];
+    }
+
+    $numero = static fn (array $p): float => (float) str_replace(
+        ',', '.', (string) (preg_match('/\d+(?:[.,]\d+)?/', (string) ($p['variante_nombre'] ?? ''), $m) ? $m[0] : '0')
+    );
+
+    usort($variantes, static fn (array $a, array $b): int => [$numero($a), (string) ($a['variante_nombre'] ?? '')]
+        <=> [$numero($b), (string) ($b['variante_nombre'] ?? '')]);
+
+    return $variantes;
 }
 
 /**

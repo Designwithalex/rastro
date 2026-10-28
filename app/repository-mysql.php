@@ -152,7 +152,8 @@ function _repo_my_products(): array
                 c.slug AS categoria, m.slug AS marca,
                 p.descripcion_corta, p.descripcion,
                 p.precio_lista, p.precio_mayorista, p.descuento_pct,
-                p.stock, p.destacado, p.nuevo, p.imagen, p.peso_kg, p.envio, p.activo
+                p.stock, p.destacado, p.nuevo, p.imagen, p.peso_kg, p.envio,
+                p.variante_grupo, p.variante_nombre, p.activo
            FROM productos p
            LEFT JOIN categorias c ON c.id = p.categoria_id
            LEFT JOIN marcas     m ON m.id = p.marca_id
@@ -188,6 +189,8 @@ function _repo_my_products(): array
             'especificaciones'  => $especificaciones[$id] ?? [],
             'peso_kg'           => _repo_my_num($f['peso_kg']),
             'envio'             => json_decode((string) ($f['envio'] ?? ''), true) ?: [],
+            'variante_grupo'    => (string) ($f['variante_grupo'] ?? ''),
+            'variante_nombre'   => (string) ($f['variante_nombre'] ?? ''),
             'activo'            => _repo_my_bool($f['activo']),
         ];
     }
@@ -593,8 +596,9 @@ function _repo_my_guardar_products(array $datos): void
             'INSERT INTO productos
                 (id, slug, sku, nombre, categoria_id, marca_id, descripcion_corta,
                  descripcion, precio_lista, precio_mayorista, descuento_pct, stock,
-                 destacado, nuevo, imagen, peso_kg, envio, activo)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                 destacado, nuevo, imagen, peso_kg, envio, variante_grupo,
+                 variante_nombre, activo)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
              ON DUPLICATE KEY UPDATE
                 slug = VALUES(slug), sku = VALUES(sku), nombre = VALUES(nombre),
                 categoria_id = VALUES(categoria_id), marca_id = VALUES(marca_id),
@@ -603,6 +607,7 @@ function _repo_my_guardar_products(array $datos): void
                 descuento_pct = VALUES(descuento_pct), stock = VALUES(stock),
                 destacado = VALUES(destacado), nuevo = VALUES(nuevo),
                 imagen = VALUES(imagen), peso_kg = VALUES(peso_kg), envio = VALUES(envio),
+                variante_grupo = VALUES(variante_grupo), variante_nombre = VALUES(variante_nombre),
                 activo = VALUES(activo)',
             [
                 $id,
@@ -622,6 +627,8 @@ function _repo_my_guardar_products(array $datos): void
                 (string) ($p['imagen'] ?? ''),
                 $p['peso_kg'] ?? null,
                 empty($p['envio']) ? null : json_encode($p['envio'], JSON_UNESCAPED_UNICODE),
+                ($p['variante_grupo'] ?? '') === '' ? null : (string) $p['variante_grupo'],
+                ($p['variante_nombre'] ?? '') === '' ? null : (string) $p['variante_nombre'],
                 _repo_my_param((bool) ($p['activo'] ?? true)),
             ]
         );

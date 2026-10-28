@@ -360,3 +360,8 @@ a.paginacion__paso:hover {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Grupo de variantes en la card: "16 opciones · desde $X". */
+.card__variantes {
+  color: var(--color-text-secondary);
+}
