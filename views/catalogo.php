@@ -78,6 +78,20 @@ $categorias = repo_categories();
    sin ella el filtro de marca esconde dos tercios del catálogo. */
 $marcas = repo_brands(true);
 
+/* Sólo las marcas que tienen algo para mostrar en la categoría que se está
+   viendo. Las de relleno ("Marca oficial 3") y las que no venden en esta
+   categoría sólo alargaban la columna (pedido de Ape, 22/10: "los filtros
+   no son fáciles"). La marca elegida queda siempre, para poder sacarla. */
+$marcas_con_productos = [];
+foreach (repo_products(['categoria' => $categoria_slug], 1, 9999)['items'] as $p) {
+    $marcas_con_productos[(string) ($p['marca'] ?? '')] = true;
+}
+$marcas = array_values(array_filter(
+    $marcas,
+    static fn (array $m): bool => isset($marcas_con_productos[(string) ($m['slug'] ?? '')])
+        || ($m['slug'] ?? '') === param('marca')
+));
+
 /* --- Título de la página ------------------------------------------- */
 
 $titulo_seccion = $categoria_actual !== null
@@ -212,6 +226,30 @@ $ordenes = [
         </form>
     </div>
 
+    <?php /* ============================================================
+             Pestañas de categoría — lo primero que se elige
+             ============================================================ */ ?>
+    <nav class="contenedor categorias-pestanas" aria-label="Categorías">
+        <ul class="categorias-pestanas__lista">
+            <li>
+                <a class="categorias-pestanas__item t-mono-label<?= $categoria_actual === null ? ' es-activa' : '' ?>"
+                   href="<?= e($url_catalogo(['categoria' => null])) ?>"
+                   <?= $categoria_actual === null ? 'aria-current="page"' : '' ?>>Todo</a>
+            </li>
+            <?php foreach ($categorias as $categoria): ?>
+                <?php $activa = ($categoria['slug'] ?? '') === $categoria_slug; ?>
+                <li>
+                    <a class="categorias-pestanas__item t-mono-label<?= $activa ? ' es-activa' : '' ?>"
+                       href="<?= e($url_catalogo(['categoria' => $categoria['slug'], 'marca' => null])) ?>"
+                       <?= $activa ? 'aria-current="page"' : '' ?>>
+                        <?= e($categoria['nombre'] ?? '') ?>
+                        <span class="categorias-pestanas__conteo"><?= e((string) ($categoria['productos_count'] ?? 0)) ?></span>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
+
     <div class="catalogo reticula">
 
         <?php /* ============================================================
@@ -220,24 +258,9 @@ $ordenes = [
         <aside class="filtros" aria-labelledby="filtros-titulo">
             <h2 class="visualmente-oculto" id="filtros-titulo">Filtros</h2>
 
-            <section class="filtros__grupo" aria-labelledby="filtro-categoria">
-                <h3 class="filtros__titulo t-mono-label" id="filtro-categoria">Categoría</h3>
-                <ul class="filtros__lista">
-                    <?php foreach ($categorias as $categoria): ?>
-                        <?php $activa = ($categoria['slug'] ?? '') === $categoria_slug; ?>
-                        <li>
-                            <a class="filtro <?= $activa ? 'es-activo' : '' ?>"
-                               href="<?= e($url_catalogo(['categoria' => $activa ? null : $categoria['slug']])) ?>"
-                               <?= $activa ? 'aria-current="true"' : '' ?>>
-                                <span class="filtro__marca" aria-hidden="true"></span>
-                                <span class="filtro__nombre t-mono-texto"><?= e($categoria['nombre'] ?? '') ?></span>
-                                <span class="filtro__linea" aria-hidden="true"></span>
-                                <span class="filtro__conteo t-mono-texto-sm"><?= e((string) ($categoria['productos_count'] ?? 0)) ?></span>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </section>
+            <?php /* Las categorías pasaron a las pestañas de arriba del
+                     listado (28/10): son el primer filtro que se usa y en
+                     la columna quedaban mezcladas con los demás. */ ?>
 
             <?php if ($marcas !== []): ?>
                 <section class="filtros__grupo" aria-labelledby="filtro-marca">

@@ -176,9 +176,10 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
 
-  /* El asomo. La mitad del sobrante a cada lado deja la placa
-     activa en el centro exacto de la pista. */
-  padding-inline: 11%;
+  /* Sin asomo desde el 28/10: las vecinas cortadas mostraban medio
+     texto de otra placa ("COT…", "EN 2…") y se leía raro (pedido de
+     Ape, 22/10). Se ve una placa entera por vez. */
+  padding-inline: 0;
 
   /* La barra se esconde pero el contenedor sigue siendo scrolleable:
      el gesto y el teclado no dependen de que se vea. */
@@ -198,7 +199,7 @@
 }
 
 .carrusel__placa {
-  flex: 0 0 78%;
+  flex: 0 0 100%;
   scroll-snap-align: center;
   min-width: 0;
 }
@@ -244,7 +245,7 @@
    Sin JavaScript la clase `carrusel--vivo` no existe y no se apaga
    ninguna: mejor todas enteras que todas al 45%. */
 .carrusel--vivo .carrusel__placa {
-  opacity: 0.4;
+  opacity: 0;
   transition: opacity 0.3s ease;
 }
 
@@ -377,20 +378,17 @@
     gap: var(--espaciado-16);
   }
 
-  /* La placa del frame mide 422 px de ancho. Con el 78% de la pista,
-     ese ancho sale de una columna de ~560: se acota acá y no en la
-     placa para que el asomo de las vecinas siga siendo proporcional.
-     Pegada a la derecha, como en el frame. */
+  /* Una placa por vez, de ~440 px: el tamaño que tenía la del medio
+     cuando asomaban las vecinas. Pegada a la derecha, como en el frame. */
   .hero__carrusel {
     width: 100%;
-    max-width: 560px;
+    max-width: 440px;
     margin-inline-start: auto;
   }
 
   .carrusel__controles {
     justify-content: flex-start;
     margin-top: var(--espaciado-24);
-    padding-inline: 11%;
   }
 }
 
@@ -481,12 +479,18 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Duotono: la foto va a escala de grises y el bordeaux lo pone la
-     capa de arriba. Sin el grayscale, el rojo de la capa se mezcla
-     con el color original y da un marrón sucio. El brillo bajo es lo
-     que evita que el duotono salga rosa: el bordeaux del sistema es
-     oscuro y sobre grises claros levanta demasiado. */
-  filter: grayscale(1) contrast(1.05) brightness(0.42);
+  object-position: center;
+  /* Hasta el 28/10 era un duotono bordeaux (multiply al 72% y brillo
+     al 42%). Con las fotos reales —producto oscuro sobre fondo gris
+     claro— todo quedaba rojo oscuro y el producto no se distinguía
+     (pedido de Ape, 22/10). Ahora la foto se ve en grises, apenas
+     bajada, y lo que asegura que el texto se lea es el degradé. */
+  filter: grayscale(1) contrast(1.05) brightness(0.85);
+  transition: transform 0.4s ease;
+}
+
+.bento__celda--foto:hover .bento__foto {
+  transform: scale(1.03);
 }
 
 .bento__celda--foto::after {
@@ -494,9 +498,19 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background-color: var(--color-accent-base);
-  mix-blend-mode: multiply;
-  opacity: 0.72;
+  /* Oscuro sólo donde va el texto: arriba (índice y pictograma) y
+     abajo a la izquierda (nombre y cantidad). El producto, al medio,
+     queda limpio. */
+  background:
+    linear-gradient(to top, rgb(0 0 0 / 0.85) 0%, rgb(0 0 0 / 0.35) 45%, rgb(0 0 0 / 0) 70%),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0) 30%);
+}
+
+/* Sobre foto, el índice va en blanco: el bordeaux claro sobre gris
+   no se leía. */
+.bento__celda--foto .bento__indice,
+.bento__celda--foto .bento__conteo {
+  color: var(--color-text-primary);
 }
 
 .bento__celda--foto:hover {
@@ -575,21 +589,16 @@
     grid-template-columns: repeat(12, 1fr);
   }
 
+  /* Grilla pareja de 3 × 2 desde el 28/10. El bento asimétrico (8+4
+     arriba, 3+3+3+3 abajo) recortaba la misma foto 16:9 a escalas muy
+     distintas: el producto salía enorme en Discos y chico en
+     Kettlebells (pedido de Ape, 22/10). Con todas las celdas iguales y
+     cerca del 16:9 de las fotos, todos los productos se ven del mismo
+     tamaño. */
   .bento__celda {
-    grid-column: span 3;
-    min-height: 210px;
-  }
-
-  /* Discos ocupa dos tercios de la primera fila y Barras el resto:
-     de ahí sale la asimetría del bloque. */
-  .bento__celda--1 {
-    grid-column: span 8;
-    min-height: 300px;
-  }
-
-  .bento__celda--2 {
     grid-column: span 4;
-    min-height: 300px;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
   }
 }
 
