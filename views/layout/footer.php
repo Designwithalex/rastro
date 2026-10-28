@@ -154,10 +154,58 @@ $layout_columnas = [
         </div>
     </div>
 
+    <?php
+    /* Data Fiscal de ARCA (pedido del 22/10). La imagen y el enlace son los
+       que da ARCA al adherir el sitio: el link se carga en Configuración. */
+    $pie_data_fiscal = trim((string) (repo_settings()['data_fiscal_url'] ?? ''));
+    ?>
+    <?php if ($pie_data_fiscal !== ''): ?>
+        <div class="contenedor pie__data-fiscal">
+            <a href="<?= e($pie_data_fiscal) ?>" target="_F960AFIPInfo" rel="noopener">
+                <img src="https://www.afip.gob.ar/images/f960/DATAWEB.jpg" width="60" height="82"
+                     alt="Data Fiscal de ARCA" loading="lazy">
+            </a>
+        </div>
+    <?php endif; ?>
+
     <?php /* La marca sangrando por el borde inferior. Decorativa. */ ?>
     <div class="pie__marca" aria-hidden="true"><span>Rastro</span></div>
 
 </footer>
+
+<?php
+/* WhatsApp flotante (pedido del 22/10). El mensaje cambia según la página:
+   la ficha de producto declara $whatsapp_mensaje_flotante con el nombre y
+   el SKU, así quien atiende sabe de qué le hablan. Sin número cargado no
+   se dibuja (whatsapp_link() devuelve null). */
+$flotante = whatsapp_link(repo_settings(), $whatsapp_mensaje_flotante ?? null);
+?>
+<?php if ($flotante !== null && !str_starts_with((string) ($clase_body ?? ''), 'pagina-checkout')): ?>
+    <a class="whatsapp-flotante" href="<?= e($flotante) ?>" rel="noopener" target="_blank">
+        <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/>
+        </svg>
+        <span class="visualmente-oculto">Escribinos por WhatsApp (abre en una pestaña nueva)</span>
+    </a>
+<?php endif; ?>
+
+<?php
+/* Medición: Meta Pixel y Google Analytics, sólo si hay IDs cargados en
+   Configuración. Los IDs viajan en data- porque el CSP no deja scripts en
+   línea; assets/js/medicion.js carga las librerías. */
+$medicion = [
+    'pixel' => preg_replace('/\D+/', '', (string) (repo_settings()['meta_pixel_id'] ?? '')),
+    'ga'    => preg_replace('/[^A-Z0-9-]+/', '', strtoupper((string) (repo_settings()['ga_id'] ?? ''))),
+];
+?>
+<?php if ($medicion['pixel'] !== '' || $medicion['ga'] !== ''): ?>
+    <script src="<?= e(asset('js/medicion.js')) ?>" defer
+            data-pixel="<?= e($medicion['pixel']) ?>"
+            data-ga="<?= e($medicion['ga']) ?>"
+            <?php if (isset($medicion_compra)): ?>
+                data-compra="<?= e(json_encode($medicion_compra, JSON_UNESCAPED_UNICODE)) ?>"
+            <?php endif; ?>></script>
+<?php endif; ?>
 
 <script src="<?= e(asset('js/nav.js')) ?>" defer></script>
 <script src="<?= e(asset('js/carrito.js')) ?>" defer></script>

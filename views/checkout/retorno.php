@@ -176,6 +176,21 @@ $whatsapp = whatsapp_link(
 
 $scripts = $vaciar_carrito ? ['checkout-retorno'] : [];
 
+/* El evento de compra para Pixel y Analytics (assets/js/medicion.js), sólo
+   con el pago aprobado: un pedido por transferencia todavía no es venta. */
+if ($situacion === 'pagado') {
+    $medicion_compra = [
+        'codigo' => (string) $pedido['codigo'],
+        'valor'  => (int) $pedido['total'],
+        'items'  => array_map(static fn (array $i): array => [
+            'item_id'   => (string) ($i['sku'] ?? ''),
+            'item_name' => (string) ($i['nombre'] ?? ''),
+            'quantity'  => (int) ($i['cantidad'] ?? 1),
+            'price'     => (int) ($i['precio_unitario'] ?? 0),
+        ], (array) $pedido['items']),
+    ];
+}
+
 require RASTRO_VIEWS . '/layout/head.php';
 ?>
 

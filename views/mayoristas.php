@@ -10,25 +10,66 @@
  * `precio_mayorista` existe en los datos y no sale a pantalla
  * (PENDIENTES #11).
  *
- * EL FORMULARIO NO ENVÍA NADA TODAVÍA
+ * EL FORMULARIO LLEGA POR MAIL (desde el 28/10)
  *
- * Falta definir a qué correo llega y qué campos son obligatorios
- * (PENDIENTES #37). La maqueta lleva la nota en pantalla que pide la
- * regla 8 del lenguaje: no se entrega un formulario sin decir qué
- * tiene que conectar el backend.
+ * Hasta octubre no enviaba nada, y el cliente preguntó a dónde llegaba
+ * (pedido del 22/10, punto 23). Llega a `avisos_email` de Configuración, o
+ * al mail de ventas si no hay uno aparte, con responder-a del que consulta.
  *
- * El `action` apunta a la propia página y el método es POST, así que si
- * alguien lo envía hoy no pierde lo que escribió en una URL ni llega a
- * ningún lado raro: recarga y ve el aviso.
+ * Contra envíos automáticos: un campo trampa que una persona no ve
+ * (`sitio_web`) y la comprobación de origen del checkout.
  */
 
 declare(strict_types=1);
+
+/* --- Envío del formulario ------------------------------------------- */
+$consulta = ['nombre' => '', 'empresa' => '', 'email' => '', 'telefono' => '', 'mensaje' => ''];
+$consulta_estado = null; // null | 'ok' | 'error'
+$consulta_error  = '';
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    foreach ($consulta as $clave => $_) {
+        $consulta[$clave] = trim(mb_substr((string) ($_POST[$clave] ?? ''), 0, $clave === 'mensaje' ? 3000 : 200));
+    }
+
+    $ajustes_may = repo_settings();
+    $destino_may = trim((string) ($ajustes_may['avisos_email'] ?? '')) ?: trim((string) ($ajustes_may['email'] ?? ''));
+
+    if (trim((string) ($_POST['sitio_web'] ?? '')) !== '' || !checkout_mismo_origen()) {
+        // Un robot: se le contesta como si hubiera salido bien.
+        $consulta_estado = 'ok';
+    } elseif ($consulta['nombre'] === '' || $consulta['mensaje'] === ''
+        || !filter_var($consulta['email'], FILTER_VALIDATE_EMAIL)
+        || strlen(preg_replace('/\D+/', '', $consulta['telefono']) ?? '') < 8) {
+        $consulta_estado = 'error';
+        $consulta_error  = 'Revisá nombre, correo, teléfono y qué querés equipar: son los datos que necesitamos para responderte.';
+    } else {
+        $enviado_may = $destino_may !== '' && correo_enviar(
+            $destino_may,
+            'Consulta mayorista · ' . $consulta['nombre'] . ($consulta['empresa'] !== '' ? ' · ' . $consulta['empresa'] : ''),
+            "Consulta desde /mayoristas\n\n"
+            . 'Nombre: ' . $consulta['nombre'] . "\n"
+            . 'Empresa: ' . ($consulta['empresa'] ?: '—') . "\n"
+            . 'Correo: ' . $consulta['email'] . "\n"
+            . 'Teléfono: ' . $consulta['telefono'] . "\n\n"
+            . "Qué quiere equipar:\n" . $consulta['mensaje'] . "\n",
+            $consulta['email']
+        );
+
+        $consulta_estado = $enviado_may ? 'ok' : 'error';
+        $consulta_error  = 'No pudimos enviar la consulta en este momento. Escribinos por WhatsApp y te respondemos.';
+
+        if ($enviado_may) {
+            $consulta = array_map(static fn (): string => '', $consulta);
+        }
+    }
+}
 
 $titulo      = 'Venta mayorista';
 $descripcion = 'Equipamos gimnasios, clubes, hoteles y barrios cerrados. '
              . 'Cotizamos el proyecto completo: pedinos una propuesta cerrada.';
 $clase_body  = 'pagina-mayoristas';
-$estilos     = ['componentes', 'catalogo', 'mayoristas'];
+$estilos     = ['componentes', 'catalogo', 'cuenta', 'mayoristas'];
 
 require RASTRO_VIEWS . '/layout/head.php';
 
@@ -238,6 +279,24 @@ $campos = [
 
             <form class="formulario" method="post" action="<?= e(url('/mayoristas')) ?>#cotizar">
 
+                <?php if ($consulta_estado === 'ok'): ?>
+                    <p class="mensaje mensaje--ok t-mono-texto" role="status">
+                        <span class="mensaje__marca" aria-hidden="true">✓</span>
+                        Recibimos tu consulta. Te respondemos por correo o por WhatsApp.
+                    </p>
+                <?php elseif ($consulta_estado === 'error'): ?>
+                    <p class="mensaje mensaje--error t-mono-texto" role="alert">
+                        <span class="mensaje__marca" aria-hidden="true">!</span>
+                        <?= e($consulta_error) ?>
+                    </p>
+                <?php endif; ?>
+
+                <?php /* Trampa para robots: una persona no lo ve ni lo llena. */ ?>
+                <p class="visualmente-oculto" aria-hidden="true">
+                    <label for="sitio_web">Sitio web</label>
+                    <input type="text" id="sitio_web" name="sitio_web" tabindex="-1" autocomplete="off">
+                </p>
+
                 <?php foreach ($campos as $campo): ?>
                     <p class="formulario__campo">
                         <label class="formulario__etiqueta t-mono-label-sm" for="<?= e($campo['nombre']) ?>">
@@ -251,6 +310,7 @@ $campos = [
                                id="<?= e($campo['nombre']) ?>"
                                name="<?= e($campo['nombre']) ?>"
                                autocomplete="<?= e($campo['auto']) ?>"
+                               value="<?= e($consulta[$campo['nombre']]) ?>"
                                <?= $campo['requerido'] ? 'required' : '' ?>>
                     </p>
                 <?php endforeach; ?>
@@ -258,7 +318,7 @@ $campos = [
                 <p class="formulario__campo">
                     <label class="formulario__etiqueta t-mono-label-sm" for="mensaje">Qué querés equipar</label>
                     <textarea class="campo campo--area t-mono-texto" id="mensaje" name="mensaje" rows="4"
-                              placeholder="Metros cuadrados, cuánta gente entrena, si ya tenés algo…" required></textarea>
+                              placeholder="Metros cuadrados, cuánta gente entrena, si ya tenés algo…" required><?= e($consulta['mensaje']) ?></textarea>
                 </p>
 
                 <button class="boton boton--acento formulario__enviar" type="submit">
@@ -266,16 +326,6 @@ $campos = [
                     <span class="boton__flecha" aria-hidden="true">→</span>
                 </button>
 
-                <?php /* Regla 8 del lenguaje visual: una maqueta de formulario
-                         lleva en pantalla lo que el backend tiene que conectar.
-                         No se entrega un formulario sin decir qué hace. */ ?>
-                <p class="nota t-mono-texto-sm">
-                    <strong>Para el backend:</strong> este formulario todavía no envía nada.
-                    Falta definir a qué correo llega y qué campos son obligatorios de verdad
-                    (PENDIENTES #37), sumar validación del lado del servidor y protección
-                    contra envíos automáticos. A futuro alimenta el cotizador con PDF por
-                    mail (PENDIENTES #14).
-                </p>
             </form>
         </div>
     </section>

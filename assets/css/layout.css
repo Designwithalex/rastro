@@ -581,3 +581,58 @@
   opacity: 0.08;
   transform: translateY(-0.19em);
 }
+
+/* ============================================================
+   WhatsApp flotante (pedido del 22/10)
+   Abajo a la derecha, por encima del contenido y lejos del
+   carrito de la cabecera. En la ficha de producto el mensaje ya
+   viene con el nombre y el SKU.
+   ============================================================ */
+
+.whatsapp-flotante {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radio-full);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.45);
+  transition: transform 0.15s ease;
+}
+
+.whatsapp-flotante:hover,
+.whatsapp-flotante:focus-visible {
+  transform: scale(1.06);
+}
+
+.whatsapp-flotante:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .whatsapp-flotante {
+    right: 16px;
+    bottom: 16px;
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-flotante {
+    transition: none;
+  }
+}
+
+/* QR de Data Fiscal de ARCA, en el pie. */
+.pie__data-fiscal {
+  display: flex;
+  justify-content: flex-end;
+  padding-block: 16px;
+}

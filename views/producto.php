@@ -46,6 +46,10 @@ if ($imagenes === [] && !empty($producto['imagen'])) {
     $imagenes = [(string) $producto['imagen']];
 }
 
+// El botón flotante de WhatsApp (footer.php) también habla de este producto.
+$whatsapp_mensaje_flotante = 'Hola Rastro, quiero consultar por ' . $producto['nombre']
+    . ' (' . ($producto['sku'] ?? '') . '): ' . checkout_url_absoluta('/producto/' . $producto['slug']);
+
 $whatsapp_producto = whatsapp_link(
     $settings,
     'Hola Rastro, quiero consultar por cantidad de: ' . $producto['nombre'] . ' (' . ($producto['sku'] ?? '') . ').'
